@@ -1,0 +1,74 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Frameworks/RPPlayerController.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/PlayerState.h"
+#include "Frameworks/RPPlayerState.h"
+#include "Net/UnrealNetwork.h"
+
+void ARPPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+}
+
+void ARPPlayerController::RequestChangePlayerName(const FString& Name)
+{
+	Server_ChangePlayerName(Name);
+}
+
+void ARPPlayerController::Server_ChangePlayerName_Implementation(const FString& Name)
+{
+	if (PlayerState)
+	{
+		PlayerState->SetPlayerName(Name);
+	}
+}
+
+bool ARPPlayerController::Server_ChangePlayerName_Validate(const FString& Name)
+{
+	if (Name.Len() > 0 && Name.Len() < 8)
+	{
+		return true;
+	}
+	return false;
+}
+
+void ARPPlayerController::OnRep_PlayerState()
+{
+	/*
+	*  컨트롤러 생성 -> 컨트롤러에 플레이어 스테이트 할당 시 자동 호출
+	*/
+	
+	Super::OnRep_PlayerState();
+
+	bIsPlayerStateStandby = true;
+
+	// 게임모드에서 InitializeSequence(); 실행
+	// 혹은 다른 곳에서?
+
+	PlayerStateProcess();
+}
+
+void ARPPlayerController::PlayerStateProcess_Implementation()
+{
+
+}
+
+void ARPPlayerController::InitializeSequence()
+{
+	if (!bIsPlayerStateStandby)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[RPPlayerController] InitializeSequence : 플레이어 스테이트 없음!"));
+		return;
+	}
+
+	// 캐릭터 생성 & 빙의 -> OnPostLogin에 게임모드에서 명시적으로 실행
+	// HUD 부착
+}
+
+
+
+
+
