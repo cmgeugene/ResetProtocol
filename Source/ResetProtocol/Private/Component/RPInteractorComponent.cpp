@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Data/ItemDataBase.h"
 #include "RPTestItemActor.h"
 
 URPInteractorComponent::URPInteractorComponent()
@@ -48,6 +49,19 @@ void URPInteractorComponent::Interact()
 		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
 		if (IsValid(TestItemActor))
 		{
+			FItemData* Data = PlayerCharacter->GetItemDataBase()->Items.FindByPredicate([&](const FItemData& ItemData)
+				{
+					//return ItemData.Class == PlayerCharacter->GetHitResult().GetActor()->GetClass();
+					return ItemData.Class == TestItemActor->GetClass();
+				});
+
+			if (Data != nullptr)
+			{
+				PlayerCharacter->GetInventory().Emplace(*Data);
+				TestItemActor->Destroy();
+			}
+
+
 			if (TestItemActor->GetMaterialType() == EMaterialState::Sphere)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Sphere"));
@@ -77,7 +91,7 @@ void URPInteractorComponent::InteractCheck()
 	}
 
 	FVector VecDirection = ViewRotation.Vector() * InteractionRange;
-	FVector InteractEnd = ViewVector + VecDirection;
+	InteractEnd = ViewVector + VecDirection;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(PlayerCharacter);
 	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);

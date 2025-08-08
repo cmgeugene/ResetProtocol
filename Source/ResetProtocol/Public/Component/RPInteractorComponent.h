@@ -28,9 +28,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void InteractCheck();
 
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	FVector GetInteractEnd() { return InteractEnd; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FVector ViewVector;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Interact")
+	FVector InteractEnd;
 
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FRotator ViewRotation;
