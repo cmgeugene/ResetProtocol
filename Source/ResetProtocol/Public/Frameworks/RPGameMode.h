@@ -37,4 +37,6 @@ public:
 
 	// {UniqueNetID, CustomNickName}
 	TMap<FString, FString> PlayerNickNames;
+
+	
 };

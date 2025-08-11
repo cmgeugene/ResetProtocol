@@ -6,33 +6,6 @@
 #include "GameFramework/PlayerState.h"
 #include "RPPlayerState.generated.h"
 
-
-
-USTRUCT(BlueprintType)
-struct FPlayerInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
-	TObjectPtr<APlayerController> PC;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
-	FText PlayerName;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
-	bool ReadyStatus;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
-	TObjectPtr<APlayerState> PS;
-
-	bool operator==(const FPlayerInfo& Other) const
-	{
-		return PC == Other.PC && PlayerName.EqualTo(Other.PlayerName) && ReadyStatus == Other.ReadyStatus && PS == Other.PS;
-	}
-
-	bool operator!=(const FPlayerInfo& Other) const
-	{
-		return !(*this == Other);
-	}
-
-};
 /**
  * 
  */
@@ -49,21 +22,13 @@ public:
 	
 	virtual void BeginPlay() override;
 
-	UPROPERTY(ReplicatedUsing = OnRep_PlayerInfo, BlueprintReadOnly, Category = "PlayerInfo")
-	FPlayerInfo PlayerInfo;
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UPlayerInfoComponent> InfoComponent;
 
-	UFUNCTION()
-	void OnRep_PlayerInfo();
-
-	// PlayerInfo 변경 시 UI에 알릴 델리게이트
-	UPROPERTY(BlueprintAssignable, Category = "PlayerInfo")
-	FOnPlayerInfoChanged OnPlayerInfoChanged;
-
-	UFUNCTION(BlueprintCallable, Category = "PlayerInfo")
-	void Server_SetPlayerInfo(const FPlayerInfo& NewInfo);
-
-	UFUNCTION(BlueprintPure, Category = "PlayerInfo")
-	FPlayerInfo GetPlayerInfo() const { return PlayerInfo; }
+public:
+	UFUNCTION(BlueprintPure, Category = "PlayerState")
+	FORCEINLINE class UPlayerInfoComponent* GetPlayerInfoComponent() const { return InfoComponent; }
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;

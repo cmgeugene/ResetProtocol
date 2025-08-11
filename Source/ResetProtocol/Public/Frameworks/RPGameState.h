@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,9 +24,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RPGameState")
 	const TArray<APlayerState*>& GetPlayerList() const;
 
+	// [추가] 플레이어 목록 변경을 모든 클라이언트에 알릴 멀티캐스트 함수
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayerListUpdated();
-	void Multicast_OnPlayerListUpdated_Implementation();
+	void Multicast_OnPlayerListChanged();
 
-	
 };
