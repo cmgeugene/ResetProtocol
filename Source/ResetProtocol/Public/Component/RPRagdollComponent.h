@@ -20,6 +20,10 @@ public:
 	void Server_RagdollOn();
 	UFUNCTION(Server, Reliable)
 	void Server_RagdollOff();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RagdollOn();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RagdollOff();
 
 protected:
 	virtual void BeginPlay() override;

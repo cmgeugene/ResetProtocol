@@ -18,6 +18,8 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("USkeletalMeshComp"));
 	SkeletalMeshComp->SetupAttachment(SceneRoot);
+	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SkeletalMeshComp->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	SkeletalMeshComp->SetIsReplicated(true);
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));

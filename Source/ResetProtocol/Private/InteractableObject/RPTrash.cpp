@@ -15,7 +15,7 @@ ARPTrash::ARPTrash()
 
 void ARPTrash::ClickInteract_Implementation(AActor* Interactor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Ragdoll Off"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("PickUp"));
 
 	if (HasAuthority())
 	{

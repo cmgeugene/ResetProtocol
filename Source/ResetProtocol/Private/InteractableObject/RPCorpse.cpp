@@ -47,7 +47,7 @@ void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 
 void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Ragdoll Off"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Ragdoll Off"));
 
 	if (HasAuthority())
 	{
