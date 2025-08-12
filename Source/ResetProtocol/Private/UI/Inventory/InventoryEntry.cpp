@@ -22,10 +22,14 @@ void UInventoryEntry::DropItem()
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwningPlayer()->GetPawn());
 	
-	FItemData ItemData = GetListItem<UItemUIObject>()->ItemData;
+	if (IsValid(PlayerCharacter))
+	{
+		FItemData ItemData = GetListItem<UItemUIObject>()->ItemData;
 
-	GetWorld()->SpawnActor<ARPTestItemActor>(ItemData.Class, PlayerCharacter->GetInteractEnd(), FRotator());
-	PlayerCharacter->GetInventory().Remove(ItemData);
-	PlayerCharacter->GetInventoryWidget()->RefreshInventory(PlayerCharacter->GetInventory());
-	DropButton->OnClicked.Clear();
+		PlayerCharacter->Server_DropItem(ItemData, PlayerCharacter->GetInteractEnd());
+
+		PlayerCharacter->GetInventory().Remove(ItemData);
+		PlayerCharacter->GetInventoryWidget()->RefreshInventory(PlayerCharacter->GetInventory());
+		DropButton->OnClicked.Clear();
+	}
 }

@@ -4,6 +4,7 @@
 #include "Character/RPBaseCharacter.h"
 #include "Component/RPInteractorComponent.h"
 #include "Data/ItemDataBase.h"
+#include "Net/UnrealNetwork.h"
 #include "RPPlayerCharacter.generated.h"
 
 class UInventoryWidget;
@@ -24,6 +25,9 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+// Get & Set
 public:
 	FHitResult& GetHitResult() { return InteractHitResult; }
 
@@ -35,15 +39,26 @@ public:
 	
 	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 
+// Input
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void ToggleInventory();
 
+// Inventory Function
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_DropItem(const FItemData& DroppedItem, FVector SpawnLocation);
+
+	UFUNCTION()
+	void OnRep_Inventory();
+
+// Component
 protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	URPInteractorComponent* InteractorComponent;
 
+// Inventory
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
@@ -55,7 +70,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	UItemDataBase* ItemDataBase;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(ReplicatedUsing = OnRep_Inventory, VisibleAnywhere, Category = "Inventory")
 	TArray<FItemData> Inventory;
 
 protected:

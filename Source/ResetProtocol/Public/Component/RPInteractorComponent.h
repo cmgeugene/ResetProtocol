@@ -22,6 +22,12 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
+	void CreateInteractWidget(AController* Controller);
+
+public:
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Interact(ARPTestItemActor* TargetActor);
+
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void Interact();
 

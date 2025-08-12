@@ -24,10 +24,16 @@ class RESETPROTOCOL_API ARPTestItemActor : public AStaticMeshActor
 	GENERATED_BODY()
 
 public:
+    ARPTestItemActor();
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
     EMaterialState GetMaterialType() { return eMaterialType; }
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Variable")
     EMaterialState eMaterialType;
+
 	
 };

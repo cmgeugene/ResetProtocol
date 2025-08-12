@@ -18,11 +18,18 @@ void ARPPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (IsValid(InventoryWidgetClass))
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (IsValid(PlayerController) && PlayerController->IsLocalController())
 	{
-		InventoryWidget = CreateWidget<UInventoryWidget>(Cast<APlayerController>(GetController()), InventoryWidgetClass);
-		InventoryWidget->AddToViewport(0);
-		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsValid(InventoryWidgetClass))
+		{
+			InventoryWidget = CreateWidget<UInventoryWidget>(Cast<APlayerController>(GetController()), InventoryWidgetClass);
+			InventoryWidget->AddToViewport(0);
+			InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+
+		InteractorComponent->CreateInteractWidget(GetController());
 	}
 }
 
@@ -34,6 +41,13 @@ void ARPPlayerCharacter::Tick(float DeltaTime)
 void ARPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void ARPPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPPlayerCharacter, Inventory);
 }
 
 void ARPPlayerCharacter::ToggleInventory()
@@ -57,5 +71,26 @@ void ARPPlayerCharacter::ToggleInventory()
 			Cast<APlayerController>(GetController())->SetCinematicMode(false, true, true);
 			Cast<APlayerController>(GetController())->bShowMouseCursor = false;
 		}
+	}
+}
+
+void ARPPlayerCharacter::OnRep_Inventory()
+{
+	if (IsValid(InventoryWidget))
+	{
+		InventoryWidget->RefreshInventory(Inventory);
+	}
+}
+
+bool ARPPlayerCharacter::Server_DropItem_Validate(const FItemData& DroppedItem, FVector SpawnLocation)
+{
+	return DroppedItem.Class != nullptr;
+}
+
+void ARPPlayerCharacter::Server_DropItem_Implementation(const FItemData& DroppedItem, FVector SpawnLocation)
+{
+	if (IsValid(DroppedItem.Class))
+	{
+		GetWorld()->SpawnActor<ARPTestItemActor>(DroppedItem.Class, GetInteractEnd(), FRotator::ZeroRotator);
 	}
 }
