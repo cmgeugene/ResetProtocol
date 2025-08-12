@@ -1,4 +1,4 @@
-#include "Component/RPInteractorComponent.h"
+#include "Component/Character/RPInteractorComponent.h"
 #include "Character/RPPlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"

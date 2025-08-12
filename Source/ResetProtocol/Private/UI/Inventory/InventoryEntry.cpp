@@ -26,7 +26,7 @@ void UInventoryEntry::DropItem()
 	{
 		FItemData ItemData = GetListItem<UItemUIObject>()->ItemData;
 
-		PlayerCharacter->Server_DropItem(ItemData, PlayerCharacter->GetInteractEnd());
+		PlayerCharacter->Server_DropItem(ItemData);
 
 		PlayerCharacter->GetInventory().Remove(ItemData);
 		PlayerCharacter->GetInventoryWidget()->RefreshInventory(PlayerCharacter->GetInventory());
