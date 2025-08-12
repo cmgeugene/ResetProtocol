@@ -37,6 +37,17 @@ void ARPBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
+void ARPBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPBaseCharacter, PlayerHudRef);
+	DOREPLIFETIME(ARPBaseCharacter, ControlRotationRep);
+	DOREPLIFETIME(ARPBaseCharacter, LeanValue);
+	DOREPLIFETIME(ARPBaseCharacter, LeanLeftArm);
+	DOREPLIFETIME(ARPBaseCharacter, LeanRightArm);
+}
+
 
 void ARPBaseCharacter::PlayMontage(UAnimMontage* MontageToPlay, float PlayRate, float StartingPosition)
 {

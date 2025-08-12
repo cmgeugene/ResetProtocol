@@ -9,6 +9,7 @@
 ARPPlayerCharacter::ARPPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	InteractorComponent = CreateDefaultSubobject<URPInteractorComponent>(TEXT("InteractorComponent"));
 

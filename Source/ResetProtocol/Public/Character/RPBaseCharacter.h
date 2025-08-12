@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "RPBaseCharacter.generated.h"
 
 UCLASS()
@@ -18,6 +19,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,17 +67,17 @@ protected:
 
 public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Reference")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Reference")
 	UUserWidget* PlayerHudRef;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Replication")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Replication")
 	FRotator ControlRotationRep;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leaning")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Leaning")
 	float LeanValue;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leaning")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Leaning")
 	float LeanLeftArm;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leaning")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Leaning")
 	float LeanRightArm;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leaning")
 	bool IsLeaning;
