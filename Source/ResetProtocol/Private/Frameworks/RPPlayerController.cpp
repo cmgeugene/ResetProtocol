@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Frameworks/RPPlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPGameMode.h"
 
 void ARPPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -67,6 +69,33 @@ void ARPPlayerController::InitializeSequence()
 	// 캐릭터 생성 & 빙의 -> OnPostLogin에 게임모드에서 명시적으로 실행
 	// HUD 부착
 }
+
+void ARPPlayerController::PostSeamlessTravel()
+{
+	Super::PostSeamlessTravel();
+
+	if (IsLocalController())
+	{
+		Server_NotifyClientReady();
+		UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPPlayerController::PostSeamlessTravel() called"));
+	}
+}
+
+void ARPPlayerController::Server_NotifyClientReady_Implementation()
+{
+	if (AGameModeBase* GameMode = GetWorld()->GetAuthGameMode())
+	{
+		ARPGameMode* GM = Cast<ARPGameMode>(GameMode);
+		if (GM)
+		{
+			GM->ControllerSeamlessComplete();
+			UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPPlayerController::Server_NotifyClientReady() called"));
+		}
+	}
+
+}
+
+
 
 
 

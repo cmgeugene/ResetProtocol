@@ -1,6 +1,7 @@
 
 #include "Component/PlayerInfoComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/PlayerState.h"
 
 // Sets default values for this component's properties
 UPlayerInfoComponent::UPlayerInfoComponent()
@@ -29,15 +30,31 @@ void UPlayerInfoComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 void UPlayerInfoComponent::OnRep_Info()
 {
+	OnRepInfoProcess();
 	OnPlayerInfoComponentUpdated.Broadcast(Info);
 }
 
-void UPlayerInfoComponent::Server_SetPlayerInfo_Implementation(const FPlayerInfo& NewInfo)
+void UPlayerInfoComponent::OnRepInfoProcess_Implementation()
 {
-	Info = NewInfo;
 
-	if (GetOwnerRole() == ENetMode::NM_ListenServer)
+}
+
+void UPlayerInfoComponent::Server_SetPlayerInfo_Implementation(const FText& NewNickname, bool bIsReady, int32 NewBytes)
+{
+	APlayerState* MyPlayerState = GetOwner<APlayerState>();
+	APlayerController* MyPlayerController = MyPlayerState ? MyPlayerState->GetPlayerController() : nullptr;
+
+	if (GetOwner()->HasAuthority())
 	{
+		FPlayerInfo NewInfo;
+
+		NewInfo.PlayerName = NewNickname;    
+		NewInfo.ReadyStatus = bIsReady;        
+		NewInfo.Bytes = NewBytes;
+
+		Info = NewInfo;
+
 		OnRep_Info();
+		UE_LOG(LogTemp, Display, TEXT("[PlayerInfoComponent] Server_SetPlayerInfo_Implementation : OnRep called"));
 	}
 }

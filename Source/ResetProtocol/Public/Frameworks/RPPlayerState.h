@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Component/PlayerInfoComponent.h"
 #include "RPPlayerState.generated.h"
 
 /**
@@ -24,11 +25,21 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<class UPlayerInfoComponent> InfoComponent;
+	TObjectPtr<UPlayerInfoComponent> InfoComponent;
+
+	
 
 public:
 	UFUNCTION(BlueprintPure, Category = "PlayerState")
-	FORCEINLINE class UPlayerInfoComponent* GetPlayerInfoComponent() const { return InfoComponent; }
+	FORCEINLINE UPlayerInfoComponent* GetPlayerInfoComponent() const { return InfoComponent; }
+
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "RPPlayerState")
+	FPlayerInfo StoredPlayerInfo;
+
+	UFUNCTION(BlueprintCallable)
+	void StorePlayerInfo(const FPlayerInfo& NewPlayerInfo);
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;

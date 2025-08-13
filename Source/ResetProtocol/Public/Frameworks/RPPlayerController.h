@@ -36,6 +36,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RPPlayerController")
 	void InitializeSequence();
 
+	virtual void PostSeamlessTravel() override;
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPPlayerController")
+	void Server_NotifyClientReady();
+	void Server_NotifyClientReady_Implementation();
 
 
 private:

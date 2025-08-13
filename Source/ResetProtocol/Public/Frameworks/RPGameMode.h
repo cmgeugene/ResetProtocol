@@ -38,5 +38,16 @@ public:
 	// {UniqueNetID, CustomNickName}
 	TMap<FString, FString> PlayerNickNames;
 
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	
+	// HandleSeamlessTravelPlayer의 블루프린트 확장 함수
+	UFUNCTION(BlueprintImplementableEvent, Category = "RPGameMode")
+	void K2_OnHandleSeamlessTravelPlayer(AController*& C);
+
+	void ControllerSeamlessComplete();
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "RPGameMode")
+	int32 CurrentSeamlessPlayer = 0;
+
+	void AllPlayerControllersTravelComplete();
 };

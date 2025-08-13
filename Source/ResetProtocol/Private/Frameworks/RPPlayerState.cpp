@@ -7,7 +7,8 @@
 
 ARPPlayerState::ARPPlayerState()
 {
-	InfoComponent = CreateDefaultSubobject<UPlayerInfoComponent>(TEXT("PlayerInfoComponent"));
+	// BP컴포넌트를 추가하기 위해서 C++ 컴포넌트 기본 부착 해제
+	//InfoComponent = CreateDefaultSubobject<UPlayerInfoComponent>(TEXT("PlayerInfoComponent"));
 }
 
 void ARPPlayerState::BeginPlay()
@@ -24,8 +25,26 @@ void ARPPlayerState::BeginPlay()
 	}*/
 }
 
+void ARPPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+
+	if (const ARPPlayerState* OldPlayerState = Cast<const ARPPlayerState>(PlayerState))
+	{
+		this->StoredPlayerInfo = OldPlayerState->StoredPlayerInfo;
+		UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] CopyProperties : 속성 카피, current byte : %d"), this->StoredPlayerInfo.Bytes);
+	}
+}
+
+void ARPPlayerState::StorePlayerInfo(const FPlayerInfo& NewPlayerInfo)
+{
+	StoredPlayerInfo = NewPlayerInfo;
+	UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] Stored Bytes in PlayerInfo : %d"), StoredPlayerInfo.Bytes);
+}
+
 void ARPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ARPPlayerState, StoredPlayerInfo);
 }

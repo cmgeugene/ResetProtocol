@@ -144,4 +144,44 @@ TArray<AController*> ARPGameMode::GetPlayerControllerArray()
 	return Controllers;
 }
 
+void ARPGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+
+	K2_OnHandleSeamlessTravelPlayer(C);
+}
+
+void ARPGameMode::ControllerSeamlessComplete()
+{
+	UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode : 현재 플레이어 수 %d"), CurrentSeamlessPlayer);
+	CurrentSeamlessPlayer++;
+	UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode : 현재 플레이어 수 %d"), CurrentSeamlessPlayer);
+	ARPGameState* GS = Cast<ARPGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		int32 TotalPlayer = GS->PlayerArray.Num();
+		UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode : 총 플레이어 수 %d"), TotalPlayer);
+		if (TotalPlayer == CurrentSeamlessPlayer)
+		{
+			AllPlayerControllersTravelComplete();
+			UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode::ControllerSeamlessComplete called"));
+		}
+	}
+}
+
+void ARPGameMode::AllPlayerControllersTravelComplete()
+{
+	//TArray<AController*> CurrentControllers = GetPlayerControllerArray();
+
+	//if (!CurrentControllers.IsEmpty())
+	//{
+	//	for (AController* Controller : CurrentControllers)
+	//	{
+	//		APawn* NewPawn = SpawnDefaultPawnFor(Controller, FindPlayerStart(Controller));
+	//		Controller->Possess(NewPawn);
+	//		UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode::RestartAllPlayerControllers() called"));
+	//	}
+	//}
+}
+
 
