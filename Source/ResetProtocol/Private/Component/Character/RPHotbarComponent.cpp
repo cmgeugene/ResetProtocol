@@ -82,10 +82,14 @@ void URPHotbarComponent::OnRep_Inventory()
 
 void URPHotbarComponent::SelectItem(int SelectedNum)
 {
+	HotbarWidget->OnHighlight(SelectedNum, CurrentSlotIndex);
+
+	CurrentSlotIndex = SelectedNum;
 }
 
 void URPHotbarComponent::UnEquip()
 {
+	HotbarWidget->OffHighlight(CurrentSlotIndex);
 }
 
 void URPHotbarComponent::AddItem_Implementation(const FItemData& Data)

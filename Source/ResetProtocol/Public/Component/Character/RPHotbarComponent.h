@@ -29,6 +29,9 @@ public:
 	UItemDataBase* GetItemDataBase() { return ItemDataBase; }
 	TArray<FItemData>& GetInventory() { return Inventory; }
 
+	UFUNCTION(BlueprintCallable)
+	void SetHotbarWidget(URPHotbarWidget* Widget) { HotbarWidget = Widget; }
+
 // Widget
 public:
 	UFUNCTION(Client, Reliable)
