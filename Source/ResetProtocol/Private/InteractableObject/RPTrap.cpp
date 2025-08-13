@@ -32,7 +32,7 @@ void ARPTrap::KeyHoldInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RepairComp->Server_StartRepair();
+		RepairComp->Server_StartRepair_Implementation();
 	}
 }
 
@@ -42,7 +42,7 @@ void ARPTrap::KeyReleaseInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RepairComp->Server_StopRepair();
+		RepairComp->Server_StopRepair_Implementation();
 	}
 }
 

@@ -2,11 +2,15 @@
 
 #include "InteractableObject/RPStain.h"
 #include "Component/RPCleanableComponent.h"
+#include "Components/DecalComponent.h"
 
 ARPStain::ARPStain()
 {
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
+	Decal->SetupAttachment(SceneRoot);
 
 	CleanComp = CreateDefaultSubobject<URPCleanableComponent>(TEXT("CleanComp"));
 	CleanComp->SetIsReplicated(true);
@@ -14,5 +18,73 @@ ARPStain::ARPStain()
 
 void ARPStain::ClickInteract_Implementation(AActor* Interactor)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Ragdoll On"));
 
+	if (HasAuthority())
+	{
+		CleanComp->Server_StartCleaning_Implementation();
+	}
+}
+
+void ARPStain::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// ★Decal의 머티리얼을 DecalMID로 변경 : Scalar값들을 동적으로 바꾸기 위해
+	if (UMaterialInterface* MaterialInterface = Decal->GetDecalMaterial())
+	{
+		DecalMID = UMaterialInstanceDynamic::Create(MaterialInterface, this);
+		Decal->SetDecalMaterial(DecalMID);
+	}
+
+	// 델리게이트 구독
+	if (CleanComp)
+	{
+		CleanComp->OnDirtChanged.AddDynamic(this, &ARPStain::HandleDirtChanged);
+	}
+
+	// Decal Opacity(=Dirty) 초기화
+	if (DecalMID)
+	{
+		DecalMID->SetScalarParameterValue("DirtAmount", 1.0f);
+	}
+}
+
+void ARPStain::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 델리게이트 해제(권장)
+	if (CleanComp)
+	{
+		CleanComp->OnDirtChanged.RemoveDynamic(this, &ARPStain::HandleDirtChanged);
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+void ARPStain::HandleDirtChanged(float NewValue)
+{
+	if (DecalMID)
+	{
+		if (NewValue < 0.0f)
+		{
+			NewValue = 0.0f;
+		}
+
+		DecalMID->SetScalarParameterValue("DirtAmount", NewValue);
+	}
+
+	if (NewValue <= 0.0f)
+	{
+		Destroy();
+	}
+}
+
+void ARPStain::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	IRPClickInterface::Execute_ClickInteract(this, OtherActor);
 }
