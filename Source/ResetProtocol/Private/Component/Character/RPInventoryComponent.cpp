@@ -66,7 +66,7 @@ void URPInventoryComponent::CreateInventoryWidget(AController* Controller)
 
 		if (IsValid(InventoryWidget))
 		{
-			InventoryWidget->AddToViewport(0);
+			InventoryWidget->AddToViewport(10);
 			InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
@@ -83,7 +83,7 @@ void URPInventoryComponent::Server_DropItem_Implementation(const FItemData& Drop
 
 	if (IsValid(DroppedItem.Class) && IsValid(PlayerCharacter))
 	{
-		GetWorld()->SpawnActor<ARPTestItemActor>(DroppedItem.Class, PlayerCharacter->GetInteractEnd(), FRotator::ZeroRotator);
+		GetWorld()->SpawnActor<ARPTestItemActor>(DroppedItem.Class, PlayerCharacter->GetInteractorComponent()->GetInteractEnd(), FRotator::ZeroRotator);
 	}
 }
 

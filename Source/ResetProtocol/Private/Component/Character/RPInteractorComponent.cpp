@@ -5,6 +5,7 @@
 
 #include "Data/ItemDataBase.h"
 #include "RPTestItemActor.h"
+#include "Component/Character/RPHotbarComponent.h"
 
 URPInteractorComponent::URPInteractorComponent()
 {
@@ -53,19 +54,28 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 	}
 }
 
+
+bool URPInteractorComponent::Server_Interact_Validate(ARPTestItemActor* TargetActor)
+{
+	return IsValid(TargetActor);
+}
+
+
 void URPInteractorComponent::Server_Interact_Implementation(ARPTestItemActor* TargetActor)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter) && IsValid(TargetActor))
 	{
-		FItemData* Data = PlayerCharacter->GetItemDataBase()->Items.FindByPredicate([&](const FItemData& ItemData)
+		FItemData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate([&](const FItemData& ItemData)
 			{
 				return ItemData.Class == TargetActor->GetClass();
 			});
 
 		if (Data != nullptr)
 		{
-			PlayerCharacter->GetInventory().Emplace(*Data);
+			//PlayerCharacter->GetHotbarInventory().Emplace(*Data);
+			PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
+
 			TargetActor->Destroy();
 		}
 
@@ -83,11 +93,6 @@ void URPInteractorComponent::Server_Interact_Implementation(ARPTestItemActor* Ta
 			UE_LOG(LogTemp, Warning, TEXT("Cube"));
 		}
 	}
-}
-
-bool URPInteractorComponent::Server_Interact_Validate(ARPTestItemActor* TargetActor)
-{
-	return IsValid(TargetActor);
 }
 
 void URPInteractorComponent::Interact()

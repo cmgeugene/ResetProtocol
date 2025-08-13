@@ -4,6 +4,7 @@
 #include "Character/RPBaseCharacter.h"
 #include "Component/Character/RPInteractorComponent.h"
 #include "Component/Character/RPInventoryComponent.h"
+#include "Component/Character/RPHotbarComponent.h"
 #include "Data/ItemDataBase.h"
 #include "Net/UnrealNetwork.h"
 #include "RPPlayerCharacter.generated.h"
@@ -32,26 +33,12 @@ public:
 public:
 	FHitResult& GetHitResult() { return InteractHitResult; }
 
-	FVector GetInteractEnd() { return InteractorComponent->GetInteractEnd(); }
+	URPHotbarComponent* GetHotbarComponent() { return HotbarComponent; }
 
-	UItemDataBase* GetItemDataBase() { return InventoryComponent->GetItemDataBase(); }
+	URPInteractorComponent* GetInteractorComponent() { return InteractorComponent; }
 
-	TArray<FItemData>& GetInventory() { return InventoryComponent->GetInventory(); }
-	
-	UInventoryWidget* GetInventoryWidget() { return InventoryComponent->GetInventoryWidget(); }
-
-//// Input
-//protected:
-//	UFUNCTION(BlueprintCallable, Category = "Input")
-//	void ToggleInventory();
-//
-//// Inventory Function
+	URPInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 public:
-	UFUNCTION()
-	void Server_DropItem(const FItemData& DroppedItem) { InventoryComponent->Server_DropItem(DroppedItem); }
-//
-//	UFUNCTION()
-//	void OnRep_Inventory();
 
 // Component
 protected:
@@ -62,20 +49,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	URPInventoryComponent* InventoryComponent;
 
-// Inventory
-//protected:
-//	
-//	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-//	TSubclassOf<UUserWidget> InventoryWidgetClass;
-//
-//	UPROPERTY(VisibleAnywhere, Category = "Inventory")
-//	UInventoryWidget* InventoryWidget;
-//
-//	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-//	UItemDataBase* ItemDataBase;
-//
-//	UPROPERTY(ReplicatedUsing = OnRep_Inventory, VisibleAnywhere, Category = "Inventory")
-//	TArray<FItemData> Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
+	URPHotbarComponent* HotbarComponent;
 
 protected:
 	

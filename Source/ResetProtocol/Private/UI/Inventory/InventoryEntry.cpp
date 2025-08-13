@@ -26,10 +26,10 @@ void UInventoryEntry::DropItem()
 	{
 		FItemData ItemData = GetListItem<UItemUIObject>()->ItemData;
 
-		PlayerCharacter->Server_DropItem(ItemData);
+		PlayerCharacter->GetInventoryComponent()->Server_DropItem(ItemData);
 
-		PlayerCharacter->GetInventory().Remove(ItemData);
-		PlayerCharacter->GetInventoryWidget()->RefreshInventory(PlayerCharacter->GetInventory());
+		PlayerCharacter->GetInventoryComponent()->GetInventory().Remove(ItemData);
+		PlayerCharacter->GetInventoryComponent()->GetInventoryWidget()->RefreshInventory(PlayerCharacter->GetInventoryComponent()->GetInventory());
 		DropButton->OnClicked.Clear();
 	}
 }

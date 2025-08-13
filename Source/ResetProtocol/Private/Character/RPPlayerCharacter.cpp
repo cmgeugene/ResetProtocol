@@ -4,8 +4,6 @@
 
 #include "UI/Inventory/InventoryWidget.h"
 #include "RPTestItemActor.h"
-#include "Component/Character/RPInteractorComponent.h"
-#include "Component/Character/RPInventoryComponent.h"
 
 
 ARPPlayerCharacter::ARPPlayerCharacter()
@@ -15,6 +13,7 @@ ARPPlayerCharacter::ARPPlayerCharacter()
 
 	InteractorComponent = CreateDefaultSubobject<URPInteractorComponent>(TEXT("InteractorComponent"));
 	InventoryComponent = CreateDefaultSubobject<URPInventoryComponent>(TEXT("InventoryComponent"));
+	HotbarComponent = CreateDefaultSubobject<URPHotbarComponent>(TEXT("HotbarComponent"));
 }
 
 void ARPPlayerCharacter::BeginPlay()
@@ -27,6 +26,7 @@ void ARPPlayerCharacter::BeginPlay()
 	{
 		InteractorComponent->CreateInteractWidget(GetController());
 		InventoryComponent->CreateInventoryWidget(GetController());
+		HotbarComponent->CreateHotbarWidget(GetController());
 	}
 }
 
