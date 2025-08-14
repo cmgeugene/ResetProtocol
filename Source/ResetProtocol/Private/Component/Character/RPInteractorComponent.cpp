@@ -7,6 +7,10 @@
 #include "RPTestItemActor.h"
 #include "Component/Character/RPHotbarComponent.h"
 
+#include "Interface/RPClickInterface.h"
+#include "Interface/RPDragInterface.h"
+#include "Interface/RPKeyHoldInterface.h"
+
 URPInteractorComponent::URPInteractorComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -16,21 +20,6 @@ URPInteractorComponent::URPInteractorComponent()
 void URPInteractorComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//if (IsValid(InteractWidgetClass))
-	//{
-	//	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-	//	if (IsValid(PlayerCharacter))
-	//	{
-	//		InteractWidget = CreateWidget(Cast<APlayerController>(PlayerCharacter->GetController()), InteractWidgetClass);
-
-	//		if (IsValid(InteractWidget))
-	//		{
-	//			InteractWidget->AddToViewport(0);
-	//			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
-	//		}
-	//	}
-	//}
 }
 
 void URPInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -101,10 +90,30 @@ void URPInteractorComponent::Interact()
 
 	if (IsValid(PlayerCharacter))
 	{
+		// 청소 도구.
 		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
 		if (IsValid(TestItemActor))
 		{
 			Server_Interact(TestItemActor);
+		}
+
+		//IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor()->Implements());
+		
+		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor());
+		if (ClickInterface)
+		{
+			IRPClickInterface::Execute_ClickInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
+		}
+
+		bool HasClickInterface = PlayerCharacter->GetHitResult().GetActor()->Implements<URPClickInterface>();
+		
+		if (HasClickInterface)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("O"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("X"));
 		}
 	}
 }

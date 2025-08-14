@@ -13,7 +13,7 @@ URPHotbarComponent::URPHotbarComponent()
 	bReplicateUsingRegisteredSubObjectList = true;
 
 	TotalItems = 4;
-	CurrentSlotIndex = 0;
+	CurrentSlotIndex = -1;
 }
 
 
@@ -90,6 +90,8 @@ void URPHotbarComponent::SelectItem(int SelectedNum)
 void URPHotbarComponent::UnEquip()
 {
 	HotbarWidget->OffHighlight(CurrentSlotIndex);
+
+	CurrentSlotIndex = -1;
 }
 
 void URPHotbarComponent::AddItem_Implementation(const FItemData& Data)

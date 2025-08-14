@@ -96,11 +96,17 @@ void URPHotbarWidget::OnHighlight(int CurrentIndex, int PreviousIndex)
 	
 		if (IsValid(PreviousHotbarSlot))
 		{
-			PreviousHotbarSlot->HighlightOn();
+			PreviousHotbarSlot->HighlightOff();
 		}
 	}
 }
 
 void URPHotbarWidget::OffHighlight(int PreviousIndex)
 {
+	URPHotbarSlot* PreviousHotbarSlot = Cast<URPHotbarSlot>(UGridPanel_Items->GetChildAt(PreviousIndex));
+
+	if (IsValid(PreviousHotbarSlot))
+	{
+		PreviousHotbarSlot->HighlightOff();
+	}
 }

@@ -1,4 +1,5 @@
 #include "UI/Inventory/RPHotbarSlot.h"
+#include "Styling/SlateBrush.h"
 
 URPHotbarSlot::URPHotbarSlot(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -34,10 +35,14 @@ void URPHotbarSlot::SetData(const FItemData& _ItemData, int _SlotIndexs)
 
 void URPHotbarSlot::HighlightOn()
 {
-	Highlight->SetColorAndOpacity(FLinearColor(1.f, 1.f, 0.f, 025.f));
+	FSlateBrush Brush = Highlight->Brush;
+	Brush.TintColor = FSlateColor(FLinearColor(1.f, 1.f, 0.f, 0.25f)); 
+	Highlight->SetBrush(Brush);
 }
 
 void URPHotbarSlot::HighlightOff()
 {
-	Highlight->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
+	FSlateBrush Brush = Highlight->Brush;
+	Brush.TintColor = FSlateColor(FLinearColor(1.f, 1.f, 0.f, 0.f));
+	Highlight->SetBrush(Brush);
 }
