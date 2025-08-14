@@ -31,10 +31,13 @@ void URPMovableComponent::Server_Pickup_Implementation()
 
 void URPMovableComponent::Server_StartDrag_Implementation()
 {
+	// 캐릭터 앞에 붙이기
+
 }
 
 void URPMovableComponent::Server_StartDrop_Implementation()
 {
+	// 캐릭터에서 때기+
 }
 
 void URPMovableComponent::OnPlaceComplete()

@@ -14,12 +14,14 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
 	StaticMeshComp->SetupAttachment(SceneRoot);
+	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	StaticMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
 	StaticMeshComp->SetIsReplicated(true);
 
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("USkeletalMeshComp"));
 	SkeletalMeshComp->SetupAttachment(SceneRoot);
 	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	SkeletalMeshComp->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	SkeletalMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
 	SkeletalMeshComp->SetIsReplicated(true);
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));
