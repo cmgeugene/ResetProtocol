@@ -20,12 +20,6 @@ void ARPGameMode::OnPostLogin(AController* NewPlayer)
 
 	PostLoginProcess(NewPlayer);
 
-	// 새 플레이어의 로그인 절차가 끝난 후, 모든 클라이언트에 목록을 갱신하라는 신호를 보냅니다.
-	ARPGameState* GS = GetGameState<ARPGameState>();
-	if (GS)
-	{
-		GS->Multicast_OnPlayerListChanged();
-	}
 }
 
 FString ARPGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
@@ -111,12 +105,7 @@ void ARPGameMode::Logout(AController* Exiting)
 
 	LogoutProcess(Exiting);
 
-	// 플레이어가 나간 후, 모든 클라이언트에 목록을 갱신하라는 신호를 보냅니다.
-	ARPGameState* GS = GetGameState<ARPGameState>();
-	if (GS)
-	{
-		GS->Multicast_OnPlayerListChanged();
-	}
+
 }
 
 void ARPGameMode::LogoutProcess_Implementation(AController* Exiting)
@@ -182,6 +171,21 @@ void ARPGameMode::AllPlayerControllersTravelComplete()
 	//		UE_LOG(LogTemp, Display, TEXT("[SeamlessTravel] RPGameMode::RestartAllPlayerControllers() called"));
 	//	}
 	//}
+}
+
+void ARPGameMode::TogglePauseGame()
+{
+	if (!bPauseable) return;
+
+	bool Paused = UGameplayStatics::IsGamePaused(GetWorld());
+	if (Paused)
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+	}
+	else
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+	}
 }
 
 

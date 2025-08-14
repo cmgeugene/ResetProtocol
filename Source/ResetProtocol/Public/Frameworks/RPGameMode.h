@@ -50,4 +50,7 @@ public:
 	int32 CurrentSeamlessPlayer = 0;
 
 	void AllPlayerControllersTravelComplete();
+
+	UFUNCTION(BlueprintCallable, Category = "RPGameMode")
+	void TogglePauseGame();
 };

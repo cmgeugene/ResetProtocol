@@ -7,6 +7,14 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerListUpdatedSignature);
 
+UENUM(BlueprintType)
+enum class EMatchPhase : uint8
+{
+	Lobby,
+	InGame,
+	Result
+};
+
 /**
  * 
  */
@@ -16,16 +24,26 @@ class RESETPROTOCOL_API ARPGameState : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-	// OnPostLogin, OnLogout 이후 호출되는 델리게이트. 플레이어 수 변동이 있을 때 호출
-	UPROPERTY(BlueprintAssignable, Category = "RPGameState")
-	FOnPlayerListUpdatedSignature OnPlayerListUpdated;
+
 
 	// 기본 제공 PlayerArray에 대한 Getter
 	UFUNCTION(BlueprintCallable, Category = "RPGameState")
 	const TArray<APlayerState*>& GetPlayerList() const;
 
-	// [추가] 플레이어 목록 변경을 모든 클라이언트에 알릴 멀티캐스트 함수
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayerListChanged();
 
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchPhase, BlueprintReadOnly, Category = "RPGameState")
+	EMatchPhase MatchPhase;
+
+	UFUNCTION()
+	void OnRep_MatchPhase();
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "RPGameState")
+	void SetMatchPhaseTo(const EMatchPhase NewPhase);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "RPGameState")
+	void OnRepMatchPhaseProcess();
+
+private:
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 };

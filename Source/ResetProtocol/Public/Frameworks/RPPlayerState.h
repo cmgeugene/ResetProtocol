@@ -11,7 +11,7 @@
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerInfoChanged, const FPlayerInfo&, NewPlayerInfo);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerInfoChanged, const FPlayerInfo&, NewPlayerInfo);
 
 UCLASS()
 class RESETPROTOCOL_API ARPPlayerState : public APlayerState
