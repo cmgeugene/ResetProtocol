@@ -29,10 +29,11 @@ void ARPPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
 
-	if (const ARPPlayerState* OldPlayerState = Cast<const ARPPlayerState>(PlayerState))
+	if (ARPPlayerState* NewPlayerState = Cast<ARPPlayerState>(PlayerState))
 	{
-		this->StoredPlayerInfo = OldPlayerState->StoredPlayerInfo;
-		UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] CopyProperties : 속성 카피, current byte : %d"), this->StoredPlayerInfo.Bytes);
+		NewPlayerState->StoredPlayerInfo = this->StoredPlayerInfo;
+
+		UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] CopyProperties : 속성 카피, current byte : %d"), NewPlayerState->StoredPlayerInfo.Bytes);
 	}
 }
 
