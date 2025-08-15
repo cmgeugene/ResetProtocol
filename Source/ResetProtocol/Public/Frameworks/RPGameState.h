@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "InteractableObject/RPBaseInteractableObject.h"
 #include "RPGameState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerListUpdatedSignature);
@@ -13,6 +14,15 @@ enum class EMatchPhase : uint8
 	Lobby,
 	InGame,
 	Result
+};
+
+USTRUCT(BlueprintType)
+struct FResetResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)		EInteractObjectType ObejctType;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)		int32 Count;
 };
 
 /**
@@ -34,6 +44,9 @@ public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchPhase, BlueprintReadOnly, Category = "RPGameState")
 	EMatchPhase MatchPhase;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "RPGameState")
+	TArray<FResetResult> ResetProcessResult;
 
 	UFUNCTION()
 	void OnRep_MatchPhase();
