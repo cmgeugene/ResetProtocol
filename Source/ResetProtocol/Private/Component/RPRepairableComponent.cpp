@@ -19,7 +19,7 @@ void URPRepairableComponent::Server_StartRepair_Implementation()
 			OwnerActor->StaticMeshComp->SetVisibility(true);
 
 			OwnerActor->ActiveMesh = OwnerActor->StaticMeshComp;
-			OwnerActor->IsBroken = false;
+			OwnerActor->bIsBroken = false;
 		}
 	}
 }
@@ -35,7 +35,7 @@ void URPRepairableComponent::Server_StopRepair_Implementation()
 			OwnerActor->BrokenMesh->SetVisibility(true);
 
 			OwnerActor->ActiveMesh = OwnerActor->BrokenMesh;
-			OwnerActor->IsBroken = true;
+			OwnerActor->bIsBroken = true;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #include "Character/RPPlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 
 #include "UI/Inventory/InventoryWidget.h"
 #include "RPTestItemActor.h"
@@ -14,6 +15,8 @@ ARPPlayerCharacter::ARPPlayerCharacter()
 	InteractorComponent = CreateDefaultSubobject<URPInteractorComponent>(TEXT("InteractorComponent"));
 	InventoryComponent = CreateDefaultSubobject<URPInventoryComponent>(TEXT("InventoryComponent"));
 	HotbarComponent = CreateDefaultSubobject<URPHotbarComponent>(TEXT("HotbarComponent"));
+
+	GrabComponent = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("GrabComponent"));
 }
 
 void ARPPlayerCharacter::BeginPlay()

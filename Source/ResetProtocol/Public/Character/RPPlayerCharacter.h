@@ -10,6 +10,7 @@
 #include "RPPlayerCharacter.generated.h"
 
 class UInventoryWidget;
+class UPhysicsHandleComponent;
 
 UCLASS()
 class RESETPROTOCOL_API ARPPlayerCharacter : public ARPBaseCharacter
@@ -51,6 +52,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	URPHotbarComponent* HotbarComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
+	UPhysicsHandleComponent* GrabComponent;
 
 protected:
 	

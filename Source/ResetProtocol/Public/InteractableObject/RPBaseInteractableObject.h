@@ -9,6 +9,17 @@
 #define CUSTOM_DEPTH_RED 250
 class UBoxComponent;
 
+UENUM(BlueprintType)
+enum class EInteractObjectType : uint8
+{
+	None				UMETA(DisplayName = "None"),
+	Trash				UMETA(DisplayName = "Trash"),
+	ScatteredObject		UMETA(DisplayName = "ScatteredObject"),
+	Corpse				UMETA(DisplayName = "Corpse"),
+	Trap				UMETA(DisplayName = "Trap"),
+	Stain				UMETA(DisplayName = "Stain")
+};
+
 UCLASS()
 class RESETPROTOCOL_API ARPBaseInteractableObject : public AActor
 {
@@ -16,6 +27,8 @@ class RESETPROTOCOL_API ARPBaseInteractableObject : public AActor
 	
 public:	
 	ARPBaseInteractableObject();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void Highlight();
 	void UnHighlight();
@@ -31,8 +44,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComp;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type")
+	EInteractObjectType ObjectType;
+
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;
+
+
 
 // 테스트용
 protected:

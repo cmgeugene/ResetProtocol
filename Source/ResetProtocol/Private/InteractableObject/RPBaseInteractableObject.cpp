@@ -2,6 +2,7 @@
 
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ARPBaseInteractableObject::ARPBaseInteractableObject()
 {
@@ -26,6 +27,13 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));
 	CollisionBox->SetupAttachment(RootComponent);
+}
+
+void ARPBaseInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPBaseInteractableObject, ObjectType);
 }
 
 void ARPBaseInteractableObject::BeginPlay()

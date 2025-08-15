@@ -30,7 +30,7 @@ public:
 	TObjectPtr<UStaticMeshComponent> BrokenMesh;
 
 	UPROPERTY(Replicated)
-	bool IsBroken;
+	bool bIsBroken;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

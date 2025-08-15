@@ -11,6 +11,8 @@ ARPTrash::ARPTrash()
 
 	MoveComp = CreateDefaultSubobject<URPMovableComponent>(TEXT("MoveComp"));
 	MoveComp->SetIsReplicated(true);
+
+	ObjectType = EInteractObjectType::Trash;
 }
 
 void ARPTrash::ClickInteract_Implementation(AActor* Interactor)

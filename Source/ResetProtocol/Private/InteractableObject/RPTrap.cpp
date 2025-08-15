@@ -16,14 +16,16 @@ ARPTrap::ARPTrap()
 	RepairComp = CreateDefaultSubobject<URPRepairableComponent>(TEXT("RepairComp"));
 	RepairComp->SetIsReplicated(true);
 
-	IsBroken = true;
+	bIsBroken = true;
+
+	ObjectType = EInteractObjectType::Trap;
 }
 
 void ARPTrap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ARPTrap, IsBroken);
+	DOREPLIFETIME(ARPTrap, bIsBroken);
 }
 
 void ARPTrap::KeyHoldInteract_Implementation(AActor* Interactor)
@@ -54,7 +56,7 @@ void ARPTrap::BeginPlay()
 	{
 		StaticMeshComp->SetVisibility(false);
 		ActiveMesh = BrokenMesh;
-		IsBroken = true;
+		bIsBroken = true;
 	}
 }
 
@@ -65,7 +67,7 @@ void ARPTrap::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other
 		return;
 	}
 
-	if (IsBroken)
+	if (bIsBroken)
 	{
 		IRPKeyHoldInterface::Execute_KeyHoldInteract(this, OtherActor);
 	}

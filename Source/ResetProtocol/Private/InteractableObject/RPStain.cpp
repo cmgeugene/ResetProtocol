@@ -14,6 +14,8 @@ ARPStain::ARPStain()
 
 	CleanComp = CreateDefaultSubobject<URPCleanableComponent>(TEXT("CleanComp"));
 	CleanComp->SetIsReplicated(true);
+
+	ObjectType = EInteractObjectType::Stain;
 }
 
 void ARPStain::ClickInteract_Implementation(AActor* Interactor)

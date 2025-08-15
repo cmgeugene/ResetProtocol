@@ -16,14 +16,16 @@ ARPCorpse::ARPCorpse()
 	RagdollComp = CreateDefaultSubobject<URPRagdollComponent>(TEXT("RagdollComp"));
 	RagdollComp->SetIsReplicated(true);
 
-	IsRagdollOn = false;
+	bIsRagdollOn = false;
+
+	ObjectType = EInteractObjectType::Corpse;
 }
 
 void ARPCorpse::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ARPCorpse, IsRagdollOn);
+	DOREPLIFETIME(ARPCorpse, bIsRagdollOn);
 }
 
 void ARPCorpse::DragInteract_Implementation(AActor* Interactor)
@@ -41,7 +43,7 @@ void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 	if (HasAuthority())
 	{
 		RagdollComp->Server_RagdollOn_Implementation();
-		IsRagdollOn = true;
+		bIsRagdollOn = true;
 	}
 }
 
@@ -52,7 +54,7 @@ void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
 	if (HasAuthority())
 	{
 		RagdollComp->Server_RagdollOff_Implementation();
-		IsRagdollOn = false;
+		bIsRagdollOn = false;
 	}
 }
 
@@ -63,7 +65,7 @@ void ARPCorpse::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		return;
 	}
 
-	if (IsRagdollOn)
+	if (bIsRagdollOn)
 	{
 		IRPKeyHoldInterface::Execute_KeyReleaseInteract(this, OtherActor);
 	}

@@ -33,7 +33,7 @@ protected:
 	TObjectPtr<URPRagdollComponent> RagdollComp;
 
 	UPROPERTY(Replicated)
-	bool IsRagdollOn;
+	bool bIsRagdollOn;
 
 // 테스트용
 protected:
