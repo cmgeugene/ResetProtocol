@@ -9,6 +9,7 @@
 #include "ResetProtocol/ResetProtocol.h"
 
 #include "InteractableObject/RPBaseInteractableObject.h"
+#include "UI/Interact/RPInteractWidget.h"
 
 #include "Interface/RPClickInterface.h"
 #include "Interface/RPDragInterface.h"
@@ -37,7 +38,7 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 {
 	if (IsValid(InteractWidgetClass))
 	{
-		InteractWidget = CreateWidget(Cast<APlayerController>(Controller), InteractWidgetClass);
+		InteractWidget = Cast<URPInteractWidget>(CreateWidget(Cast<APlayerController>(Controller), InteractWidgetClass));
 
 		if (IsValid(InteractWidget))
 		{
@@ -184,6 +185,8 @@ void URPInteractorComponent::InteractCheck()
 		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
 		if (TestItemActor)
 		{
+			InteractWidget->SetText(TEXT("asdfdsf"));
+
 			InteractActor = TestItemActor;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);
 		}
@@ -192,6 +195,15 @@ void URPInteractorComponent::InteractCheck()
 		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
 		if (InteractableObjcet)
 		{
+			EInteractObjectType Type = InteractableObjcet->ObjectType;
+
+			UEnum* EnumPtr = StaticEnum<EInteractObjectType>();
+			if (EnumPtr)
+			{
+				FString EnumString = EnumPtr->GetNameStringByValue((int64)Type);
+				InteractWidget->SetText(EnumString);
+			}
+
 			InteractActor = InteractableObjcet;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);			
 		}

@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "RPInteractorComponent.generated.h"
 
+class URPInteractWidget;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RESETPROTOCOL_API URPInteractorComponent : public UActorComponent
@@ -64,7 +66,7 @@ protected:
 	TSubclassOf<UUserWidget> InteractWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
-	UUserWidget* InteractWidget;
+	URPInteractWidget* InteractWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* InteractActor;
