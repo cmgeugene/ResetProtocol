@@ -6,12 +6,16 @@
 #include "Data/ItemDataBase.h"
 #include "RPTestItemActor.h"
 #include "Component/Character/RPHotbarComponent.h"
+#include "ResetProtocol/ResetProtocol.h"
+
+#include "InteractableObject/RPBaseInteractableObject.h"
 
 #include "Interface/RPClickInterface.h"
 #include "Interface/RPDragInterface.h"
 #include "Interface/RPKeyHoldInterface.h"
 
 URPInteractorComponent::URPInteractorComponent()
+	: IsHoldingItem(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -43,14 +47,28 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 	}
 }
 
+void URPInteractorComponent::PickUpItem()
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-bool URPInteractorComponent::Server_Interact_Validate(ARPTestItemActor* TargetActor)
+	if (IsValid(PlayerCharacter))
+	{
+		// 청소 도구.
+		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
+		if (IsValid(TestItemActor))
+		{
+			Server_PickUpItem(TestItemActor);
+		}
+	}
+}
+
+bool URPInteractorComponent::Server_PickUpItem_Validate(ARPTestItemActor* TargetActor)
 {
 	return IsValid(TargetActor);
 }
 
 
-void URPInteractorComponent::Server_Interact_Implementation(ARPTestItemActor* TargetActor)
+void URPInteractorComponent::Server_PickUpItem_Implementation(ARPTestItemActor* TargetActor)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter) && IsValid(TargetActor))
@@ -90,33 +108,44 @@ void URPInteractorComponent::Interact()
 
 	if (IsValid(PlayerCharacter))
 	{
-		// 청소 도구.
-		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
-		if (IsValid(TestItemActor))
-		{
-			Server_Interact(TestItemActor);
-		}
-
-		//IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor()->Implements());
-		
 		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor());
 		if (ClickInterface)
 		{
 			IRPClickInterface::Execute_ClickInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
 		}
 
-		bool HasClickInterface = PlayerCharacter->GetHitResult().GetActor()->Implements<URPClickInterface>();
+		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(PlayerCharacter->GetHitResult().GetActor());
+		if (DragInterface)
+		{
+			IRPDragInterface::Execute_DragInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
+			IsHoldingItem = true;
+			HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+		}
+
+
+		// KeyHold로 이전.
 		
-		if (HasClickInterface)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("O"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("X"));
-		}
+		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(PlayerCharacter->GetHitResult().GetActor());
+		//if (ClickInterface)
+		//{
+		//	//IRPKeyHoldInterface::Execute_ClickInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
+		//}
+
+		//bool HasClickInterface = PlayerCharacter->GetHitResult().GetActor()->Implements<URPClickInterface>();
 	}
 }
+
+bool URPInteractorComponent::Server_Interact_Validate()
+{
+	return true;
+}
+
+
+void URPInteractorComponent::Server_Interact_Implementation()
+{
+}
+
+
 
 void URPInteractorComponent::InteractCheck()
 {
@@ -131,23 +160,53 @@ void URPInteractorComponent::InteractCheck()
 			PlayerController->GetPlayerViewPoint(ViewVector, ViewRotation);
 		}
 	}
-
+		
 	FVector VecDirection = ViewRotation.Vector() * InteractionRange;
+	
 	InteractEnd = ViewVector + VecDirection;
+
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(PlayerCharacter);
+	
 	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
+
+	if (InteractActor == PlayerCharacter->GetHitResult().GetActor())
+		return;
 
 	if (IsValid(InteractWidget))
 	{
+		if (!IsValid(PlayerCharacter->GetHitResult().GetActor()) || IsHoldingItem)
+		{
+			InteractActor = nullptr;
+			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+
 		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
 		if (TestItemActor)
 		{
+			InteractActor = TestItemActor;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);
 		}
-		else
+
+
+		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
+		if (InteractableObjcet)
 		{
-			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+			InteractActor = InteractableObjcet;
+			InteractWidget->SetVisibility(ESlateVisibility::Visible);			
 		}
+	}
+}
+
+void URPInteractorComponent::OnLeftMouseButtonReleased()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Mouse Left Button Released!"));
+
+	IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
+	if (DragInterface)
+	{
+		IRPDragInterface::Execute_DropInteract(HoldingActor, GetOwner());
+		IsHoldingItem = false;
+		HoldingActor = nullptr;
 	}
 }

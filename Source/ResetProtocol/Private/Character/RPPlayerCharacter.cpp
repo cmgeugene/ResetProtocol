@@ -41,56 +41,17 @@ void ARPPlayerCharacter::Tick(float DeltaTime)
 void ARPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("LeftMouseButton", EInputEvent::IE_Released, this, &ARPPlayerCharacter::OnLeftMouseButtonReleased);
+
 }
 
 void ARPPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//DOREPLIFETIME(ARPPlayerCharacter, Inventory);
 }
 
-//void ARPPlayerCharacter::ToggleInventory()
-//{
-//	if (IsValid(InventoryWidget))
-//	{
-//		if (!InventoryWidget->IsVisible())
-//		{
-//			InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-//			InventoryWidget->RefreshInventory(Inventory);
-//
-//			Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameAndUI());
-//			Cast<APlayerController>(GetController())->SetCinematicMode(true, true, true);
-//			Cast<APlayerController>(GetController())->bShowMouseCursor = true;
-//		}
-//		else
-//		{
-//			InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
-//
-//			Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameOnly());
-//			Cast<APlayerController>(GetController())->SetCinematicMode(false, true, true);
-//			Cast<APlayerController>(GetController())->bShowMouseCursor = false;
-//		}
-//	}
-//}
-//
-//void ARPPlayerCharacter::OnRep_Inventory()
-//{
-//	if (IsValid(InventoryWidget))
-//	{
-//		InventoryWidget->RefreshInventory(Inventory);
-//	}
-//}
-//
-//bool ARPPlayerCharacter::Server_DropItem_Validate(const FItemData& DroppedItem, FVector SpawnLocation)
-//{
-//	return DroppedItem.Class != nullptr;
-//}
-//
-//void ARPPlayerCharacter::Server_DropItem_Implementation(const FItemData& DroppedItem, FVector SpawnLocation)
-//{
-//	if (IsValid(DroppedItem.Class))
-//	{
-//		GetWorld()->SpawnActor<ARPTestItemActor>(DroppedItem.Class, GetInteractEnd(), FRotator::ZeroRotator);
-//	}
-//}
+void ARPPlayerCharacter::OnLeftMouseButtonReleased()
+{
+	InteractorComponent->OnLeftMouseButtonReleased();
+}

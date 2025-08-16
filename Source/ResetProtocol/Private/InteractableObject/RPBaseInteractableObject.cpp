@@ -17,6 +17,7 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 	StaticMeshComp->SetupAttachment(SceneRoot);
 	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	StaticMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
+	StaticMeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 	StaticMeshComp->SetIsReplicated(true);
 
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("USkeletalMeshComp"));

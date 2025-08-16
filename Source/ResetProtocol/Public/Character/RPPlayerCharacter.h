@@ -39,7 +39,10 @@ public:
 	URPInteractorComponent* GetInteractorComponent() { return InteractorComponent; }
 
 	URPInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
+
 public:
+	void OnLeftMouseButtonReleased();
+
 
 // Component
 protected:
@@ -55,6 +58,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component")
 	UPhysicsHandleComponent* GrabComponent;
+
 
 protected:
 	

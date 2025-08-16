@@ -25,17 +25,27 @@ public:
 	void CreateInteractWidget(AController* Controller);
 
 public:
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Interact(ARPTestItemActor* TargetActor);
-
 	UFUNCTION(BlueprintCallable, Category = "Interact")
-	void Interact();
+	FVector GetInteractEnd() { return InteractEnd; }
 
+public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void InteractCheck();
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
-	FVector GetInteractEnd() { return InteractEnd; }
+	void PickUpItem();
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_PickUpItem(ARPTestItemActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void Interact();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Interact();
+
+public:
+	void OnLeftMouseButtonReleased();
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
@@ -55,5 +65,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	UUserWidget* InteractWidget;
+
+	UPROPERTY(VisibleAnywhere)
+	AActor* InteractActor;
+
+	UPROPERTY(VisibleAnywhere)
+	AActor* HoldingActor;
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsHoldingItem;
 		
 };
