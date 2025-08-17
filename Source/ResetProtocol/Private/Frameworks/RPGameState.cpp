@@ -20,6 +20,24 @@ void ARPGameState::SetMatchPhaseTo(const EMatchPhase NewPhase)
 	MatchPhase = NewPhase;
 }
 
+void ARPGameState::OnResetSuccess_Implementation(const EInteractObjectType Type)
+{
+	FResetResult* FoundResult = ResetProcessResult.FindByKey(Type);
+	
+	if (FoundResult)
+	{
+		FoundResult->Count++;
+	}
+	else
+	{
+		FResetResult NewResult;
+		NewResult.ObejctType = Type;
+		NewResult.Count = 1;
+
+		ResetProcessResult.Add(NewResult);
+	}
+}
+
 void ARPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

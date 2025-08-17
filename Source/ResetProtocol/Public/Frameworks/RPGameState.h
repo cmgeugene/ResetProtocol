@@ -23,6 +23,12 @@ struct FResetResult
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)		EInteractObjectType ObejctType;
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)		int32 Count;
+
+	// FindByKey를 위한 연산자 정의
+	bool operator==(const EInteractObjectType InObejctType) const
+	{
+		return this->ObejctType == InObejctType;
+	}
 };
 
 /**
@@ -56,6 +62,15 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "RPGameState")
 	void OnRepMatchPhaseProcess();
+	
+	/*
+	*	상호 작용 완료시 호출되는 함수
+	*	결과 중 EInteractableObjectType이 이미 있으면 count 1 증가
+	*	없으면 추가 후 count 1 증가
+	*/
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPGameState")
+	void OnResetSuccess(const EInteractObjectType Type);
+	void OnResetSuccess_Implementation(const EInteractObjectType Type);
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;

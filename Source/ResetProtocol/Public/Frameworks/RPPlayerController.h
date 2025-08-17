@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Frameworks/RPPlayerState.h"
+#include "InteractableObject/RPBaseInteractableObject.h"
 #include "RPPlayerController.generated.h"
 
 
@@ -42,6 +43,13 @@ public:
 	void Server_NotifyClientReady();
 	void Server_NotifyClientReady_Implementation();
 
+	/*
+	*  상호작용 당하는 아이템에서 호출할 핸들
+	*  아이템->컨트롤러->게임스테이트 흐름으로 연결됩니다
+	*/
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPPlayerController")
+	void Server_OnResetSuccessHandle(const EInteractObjectType Type);
+	void Server_OnResetSuccessHandle_Implementation(const EInteractObjectType Type);
 
 private:
 

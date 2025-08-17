@@ -5,9 +5,16 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerState.h"
 #include "Frameworks/RPPlayerState.h"
+#include "Frameworks/RPGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/RPPlayerCharacter.h"
 #include "Frameworks/RPGameMode.h"
+
+void ARPPlayerController::Server_OnResetSuccessHandle_Implementation(const EInteractObjectType Type)
+{
+	ARPGameState* RPGS = Cast<ARPGameState>(GetWorld()->GetGameState());
+	RPGS->OnResetSuccess(Type);
+}
 
 void ARPPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
