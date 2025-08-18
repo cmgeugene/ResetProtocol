@@ -81,6 +81,8 @@ void URPHotbarComponent::OnRep_Inventory()
 	}
 }
 
+
+
 void URPHotbarComponent::SelectItem(int SelectedNum)
 {
 	HotbarWidget->OnHighlight(SelectedNum, CurrentSlotIndex);
@@ -94,13 +96,20 @@ void URPHotbarComponent::SelectItem(int SelectedNum)
 
 	if (IsValid(Inventory[SelectedNum].Class) && IsValid(PlayerCharacter))
 	{
-		CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(Inventory[SelectedNum].Class, PlayerCharacter->GetInteractorComponent()->GetInteractEnd(), FRotator::ZeroRotator);
+		CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(Inventory[SelectedNum].Class, FVector::ZeroVector, FRotator::ZeroRotator);
 		
 		USkeletalMeshComponent* PlayerMesh = PlayerCharacter->GetMesh();
 		if (IsValid(PlayerMesh))
 		{
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-			CurrentCleaningTool->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
+			if (PlayerMesh->DoesSocketExist(FName("CleaningToolSocket")))
+			{
+				CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
+				CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+				CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+				CurrentCleaningTool->GetMesh()->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
+			}
 		}
 	}
 
@@ -121,25 +130,46 @@ void URPHotbarComponent::UnEquip()
 
 void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
 {
-	HotbarWidget->UpdateUI();
 
-	int LatestIndex = HotbarWidget->GetLatestIndex();
-
-	if (CurrentSlotIndex == -1)
+	for (int i = 0; i < Inventory.Num();i++)
 	{
-		if (LatestIndex >= 0 && LatestIndex <= 2)
+		if (!IsValid(Inventory[i].Class))
 		{
-			Inventory[LatestIndex] = Data;
+			Inventory[i] = Data;
 			HotbarWidget->UpdateUI();
+
+			if (CurrentSlotIndex == -1)
+			{
+				return;
+			}	
+			else
+			{
+				if (i == CurrentSlotIndex)
+				{
+					SelectItem(i);
+				}
+				else
+				{
+					HotbarWidget->OnHighlight(CurrentSlotIndex, CurrentSlotIndex);
+				}
+				return;
+			}
 		}
 	}
-	else
-	{
-		if (!IsValid(CurrentCleaningTool))
-		{
-			Inventory[CurrentSlotIndex] = Data;
-			HotbarWidget->UpdateUI();
-		}
-	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Inventory Full"));
 	
+}
+
+bool URPHotbarComponent::CheckInventoryFull()
+{
+	for (int i = 0; i < Inventory.Num();i++)
+	{
+		if (!IsValid(Inventory[i].Class))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

@@ -33,6 +33,8 @@ public:
 public:
 	ECleaningToolState GetCleaningToolState() { return eCleaningTool; }
 
+	UStaticMeshComponent* GetMesh() { return StaticMeshComp; }
+
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")

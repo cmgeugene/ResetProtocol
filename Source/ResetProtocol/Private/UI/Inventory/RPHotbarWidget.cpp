@@ -93,12 +93,12 @@ void URPHotbarWidget::OnHighlight(int CurrentIndex, int PreviousIndex)
 
 	if (IsValid(CurrentHotbarSlot))
 	{
-		CurrentHotbarSlot->HighlightOn();
-	
 		if (IsValid(PreviousHotbarSlot))
 		{
 			PreviousHotbarSlot->HighlightOff();
 		}
+
+		CurrentHotbarSlot->HighlightOn();
 	}
 }
 

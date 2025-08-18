@@ -85,24 +85,14 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 
 		if (Data != nullptr)
 		{
-			//PlayerCharacter->GetHotbarInventory().Emplace(*Data);
 			PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
 
-			TargetActor->Destroy();
-		}
-
-		// 디버그 로그
-		if (TargetActor->GetCleaningToolState() == ECleaningToolState::Broom)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Broom"));
-		}
-		else if (TargetActor->GetCleaningToolState() == ECleaningToolState::Vacuum)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Vacuum"));
-		}
-		else if (TargetActor->GetCleaningToolState() == ECleaningToolState::Mop)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Mop"));
+			bool CanPickUp = PlayerCharacter->GetHotbarComponent()->CheckInventoryFull();
+		
+			if (CanPickUp)
+			{
+				TargetActor->Destroy();
+			}
 		}
 	}
 }
@@ -111,7 +101,7 @@ void URPInteractorComponent::Interact()
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-	if (IsValid(PlayerCharacter))
+	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
 		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor());
 		if (ClickInterface)
@@ -185,7 +175,7 @@ void URPInteractorComponent::InteractCheck()
 		ARPBaseCleaningTool* CleaningTool = Cast<ARPBaseCleaningTool>(PlayerCharacter->GetHitResult().GetActor());
 		if (CleaningTool)
 		{
-			InteractWidget->SetText(TEXT("asdfdsf"));
+			InteractWidget->SetText(TEXT("PickUp CleaningTool"));
 
 			InteractActor = CleaningTool;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);
@@ -214,7 +204,7 @@ void URPInteractorComponent::KeyHoldInteract()
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-	if (IsValid(PlayerCharacter))
+	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
 		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(PlayerCharacter->GetHitResult().GetActor());
 		if (KeyHoldInterface)
@@ -227,7 +217,7 @@ void URPInteractorComponent::KeyHoldInteract()
 		GetWorld()->GetTimerManager().SetTimer(
 			KeyHoldTimerHandle,
 			this,
-			&URPInteractorComponent::KeyReleaseInteract,
+			&URPInteractorComponent::KeyHoldTimerEnd,
 			KeyHoldingTime, 
 			false 
 		);
@@ -236,23 +226,26 @@ void URPInteractorComponent::KeyHoldInteract()
 
 void URPInteractorComponent::KeyReleaseInteract()
 {
-	if (KeyHoldTimerHandle.IsValid()) 
+	if (KeyHoldTimerHandle.IsValid())
 	{
 		KeyHoldTimerHandle.Invalidate();
+		IsHoldingItem = false;
+		HoldingActor = nullptr;
 	}
-	else
-	{
-		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+}
 
-		if (IsValid(PlayerCharacter))
+void URPInteractorComponent::KeyHoldTimerEnd()
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	if (IsValid(PlayerCharacter) && KeyHoldTimerHandle.IsValid())
+	{
+		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
+		if (KeyHoldInterface)
 		{
-			IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
-			if (KeyHoldInterface)
-			{
-				IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
-				IsHoldingItem = false;
-				HoldingActor = nullptr;
-			}
+			IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+			IsHoldingItem = false;
+			HoldingActor = nullptr;
 		}
 	}
 }

@@ -50,6 +50,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void AddItem(const FCleaningToolData& Data);
 
+	UFUNCTION()
+	bool CheckInventoryFull();
+
 // Item
 public:
 

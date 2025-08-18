@@ -53,7 +53,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void KeyReleaseInteract();
 
-
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void KeyHoldTimerEnd();
 
 public:
 	void OnLeftMouseButtonReleased();

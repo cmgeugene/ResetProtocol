@@ -24,6 +24,7 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 	SkeletalMeshComp->SetupAttachment(SceneRoot);
 	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SkeletalMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
+	SkeletalMeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 	SkeletalMeshComp->SetIsReplicated(true);
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));
