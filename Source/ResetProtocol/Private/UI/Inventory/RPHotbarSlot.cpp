@@ -12,7 +12,7 @@ void URPHotbarSlot::NativeConstruct()
 
 }
 
-void URPHotbarSlot::SetData(const FItemData& _ItemData, int _SlotIndexs)
+void URPHotbarSlot::SetData(const FCleaningToolData& _ItemData, int _SlotIndexs)
 {
 	ItemData = _ItemData;
 	SlotIndexs = _SlotIndexs;

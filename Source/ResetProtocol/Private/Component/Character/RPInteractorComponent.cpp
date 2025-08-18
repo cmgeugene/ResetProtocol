@@ -5,6 +5,8 @@
 
 #include "Data/ItemDataBase.h"
 #include "RPTestItemActor.h"
+#include "Data/RPCleaningToolData.h"
+#include "CleaningTool/RPBaseCleaningTool.h"
 #include "Component/Character/RPHotbarComponent.h"
 #include "ResetProtocol/ResetProtocol.h"
 
@@ -17,6 +19,8 @@
 
 URPInteractorComponent::URPInteractorComponent()
 	: IsHoldingItem(false)
+	, IsKeyRelease(false)
+	, KeyHoldingTime(5.f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -55,26 +59,26 @@ void URPInteractorComponent::PickUpItem()
 	if (IsValid(PlayerCharacter))
 	{
 		// 청소 도구.
-		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
-		if (IsValid(TestItemActor))
+		ARPBaseCleaningTool* CleaningTool = Cast<ARPBaseCleaningTool>(PlayerCharacter->GetHitResult().GetActor());
+		if (IsValid(CleaningTool))
 		{
-			Server_PickUpItem(TestItemActor);
+			Server_PickUpItem(CleaningTool);
 		}
 	}
 }
 
-bool URPInteractorComponent::Server_PickUpItem_Validate(ARPTestItemActor* TargetActor)
+bool URPInteractorComponent::Server_PickUpItem_Validate(ARPBaseCleaningTool* TargetActor)
 {
 	return IsValid(TargetActor);
 }
 
 
-void URPInteractorComponent::Server_PickUpItem_Implementation(ARPTestItemActor* TargetActor)
+void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningTool* TargetActor)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter) && IsValid(TargetActor))
 	{
-		FItemData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate([&](const FItemData& ItemData)
+		FCleaningToolData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate([&](const FCleaningToolData& ItemData)
 			{
 				return ItemData.Class == TargetActor->GetClass();
 			});
@@ -88,17 +92,17 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPTestItemActor* 
 		}
 
 		// 디버그 로그
-		if (TargetActor->GetMaterialType() == EMaterialState::Sphere)
+		if (TargetActor->GetCleaningToolState() == ECleaningToolState::Broom)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Sphere"));
+			UE_LOG(LogTemp, Warning, TEXT("Broom"));
 		}
-		else if (TargetActor->GetMaterialType() == EMaterialState::Con)
+		else if (TargetActor->GetCleaningToolState() == ECleaningToolState::Vacuum)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Con"));
+			UE_LOG(LogTemp, Warning, TEXT("Vacuum"));
 		}
-		else if (TargetActor->GetMaterialType() == EMaterialState::Cube)
+		else if (TargetActor->GetCleaningToolState() == ECleaningToolState::Mop)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Cube"));
+			UE_LOG(LogTemp, Warning, TEXT("Mop"));
 		}
 	}
 }
@@ -126,11 +130,7 @@ void URPInteractorComponent::Interact()
 
 		// KeyHold로 이전.
 		
-		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(PlayerCharacter->GetHitResult().GetActor());
-		//if (ClickInterface)
-		//{
-		//	//IRPKeyHoldInterface::Execute_ClickInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
-		//}
+	
 
 		//bool HasClickInterface = PlayerCharacter->GetHitResult().GetActor()->Implements<URPClickInterface>();
 	}
@@ -182,12 +182,12 @@ void URPInteractorComponent::InteractCheck()
 			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 
-		ARPTestItemActor* TestItemActor = Cast<ARPTestItemActor>(PlayerCharacter->GetHitResult().GetActor());
-		if (TestItemActor)
+		ARPBaseCleaningTool* CleaningTool = Cast<ARPBaseCleaningTool>(PlayerCharacter->GetHitResult().GetActor());
+		if (CleaningTool)
 		{
 			InteractWidget->SetText(TEXT("asdfdsf"));
 
-			InteractActor = TestItemActor;
+			InteractActor = CleaningTool;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);
 		}
 
@@ -206,6 +206,53 @@ void URPInteractorComponent::InteractCheck()
 
 			InteractActor = InteractableObjcet;
 			InteractWidget->SetVisibility(ESlateVisibility::Visible);			
+		}
+	}
+}
+
+void URPInteractorComponent::KeyHoldInteract()
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	if (IsValid(PlayerCharacter))
+	{
+		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(PlayerCharacter->GetHitResult().GetActor());
+		if (KeyHoldInterface)
+		{
+			IsHoldingItem = true;
+			HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+		}
+
+
+		GetWorld()->GetTimerManager().SetTimer(
+			KeyHoldTimerHandle,
+			this,
+			&URPInteractorComponent::KeyReleaseInteract,
+			KeyHoldingTime, 
+			false 
+		);
+	}
+}
+
+void URPInteractorComponent::KeyReleaseInteract()
+{
+	if (KeyHoldTimerHandle.IsValid()) 
+	{
+		KeyHoldTimerHandle.Invalidate();
+	}
+	else
+	{
+		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+		if (IsValid(PlayerCharacter))
+		{
+			IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
+			if (KeyHoldInterface)
+			{
+				IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+				IsHoldingItem = false;
+				HoldingActor = nullptr;
+			}
 		}
 	}
 }

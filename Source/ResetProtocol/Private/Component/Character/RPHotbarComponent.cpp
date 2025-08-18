@@ -4,6 +4,7 @@
 #include "Character/RPPlayerCharacter.h"
 #include "UI/Inventory/RPHotbarWidget.h"
 #include "RPTestItemActor.h"
+#include "CleaningTool/RPBaseCleaningTool.h"
 
 URPHotbarComponent::URPHotbarComponent()
 {
@@ -25,7 +26,7 @@ void URPHotbarComponent::BeginPlay()
 	{
 		for (int i = 0; i < TotalItems; i++)
 		{
-			Inventory.Add(FItemData());
+			Inventory.Add(FCleaningToolData());
 		}
 	}
 }
@@ -58,12 +59,12 @@ void URPHotbarComponent::CreateHotbarWidget_Implementation(AController* Controll
 	}
 }
 
-bool URPHotbarComponent::Server_DropItem_Validate(const FItemData& DroppedItem)
+bool URPHotbarComponent::Server_DropItem_Validate(const FCleaningToolData& DroppedItem)
 {
 	return DroppedItem.Class != nullptr;
 }
 
-void URPHotbarComponent::Server_DropItem_Implementation(const FItemData& DroppedItem)
+void URPHotbarComponent::Server_DropItem_Implementation(const FCleaningToolData& DroppedItem)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
@@ -84,6 +85,25 @@ void URPHotbarComponent::SelectItem(int SelectedNum)
 {
 	HotbarWidget->OnHighlight(SelectedNum, CurrentSlotIndex);
 
+	if (IsValid(CurrentCleaningTool))
+	{
+		CurrentCleaningTool->Destroy();
+	}
+
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	if (IsValid(Inventory[SelectedNum].Class) && IsValid(PlayerCharacter))
+	{
+		CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(Inventory[SelectedNum].Class, PlayerCharacter->GetInteractorComponent()->GetInteractEnd(), FRotator::ZeroRotator);
+		
+		USkeletalMeshComponent* PlayerMesh = PlayerCharacter->GetMesh();
+		if (IsValid(PlayerMesh))
+		{
+			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+			CurrentCleaningTool->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
+		}
+	}
+
 	CurrentSlotIndex = SelectedNum;
 }
 
@@ -91,20 +111,35 @@ void URPHotbarComponent::UnEquip()
 {
 	HotbarWidget->OffHighlight(CurrentSlotIndex);
 
+	if (IsValid(CurrentCleaningTool))
+	{
+		CurrentCleaningTool->Destroy();
+	}
+
 	CurrentSlotIndex = -1;
 }
 
-void URPHotbarComponent::AddItem_Implementation(const FItemData& Data)
+void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
 {
+	HotbarWidget->UpdateUI();
+
 	int LatestIndex = HotbarWidget->GetLatestIndex();
 
-	if (LatestIndex != -1)
+	if (CurrentSlotIndex == -1)
 	{
-		Inventory[LatestIndex] = Data;
-		HotbarWidget->UpdateUI();
+		if (LatestIndex >= 0 && LatestIndex <= 2)
+		{
+			Inventory[LatestIndex] = Data;
+			HotbarWidget->UpdateUI();
+		}
 	}
 	else
 	{
-		return;
+		if (!IsValid(CurrentCleaningTool))
+		{
+			Inventory[CurrentSlotIndex] = Data;
+			HotbarWidget->UpdateUI();
+		}
 	}
+	
 }

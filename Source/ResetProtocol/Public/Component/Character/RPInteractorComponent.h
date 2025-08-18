@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "TimerManager.h"
 #include "RPInteractorComponent.generated.h"
 
 class URPInteractWidget;
@@ -38,13 +39,21 @@ public:
 	void PickUpItem();
 	
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_PickUpItem(ARPTestItemActor* TargetActor);
+	void Server_PickUpItem(ARPBaseCleaningTool* TargetActor);
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void Interact();
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_Interact();
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void KeyHoldInteract();
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void KeyReleaseInteract();
+
+
 
 public:
 	void OnLeftMouseButtonReleased();
@@ -76,5 +85,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsHoldingItem;
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsKeyRelease;
+
+	UPROPERTY(VisibleAnywhere)
+	float KeyHoldingTime;
+
+	FTimerHandle KeyHoldTimerHandle;
 		
 };

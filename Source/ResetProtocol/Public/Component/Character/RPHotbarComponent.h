@@ -3,9 +3,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Data/ItemDataBase.h"
+#include "Data/RPCleaningToolData.h"
 #include "RPHotbarComponent.generated.h"
 
 class URPHotbarWidget;
+class ARPBaseCleaningTool;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RESETPROTOCOL_API URPHotbarComponent : public UActorComponent
@@ -26,8 +28,8 @@ public:
 // Get & Set
 public:
 	URPHotbarWidget* GetInventoryWidget() { return HotbarWidget; }
-	UItemDataBase* GetItemDataBase() { return ItemDataBase; }
-	TArray<FItemData>& GetInventory() { return Inventory; }
+	URPCleaningToolData* GetItemDataBase() { return ItemDataBase; }
+	TArray<FCleaningToolData>& GetInventory() { return Inventory; }
 
 	UFUNCTION(BlueprintCallable)
 	void SetHotbarWidget(URPHotbarWidget* Widget) { HotbarWidget = Widget; }
@@ -40,13 +42,13 @@ public:
 // Inventory Function
 public:
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_DropItem(const FItemData& DroppedItem);
+	void Server_DropItem(const FCleaningToolData& DroppedItem);
 
 	UFUNCTION()
 	void OnRep_Inventory();
 
 	UFUNCTION(Client, Reliable)
-	void AddItem(const FItemData& Data);
+	void AddItem(const FCleaningToolData& Data);
 
 // Item
 public:
@@ -62,10 +64,10 @@ protected:
 	int TotalItems;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	UItemDataBase* ItemDataBase;
+	URPCleaningToolData* ItemDataBase;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Inventory, VisibleAnywhere, Category = "Inventory")
-	TArray<FItemData> Inventory;
+	TArray<FCleaningToolData> Inventory;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<UUserWidget> HotbarWidgetClass;
@@ -75,4 +77,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	int CurrentSlotIndex;
+
+	UPROPERTY(VisibleAnywhere)
+	ARPBaseCleaningTool* CurrentCleaningTool;
 };

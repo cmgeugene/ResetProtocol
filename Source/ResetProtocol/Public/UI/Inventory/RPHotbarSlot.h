@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/ItemDataBase.h"
+#include "Data/RPCleaningToolData.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
@@ -26,7 +27,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void SetData(const FItemData& _ItemData, int _SlotIndexs);
+	void SetData(const FCleaningToolData& _ItemData, int _SlotIndexs);
 
 	UFUNCTION()
 	void HighlightOn();
@@ -51,7 +52,7 @@ protected:
 	UImage* IconImage;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item")
-	FItemData ItemData;
+	FCleaningToolData ItemData;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	int SlotIndexs;

@@ -3,6 +3,7 @@
 
 #include "Character/RPPlayerCharacter.h"
 #include "RPTestItemActor.h"
+#include "CleaningTool/RPBaseCleaningTool.h"
 
 
 URPHotbarWidget::URPHotbarWidget(const FObjectInitializer& ObjectInitializer)
@@ -20,7 +21,7 @@ void URPHotbarWidget::NativeConstruct()
 	UpdateUI();
 }
 
-void URPHotbarWidget::UpdateUI()
+void URPHotbarWidget::UpdateUI(int Index)
 {
 	APlayerController* PlayerController = GetOwningPlayer();
 
@@ -30,14 +31,14 @@ void URPHotbarWidget::UpdateUI()
 
 		if (IsValid(PlayerCharacter))
 		{
-			TArray<FItemData>& Inventory = PlayerCharacter->GetHotbarComponent()->GetInventory();
+			TArray<FCleaningToolData>& Inventory = PlayerCharacter->GetHotbarComponent()->GetInventory();
 
 			UGridPanel_Items->ClearChildren();
 
 			SlotIndex = -1;
 			LatestIndex = 0;
 
-			for (FItemData Item : Inventory)
+			for (FCleaningToolData Item : Inventory)
 			{
 				SlotIndex++;
 

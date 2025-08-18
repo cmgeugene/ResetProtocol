@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/ItemDataBase.h"
+#include "Data/RPCleaningToolData.h"
 #include "UI/Inventory/RPHotbarSlot.h"
 #include "RPHotbarWidget.generated.h"
 
@@ -23,7 +24,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void UpdateUI();
+	void UpdateUI(int Index = -1);
 
 	UFUNCTION()
 	int GetLatestIndex();
