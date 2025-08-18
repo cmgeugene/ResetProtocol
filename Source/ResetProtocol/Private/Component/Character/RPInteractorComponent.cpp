@@ -103,18 +103,43 @@ void URPInteractorComponent::Interact()
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(PlayerCharacter->GetHitResult().GetActor());
+		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
+			
+		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
+
+		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObjcet);
 		if (ClickInterface)
 		{
-			IRPClickInterface::Execute_ClickInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
+
+			if (InteractableObjcet->ObjectType == EInteractObjectType::Trash)
+			{
+				if (!IsValid(CleaningTool))
+				{
+					IRPClickInterface::Execute_ClickInteract(InteractableObjcet, GetOwner());
+				}
+			}
+			else if (InteractableObjcet->ObjectType == EInteractObjectType::Stain)
+			{
+				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
+				{
+					IRPClickInterface::Execute_ClickInteract(InteractableObjcet, GetOwner());
+				}
+			}
+
 		}
 
-		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(PlayerCharacter->GetHitResult().GetActor());
+		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObjcet);
 		if (DragInterface)
 		{
-			IRPDragInterface::Execute_DragInteract(PlayerCharacter->GetHitResult().GetActor(), GetOwner());
-			IsHoldingItem = true;
-			HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+			if (InteractableObjcet->ObjectType == EInteractObjectType::ScatteredObject || InteractableObjcet->ObjectType == EInteractObjectType::Corpse)
+			{
+				if (!IsValid(CleaningTool))
+				{
+					IRPDragInterface::Execute_DragInteract(InteractableObjcet, GetOwner());
+					IsHoldingItem = true;
+					HoldingActor = InteractableObjcet;
+				}
+			}
 		}
 
 
@@ -206,21 +231,30 @@ void URPInteractorComponent::KeyHoldInteract()
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(PlayerCharacter->GetHitResult().GetActor());
+		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
+
+		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
+		
+		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(InteractableObjcet);
 		if (KeyHoldInterface)
 		{
-			IsHoldingItem = true;
-			HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+			if (InteractableObjcet->ObjectType == EInteractObjectType::Trap || InteractableObjcet->ObjectType == EInteractObjectType::Corpse)
+			{
+				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Hammer)
+				{
+					IsHoldingItem = true;
+					HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+
+					GetWorld()->GetTimerManager().SetTimer(
+						KeyHoldTimerHandle,
+						this,
+						&URPInteractorComponent::KeyHoldTimerEnd,
+						KeyHoldingTime,
+						false
+					);
+				}
+			}
 		}
-
-
-		GetWorld()->GetTimerManager().SetTimer(
-			KeyHoldTimerHandle,
-			this,
-			&URPInteractorComponent::KeyHoldTimerEnd,
-			KeyHoldingTime, 
-			false 
-		);
 	}
 }
 

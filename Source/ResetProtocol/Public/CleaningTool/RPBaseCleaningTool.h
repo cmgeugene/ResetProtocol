@@ -13,6 +13,8 @@ enum class ECleaningToolState : uint8
 
 	Vacuum UMETA(DisplayName = "Vacuum"),
 
+	Hammer UMETA(DisplayName = "Hammer"),
+
 	Max
 };
 
@@ -34,6 +36,8 @@ public:
 	ECleaningToolState GetCleaningToolState() { return eCleaningTool; }
 
 	UStaticMeshComponent* GetMesh() { return StaticMeshComp; }
+
+
 
 
 protected:
