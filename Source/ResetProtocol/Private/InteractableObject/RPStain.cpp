@@ -10,7 +10,7 @@ ARPStain::ARPStain()
 	SetReplicateMovement(true);
 
 	Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
-	Decal->SetupAttachment(SceneRoot);
+	Decal->SetupAttachment(RootComponent);
 
 	CleanComp = CreateDefaultSubobject<URPCleanableComponent>(TEXT("CleanComp"));
 	CleanComp->SetIsReplicated(true);

@@ -3,10 +3,11 @@
 #include "InteractableObject/RPCorpse.h"
 #include "Component/RPMovableComponent.h"
 #include "Component/RPRagdollComponent.h"
-#include "Net/UnrealNetwork.h"
 
 ARPCorpse::ARPCorpse()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	bReplicates = true;
 	SetReplicateMovement(true);
 
@@ -16,16 +17,19 @@ ARPCorpse::ARPCorpse()
 	RagdollComp = CreateDefaultSubobject<URPRagdollComponent>(TEXT("RagdollComp"));
 	RagdollComp->SetIsReplicated(true);
 
-	bIsRagdollOn = false;
-
 	ObjectType = EInteractObjectType::Corpse;
 }
 
-void ARPCorpse::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ARPCorpse::Tick(float DeltaTime)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::Tick(DeltaTime);
 
-	DOREPLIFETIME(ARPCorpse, bIsRagdollOn);
+	if (SkeletalMeshComp->IsSimulatingPhysics())
+	{
+		FVector MeshLocation = SkeletalMeshComp->GetRelativeLocation();
+		FVector NewActorLocation = GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
+		SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
+	}
 }
 
 void ARPCorpse::DragInteract_Implementation(AActor* Interactor)
@@ -43,7 +47,6 @@ void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 	if (HasAuthority())
 	{
 		RagdollComp->Server_RagdollOn_Implementation();
-		bIsRagdollOn = true;
 	}
 }
 
@@ -54,8 +57,12 @@ void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
 	if (HasAuthority())
 	{
 		RagdollComp->Server_RagdollOff_Implementation();
-		bIsRagdollOn = false;
 	}
+}
+
+void ARPCorpse::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void ARPCorpse::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -65,7 +72,7 @@ void ARPCorpse::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		return;
 	}
 
-	if (bIsRagdollOn)
+	if (SkeletalMeshComp->IsSimulatingPhysics())
 	{
 		IRPKeyHoldInterface::Execute_KeyReleaseInteract(this, OtherActor);
 	}

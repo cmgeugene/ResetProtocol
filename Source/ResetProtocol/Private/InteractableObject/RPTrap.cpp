@@ -10,7 +10,10 @@ ARPTrap::ARPTrap()
 	SetReplicateMovement(true);
 
 	BrokenMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BrokenMesh"));
-	BrokenMesh->SetupAttachment(SceneRoot);
+	BrokenMesh->SetupAttachment(RootComponent);
+	BrokenMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BrokenMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
+	BrokenMesh->SetVisibility(false);
 	BrokenMesh->SetIsReplicated(true);
 
 	RepairComp = CreateDefaultSubobject<URPRepairableComponent>(TEXT("RepairComp"));
@@ -55,6 +58,7 @@ void ARPTrap::BeginPlay()
 	if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
 	{
 		StaticMeshComp->SetVisibility(false);
+		BrokenMesh->SetVisibility(true);
 		ActiveMesh = BrokenMesh;
 		bIsBroken = true;
 	}

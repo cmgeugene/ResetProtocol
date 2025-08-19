@@ -15,6 +15,8 @@ class RESETPROTOCOL_API URPRagdollComponent : public UActorComponent
 public:	
 	URPRagdollComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// RPC
 	UFUNCTION(Server, Reliable)
 	void Server_RagdollOn();
@@ -27,5 +29,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnRep_IsRagdollOn();
+
+	void InitRagdoll(bool bOn);
+
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_IsRagdollOn)
+	bool bIsRagdollOn;
 	
 };

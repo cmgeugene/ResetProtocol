@@ -38,7 +38,7 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USceneComponent> SceneRoot;
+	TObjectPtr<UBoxComponent> RootBox;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
@@ -49,7 +49,6 @@ public:
 
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;
-
 
 
 // 테스트용

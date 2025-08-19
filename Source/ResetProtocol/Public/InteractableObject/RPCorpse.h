@@ -19,7 +19,7 @@ class RESETPROTOCOL_API ARPCorpse : public ARPBaseInteractableObject, public IRP
 public:
 	ARPCorpse();
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void DragInteract_Implementation(AActor* Interactor) override;
 	virtual void DropInteract_Implementation(AActor* Interactor) override;
@@ -27,13 +27,13 @@ public:
 	virtual void KeyReleaseInteract_Implementation(AActor* Interactor) override;
 
 protected:
+	virtual void BeginPlay() override;
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<URPMovableComponent> MoveComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<URPRagdollComponent> RagdollComp;
-
-	UPROPERTY(Replicated)
-	bool bIsRagdollOn;
 
 // 테스트용
 protected:

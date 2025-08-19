@@ -1,12 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Component/RPRagdollComponent.h"
+#include "Components/BoxComponent.h"
 #include "InteractableObject/RPCorpse.h"
+#include "Net/UnrealNetwork.h"
 
 URPRagdollComponent::URPRagdollComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
+
+	bIsRagdollOn = false;
+}
+
+void URPRagdollComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URPRagdollComponent, bIsRagdollOn);
 }
 
 void URPRagdollComponent::Server_RagdollOn_Implementation()
@@ -24,7 +35,8 @@ void URPRagdollComponent::Multicast_RagdollOn_Implementation()
 	if (ARPCorpse* OwnerActor = Cast<ARPCorpse>(GetOwner()))
 	{
 		OwnerActor->SkeletalMeshComp->SetSimulatePhysics(true);
-		OwnerActor->SkeletalMeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
+		OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		OwnerActor->SkeletalMeshComp->RegisterComponent();
 	}
 }
 
@@ -33,16 +45,15 @@ void URPRagdollComponent::Multicast_RagdollOff_Implementation()
 	if (ARPCorpse* OwnerActor = Cast<ARPCorpse>(GetOwner()))
 	{
 		OwnerActor->SkeletalMeshComp->SetSimulatePhysics(false);
-		OwnerActor->SkeletalMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));	// 기본값이 뭔지 보고 수정 필요
 		// Ragdoll을 키면 움직임의 제어권이 물리 엔진으로 넘어감
 		// - Ragdoll을 껐을 때 넘어간 제어권을 EAnimationMode로 가져오는 것
 		OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
-		// 위치 보정
+		// 위치 보정(Root가 SceneComp인 경우)
 		FVector MeshLocation = OwnerActor->SkeletalMeshComp->GetRelativeLocation();
 		FVector NewActorLocation = OwnerActor->GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
 		OwnerActor->SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
-		OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
+		OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, -90.0f, 0.0f));
 	}
 }
 
@@ -50,4 +61,60 @@ void URPRagdollComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (GetOwner()->HasAuthority())
+	{
+		bIsRagdollOn = true;
+
+		InitRagdoll(true);
+	}
 }
+
+void URPRagdollComponent::OnRep_IsRagdollOn()
+{
+	InitRagdoll(bIsRagdollOn);
+}
+
+void URPRagdollComponent::InitRagdoll(bool bOn)
+{
+	if (ARPCorpse* OwnerActor = Cast<ARPCorpse>(GetOwner()))
+	{
+		if (bOn)
+		{
+			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(true);
+			OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			OwnerActor->SkeletalMeshComp->RegisterComponent();
+		}
+		else
+		{
+			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(false);
+			// Ragdoll을 키면 움직임의 제어권이 물리 엔진으로 넘어감
+			// - Ragdoll을 껐을 때 넘어간 제어권을 EAnimationMode로 가져오는 것
+			OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+			if (OwnerActor->HasAuthority())
+			{
+				// 위치 보정(Root가 SceneComp인 경우)
+				FVector MeshLocation = OwnerActor->SkeletalMeshComp->GetRelativeLocation();
+				FVector NewActorLocation = OwnerActor->GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
+				OwnerActor->SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::TeleportPhysics);
+			
+				OwnerActor->ForceNetUpdate();
+			}
+
+			OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, -90.0f, 0.0f));
+		}
+	}
+}
+
+// --------- Ragdoll On -----------
+// OwnerActor->SkeletalMeshComp->SetPhysicsBlendWeight(0.0f);	// 애니 100%, 물리 0%
+
+// --------- Ragdoll Off -------------
+// 	OwnerActor->SkeletalMeshComp->SetPhysicsBlendWeight(1.0f);	// 애니 0%, 물리 100%
+//	OwnerActor->SkeletalMeshComp->WakeAllRigidBodies();			// 확실히 쓰러지도록
+//	
+//	// 위치 보정
+//	FVector MeshLocation = OwnerActor->SkeletalMeshComp->GetRelativeLocation();
+//	FVector NewActorLocation = OwnerActor->GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
+//	OwnerActor->SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
+//	OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));

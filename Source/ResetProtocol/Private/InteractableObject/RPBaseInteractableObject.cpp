@@ -4,27 +4,37 @@
 #include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
 
+#define ECC_ObjectRootBox ECC_GameTraceChannel2
+#define ECC_ObjectSkeletalMesh ECC_GameTraceChannel3
+
 ARPBaseInteractableObject::ARPBaseInteractableObject()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 	SetReplicateMovement(true);
 
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	SetRootComponent(SceneRoot);
+	RootBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RootBox"));
+	RootBox->SetSimulatePhysics(true);
+	RootBox->SetCollisionProfileName(TEXT("ResetObjectRoot"));
+	SetRootComponent(RootBox);
 
+	// StaticMesh는 Physics Off => Root의 Collision을 무시할 필요 없음
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
-	StaticMeshComp->SetupAttachment(SceneRoot);
+	StaticMeshComp->SetupAttachment(RootComponent);
 	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	StaticMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
 	StaticMeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 	StaticMeshComp->SetIsReplicated(true);
 
+	// SkeletalMesh는 Physics On/Off
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("USkeletalMeshComp"));
-	SkeletalMeshComp->SetupAttachment(SceneRoot);
+	//SkeletalMeshComp->SetSimulatePhysics(true);
+	SkeletalMeshComp->SetupAttachment(RootComponent);
+	SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	SkeletalMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
-	SkeletalMeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
+	SkeletalMeshComp->SetCollisionProfileName(TEXT("ResetObjectSkeletal"));
+	SkeletalMeshComp->SetCollisionObjectType(ECC_ObjectSkeletalMesh);
+	//SkeletalMeshComp->SetCollisionResponseToChannel(ECC_ObjectRootBox, ECR_Ignore);		// Root의 Collision 무시
 	SkeletalMeshComp->SetIsReplicated(true);
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));

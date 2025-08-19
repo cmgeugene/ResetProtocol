@@ -1,9 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Component/RPMovableComponent.h"
+#include "InteractableObject/RPBaseInteractableObject.h"
 #include "InteractableObject/RPTrap.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Net/UnrealNetwork.h"
 
 URPMovableComponent::URPMovableComponent()
@@ -12,7 +15,7 @@ URPMovableComponent::URPMovableComponent()
 	SetIsReplicatedByDefault(true);
 
 	Holder = nullptr;
-	GrabbedMesh = nullptr;
+	GrabbedBox = nullptr;
 	bIsHeld = false;
 }
 
@@ -34,14 +37,34 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
 	{
-		if (GrabComp->GetGrabbedComponent() == GrabbedMesh.Get())
+		if (GrabComp->GetGrabbedComponent() == GrabbedBox.Get())
 		{
 			if (USceneComponent* GrabAnchor = FindAnchor(Holder.Get()))
 			{
-				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * 150.0f;
-				//FRotator NewRotation;
+				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * 250.0f;
+				
+				// 누적 : 이전 Rotation과 현재 Rotation의 차이를 구해서 Target에도 그 차이만큼 더해주면 됨
+				// - 정확하게는 회전한 각만큼 Target도 회전시키면 됨
+				//FQuat CurrAnchorRotation = GrabAnchor->GetComponentQuat();
+				//CurrAnchorRotation.Normalize();										// 정규화를 하면 누적 오차를 줄일 수 있음
+				//FQuat Delta = CurrAnchorRotation * PrevAnchorRotation.Inverse();	// 과거와 현재 회전의 차이 계산
+				//Delta.Normalize();
 
-				GrabComp->SetTargetLocation(NewLocation);
+				//FQuat CurrTargetRotation = GrabbedBox.Get()->GetComponentQuat();
+				//CurrTargetRotation.Normalize();
+				//FQuat NewTargetRotation = Delta * CurrTargetRotation;
+				//NewTargetRotation.Normalize();
+				//GrabComp->SetTargetLocationAndRotation(NewLocation, NewTargetRotation.Rotator());
+
+				//PrevAnchorRotation = CurrAnchorRotation;
+
+				// 누적 방법이 잘 안됨
+				// - Anchor 대비 Target의 상대 회전을 사용
+				//  - Grab 시 상대 회전을 구하고, Tick에서 갱신
+				FQuat CurrAnchorRotation = GrabAnchor->GetComponentQuat();
+				FQuat Expected = (CurrAnchorRotation * DeltaAnchorTarget).GetNormalized();
+
+				GrabComp->SetTargetLocationAndRotation(NewLocation, Expected.Rotator());
 			}
 		}
 	}
@@ -79,44 +102,51 @@ void URPMovableComponent::Server_Grab_Implementation(AActor* Interactor)
 	if (GetOwner()->HasAuthority()) 
 	{
 		Holder = Interactor;
+
+		UBoxComponent* RootBox = Cast<UBoxComponent>(GetOwner()->GetRootComponent());
+		if (!RootBox)
+		{
+			return;
+		}
+
 		UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner());
 		if (!OwnerMesh)
 		{
 			return;
 		}
 
-		if (!IsPhysicsActive())
+		if (!IsRootPhysicsActive())
 		{
-			// Simulate Physics = false
-			USceneComponent* Root = GetOwner()->GetRootComponent();
-			if (!Root)
-			{
-				return;
-			}
-
 			UCameraComponent* CharacterCamera = Holder->FindComponentByClass<UCameraComponent>();
 			if (CharacterCamera)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab : Physics Simulation Off"));
-
-				Mulitcast_ApplyHoldCollision();
-				Root->AttachToComponent(CharacterCamera, FAttachmentTransformRules::KeepWorldTransform);
+				RootBox->AttachToComponent(CharacterCamera, FAttachmentTransformRules::KeepWorldTransform);
 				bIsHeld = true;
 			}
 		}
 		else
 		{
-			// Simulate Physics = true
-			FVector GrabLocation = OwnerMesh->GetComponentLocation();
-			FRotator GrabRotation = OwnerMesh->GetComponentRotation();
-
+			FVector GrabLocation = RootBox->GetComponentLocation();
+			FRotator GrabRotation = RootBox->GetComponentRotation();
+			
 			if (UPhysicsHandleComponent* GrabComp = Holder->FindComponentByClass<UPhysicsHandleComponent>())
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab : Physics Simulation Off On"));
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SkeletalMesh : Physics Off"));
 
-				Mulitcast_ApplyHoldCollision();
-				GrabComp->GrabComponentAtLocationWithRotation(OwnerMesh, NAME_None, GrabLocation, GrabRotation);
-				GrabbedMesh = OwnerMesh;
+				GrabComp->GrabComponentAtLocationWithRotation(RootBox, NAME_None, GrabLocation, GrabRotation);
+
+				// Mesh의 Physics = true인 경우
+				// - 제약(Constraint)로 Mesh와 Root를 하나로 묶음
+				if (OwnerMesh->IsSimulatingPhysics())
+				{
+
+				}
+
+				FQuat AnchorRotation = FindAnchor(Interactor)->GetComponentQuat();
+				FQuat BoxRotation = RootBox->GetComponentQuat();
+				DeltaAnchorTarget = (AnchorRotation.Inverse() * BoxRotation).GetNormalized();
+
+				GrabbedBox = RootBox;
 				bIsHeld = true;
 			}
 		}
@@ -133,35 +163,29 @@ void URPMovableComponent::Server_Drop_Implementation()
 
 	if (GetOwner()->HasAuthority())
 	{
+		UBoxComponent* RootBox = Cast<UBoxComponent>(GetOwner()->GetRootComponent());
+		if (!RootBox)
+		{
+			return;
+		}
+
 		UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner());
 		if (!OwnerMesh)
 		{
 			return;
 		}
 
-		if (!IsPhysicsActive())
+		if (!IsRootPhysicsActive())
 		{
-			// Simulate Physics = false
-			USceneComponent* Root = GetOwner()->GetRootComponent();
-			if (!Root)
-			{
-				return;
-			}
-
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Drop : Physics Simulation Off"));
-
-			Root->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+			RootBox->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		}
 		else
 		{
-			// Simulate Physics = true
 			if (Holder.IsValid())
 			{
 				if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Drop : Physics Simulation On"));
-
-					if (Cast<UMeshComponent>(GrabComp->GetGrabbedComponent()) == GrabbedMesh.Get())
+					if (Cast<UBoxComponent>(GrabComp->GetGrabbedComponent()) == GrabbedBox.Get())
 					{
 						GrabComp->ReleaseComponent();
 					}
@@ -169,48 +193,10 @@ void URPMovableComponent::Server_Drop_Implementation()
 			}
 		}
 
-		Multicast_RestoreCollision();
-
 		bIsHeld = false;
 		Holder = nullptr;
-		GrabbedMesh = nullptr;
+		GrabbedBox = nullptr;
 	}
-}
-
-void URPMovableComponent::Mulitcast_ApplyHoldCollision_Implementation()
-{
-	if (UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner()))
-	{
-		OwnerMesh->SetCollisionProfileName("ObjectHold");
-	}
-}
-
-void URPMovableComponent::Multicast_RestoreCollision_Implementation()
-{
-	if (UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner()))
-	{
-		OwnerMesh->SetCollisionProfileName("PhysicsActor");
-	}
-}
-
-void URPMovableComponent::OnPlaceComplete()
-{
-}
-
-bool URPMovableComponent::IsPhysicsActive()
-{
-	if (UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner()))
-	{
-		bool bSim = OwnerMesh->IsSimulatingPhysics();
-
-		FString Msg = FString::Printf(TEXT("Mesh : %s, Physics : %s"), *OwnerMesh->GetName(), bSim ? TEXT("True") : TEXT("False"));
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Msg);
-
-		return bSim;
-	}
-
-	return false;
 }
 
 void URPMovableComponent::BeginPlay()
@@ -263,4 +249,24 @@ USceneComponent* URPMovableComponent::FindAnchor(AActor* Interactor) const
 	}
 
 	return Interactor->GetRootComponent();
+}
+
+bool URPMovableComponent::IsRootPhysicsActive()
+{
+	if (UBoxComponent* OwnerRoot = Cast<UBoxComponent>(GetOwner()->GetRootComponent()))
+	{
+		bool bSim = OwnerRoot->IsSimulatingPhysics();
+
+		FString Msg = FString::Printf(TEXT("Physics : %s"), bSim ? TEXT("True") : TEXT("False"));
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Msg);
+
+		return bSim;
+	}
+
+	return false;
+}
+
+void URPMovableComponent::OnPlaceComplete()
+{
 }

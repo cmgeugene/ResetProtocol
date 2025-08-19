@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "RPMovableComponent.generated.h"
 
+class UBoxComponent;
+class UPhysicsConstraintComponent;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RESETPROTOCOL_API URPMovableComponent : public UActorComponent
 {
@@ -25,14 +28,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_Drop();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Mulitcast_ApplyHoldCollision();
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_RestoreCollision();
-
-	void OnPlaceComplete();
-	bool IsPhysicsActive();
-
 	bool GetIsHeld() { return bIsHeld; }
 
 protected:
@@ -42,15 +37,23 @@ protected:
 	UMeshComponent* FindOwnerMeshComponent(AActor* Owner) const;
 	// 액터를 부착할 Interactor의 컴포넌트 찾기
 	USceneComponent* FindAnchor(AActor* Interactor) const;
+	bool IsRootPhysicsActive();	
+
+	void OnPlaceComplete();
+
+public:
+	UPROPERTY()
+	TObjectPtr<UPhysicsConstraintComponent> CarryConstraint;
 
 private:
-	UPROPERTY()
+	// Physics Handle 사용
+	UPROPERTY(Transient)
 	TWeakObjectPtr<AActor> Holder;
-	UPROPERTY()
-	TWeakObjectPtr<UMeshComponent> GrabbedMesh;
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UBoxComponent> GrabbedBox;
 
 	UPROPERTY(Replicated)
 	bool bIsHeld;
 
-
+	FQuat DeltaAnchorTarget;
 };
