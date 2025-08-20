@@ -3,11 +3,14 @@
 #include "InteractableObject/RPStain.h"
 #include "Component/RPCleanableComponent.h"
 #include "Components/DecalComponent.h"
+#include "Components/BoxComponent.h"
 
 ARPStain::ARPStain()
 {
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	RootBox->SetSimulatePhysics(false);
 
 	Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
 	Decal->SetupAttachment(RootComponent);
@@ -79,14 +82,4 @@ void ARPStain::HandleDirtChanged(float NewValue)
 	{
 		Destroy();
 	}
-}
-
-void ARPStain::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	IRPClickInterface::Execute_ClickInteract(this, OtherActor);
 }

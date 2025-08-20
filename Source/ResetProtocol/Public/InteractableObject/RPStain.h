@@ -36,9 +36,4 @@ protected:
 	// 정적인 머티리얼/머티리얼 인스턴스의 Scalar 값들을 동적으로 변경할 수 있게 해줌
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DecalMID;
-
-// 테스트용
-protected:
-	virtual void OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 };

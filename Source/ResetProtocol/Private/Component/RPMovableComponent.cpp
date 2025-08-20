@@ -15,8 +15,14 @@ URPMovableComponent::URPMovableComponent()
 	SetIsReplicatedByDefault(true);
 
 	Holder = nullptr;
-	GrabbedBox = nullptr;
+	CacheGrabbedComp = nullptr;
+	CacheRootBox = nullptr;
+	CacheOwnerMesh = nullptr;
+
 	bIsHeld = false;
+
+	RootMode = ERPRootMode::Box;
+	bSwappingRoot = false;
 }
 
 void URPMovableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -24,6 +30,7 @@ void URPMovableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(URPMovableComponent, bIsHeld);
+	DOREPLIFETIME(URPMovableComponent, RootMode);
 }
 
 void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -37,27 +44,12 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
 	{
-		if (GrabComp->GetGrabbedComponent() == GrabbedBox.Get())
+		if (GrabComp->GetGrabbedComponent() == CacheGrabbedComp.Get())
 		{
 			if (USceneComponent* GrabAnchor = FindAnchor(Holder.Get()))
 			{
 				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * 250.0f;
 				
-				// 누적 : 이전 Rotation과 현재 Rotation의 차이를 구해서 Target에도 그 차이만큼 더해주면 됨
-				// - 정확하게는 회전한 각만큼 Target도 회전시키면 됨
-				//FQuat CurrAnchorRotation = GrabAnchor->GetComponentQuat();
-				//CurrAnchorRotation.Normalize();										// 정규화를 하면 누적 오차를 줄일 수 있음
-				//FQuat Delta = CurrAnchorRotation * PrevAnchorRotation.Inverse();	// 과거와 현재 회전의 차이 계산
-				//Delta.Normalize();
-
-				//FQuat CurrTargetRotation = GrabbedBox.Get()->GetComponentQuat();
-				//CurrTargetRotation.Normalize();
-				//FQuat NewTargetRotation = Delta * CurrTargetRotation;
-				//NewTargetRotation.Normalize();
-				//GrabComp->SetTargetLocationAndRotation(NewLocation, NewTargetRotation.Rotator());
-
-				//PrevAnchorRotation = CurrAnchorRotation;
-
 				// 누적 방법이 잘 안됨
 				// - Anchor 대비 Target의 상대 회전을 사용
 				//  - Grab 시 상대 회전을 구하고, Tick에서 갱신
@@ -103,51 +95,69 @@ void URPMovableComponent::Server_Grab_Implementation(AActor* Interactor)
 	{
 		Holder = Interactor;
 
-		UBoxComponent* RootBox = Cast<UBoxComponent>(GetOwner()->GetRootComponent());
-		if (!RootBox)
+		CacheRootBox = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent());
+		CacheOwnerMesh = FindOwnerMeshComponent(GetOwner());
+		if (!CacheRootBox.IsValid() || !CacheOwnerMesh.IsValid())
 		{
 			return;
 		}
 
-		UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner());
-		if (!OwnerMesh)
+		UPrimitiveComponent* BeGrabbedComp = nullptr;
+		if (IsRootPhysicsActive())
 		{
-			return;
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("IsRootPhysicsActive()"));
+			BeGrabbedComp = CacheRootBox.Get();
+		}
+		else if(CacheOwnerMesh->IsSimulatingPhysics())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("IsSimulatingPhysics()"));
+			BeGrabbedComp = CacheOwnerMesh.Get();
 		}
 
-		if (!IsRootPhysicsActive())
+		// Grab
+		if (BeGrabbedComp == nullptr)
 		{
+			// Attach
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("BeGrabbedComp == nullptr"));
 			UCameraComponent* CharacterCamera = Holder->FindComponentByClass<UCameraComponent>();
 			if (CharacterCamera)
 			{
-				RootBox->AttachToComponent(CharacterCamera, FAttachmentTransformRules::KeepWorldTransform);
+				CacheRootBox->AttachToComponent(CharacterCamera, FAttachmentTransformRules::KeepWorldTransform);
 				bIsHeld = true;
 			}
 		}
 		else
-		{
-			FVector GrabLocation = RootBox->GetComponentLocation();
-			FRotator GrabRotation = RootBox->GetComponentRotation();
-			
-			if (UPhysicsHandleComponent* GrabComp = Holder->FindComponentByClass<UPhysicsHandleComponent>())
+		{	
+			// Physics Handle
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("BeGrabbedComp != nullptr"));
+			UPhysicsHandleComponent* GrabComp = Holder->FindComponentByClass<UPhysicsHandleComponent>();
+			if (!GrabComp)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SkeletalMesh : Physics Off"));
+				return;
+			}
 
-				GrabComp->GrabComponentAtLocationWithRotation(RootBox, NAME_None, GrabLocation, GrabRotation);
+			if (CacheOwnerMesh.Get() == BeGrabbedComp)
+			{
+				RootMode = ERPRootMode::Mesh;
+				ApplyRootSwap(RootMode, CacheOwnerMesh.Get(), CacheRootBox.Get());
+			}
 
-				// Mesh의 Physics = true인 경우
-				// - 제약(Constraint)로 Mesh와 Root를 하나로 묶음
-				if (OwnerMesh->IsSimulatingPhysics())
-				{
+			// Grab
+			FVector GrabLocation = BeGrabbedComp->GetComponentLocation();
+			FRotator GrabRotation = BeGrabbedComp->GetComponentRotation();
+			GrabComp->GrabComponentAtLocationWithRotation(BeGrabbedComp, NAME_None, GrabLocation, GrabRotation);
 
-				}
+			// 상대 회전 저장
+			FQuat AnchorRotation = FindAnchor(Interactor)->GetComponentQuat();
+			FQuat BeGrabbedCompRotation = BeGrabbedComp->GetComponentQuat();
+			DeltaAnchorTarget = (AnchorRotation.Inverse() * BeGrabbedCompRotation).GetNormalized();
 
-				FQuat AnchorRotation = FindAnchor(Interactor)->GetComponentQuat();
-				FQuat BoxRotation = RootBox->GetComponentQuat();
-				DeltaAnchorTarget = (AnchorRotation.Inverse() * BoxRotation).GetNormalized();
+			CacheGrabbedComp = BeGrabbedComp;
+			bIsHeld = true;
 
-				GrabbedBox = RootBox;
-				bIsHeld = true;
+			if (CacheOwnerMesh.Get() == BeGrabbedComp)
+			{
+				GetOwner()->ForceNetUpdate();
 			}
 		}
 	}	
@@ -163,39 +173,56 @@ void URPMovableComponent::Server_Drop_Implementation()
 
 	if (GetOwner()->HasAuthority())
 	{
-		UBoxComponent* RootBox = Cast<UBoxComponent>(GetOwner()->GetRootComponent());
-		if (!RootBox)
+		// Grab할 때 Root가 바뀐 상황을 고려해야함
+		UPrimitiveComponent* GrabbedComp = nullptr;
+		if (!Holder.IsValid())
 		{
 			return;
 		}
 
-		UMeshComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner());
-		if (!OwnerMesh)
+		if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
 		{
-			return;
-		}
-
-		if (!IsRootPhysicsActive())
-		{
-			RootBox->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		}
-		else
-		{
-			if (Holder.IsValid())
+			GrabbedComp = GrabComp->GetGrabbedComponent();
+			if(GrabbedComp)
 			{
-				if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
+				if (GrabbedComp == CacheGrabbedComp.Get())
 				{
-					if (Cast<UBoxComponent>(GrabComp->GetGrabbedComponent()) == GrabbedBox.Get())
+					GrabComp->ReleaseComponent();
+
+					if (CacheOwnerMesh.Get() == GrabbedComp)
 					{
-						GrabComp->ReleaseComponent();
+						// 1) 핸들 릴리즈 이후
+						const FTransform MeshTransform = CacheOwnerMesh->GetComponentTransform();
+
+						// 2) 다음 프레임으로 미루기 (씬 업데이트 끝난 뒤 구조 변경)
+						GetWorld()->GetTimerManager().SetTimerForNextTick(
+							[this, MeshTransform]()
+							{
+								// 3) 먼저 액터를 메시 위치로 텔레포트
+								GetOwner()->SetActorTransform(MeshTransform, false, nullptr, ETeleportType::TeleportPhysics);
+
+								// 4) 루트 복귀
+								RootMode = ERPRootMode::Box;
+								ApplyRootSwap(RootMode, CacheRootBox.Get(), CacheOwnerMesh.Get());
+
+								bIsHeld = false;
+								Holder = nullptr;
+								CacheGrabbedComp = nullptr;
+
+								GetOwner()->ForceNetUpdate();
+							});
 					}
 				}
 			}
-		}
+			else
+			{
+				CacheRootBox->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
-		bIsHeld = false;
-		Holder = nullptr;
-		GrabbedBox = nullptr;
+				bIsHeld = false;
+				Holder = nullptr;
+				CacheGrabbedComp = nullptr;
+			}
+		}
 	}
 }
 
@@ -203,6 +230,88 @@ void URPMovableComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void URPMovableComponent::OnRep_RootMode()
+{
+	UPrimitiveComponent* TempRootBox = GetOwner()->FindComponentByClass<UBoxComponent>();
+	UPrimitiveComponent* TempOwnerMesh = FindOwnerMeshComponent(GetOwner());
+	if (!TempRootBox || !TempOwnerMesh)
+	{
+		return;
+	}
+
+	if (RootMode == ERPRootMode::Mesh)
+	{
+		ApplyRootSwap(RootMode, TempOwnerMesh, TempRootBox);
+	}
+	else
+	{
+		ApplyRootSwap(RootMode, TempRootBox, TempOwnerMesh);
+	}
+	
+}
+
+void URPMovableComponent::ApplyRootSwap(ERPRootMode Mode, UPrimitiveComponent* NewRoot, UPrimitiveComponent* Other)
+{	
+	if (!NewRoot || !Other)
+	{
+		return;
+	}
+	if (NewRoot == Other)
+	{
+		return;
+	}
+	if (bSwappingRoot)
+	{
+		return;
+	}
+
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return;
+	}
+
+	if (Owner->GetRootComponent() == NewRoot && Other->GetAttachParent() == NewRoot)
+	{
+		return;
+	}
+
+	bSwappingRoot = true;
+
+	// Swap 대상 컴포넌트들 분리
+	if (Other->IsAttachedTo(NewRoot))
+	{
+		Other->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
+	if (NewRoot->IsAttachedTo(Other))
+	{
+		NewRoot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
+	// 분리 한 번 더
+	if (Other->GetAttachParent())
+	{
+		Other->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
+	if (NewRoot->GetAttachParent())
+	{
+		NewRoot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
+	const FTransform NewRootTransform = NewRoot->GetComponentTransform();
+
+	// Root 교체
+	Owner->SetRootComponent(NewRoot);
+
+	// 컴포넌트 계층구조 유지
+	if (Other->GetAttachParent() != NewRoot)
+	{
+		Other->AttachToComponent(NewRoot, FAttachmentTransformRules::KeepWorldTransform);
+	}
+
+	NewRoot->SetWorldTransform(NewRootTransform, false, nullptr, ETeleportType::TeleportPhysics);
+
+	bSwappingRoot = false;
 }
 
 UMeshComponent* URPMovableComponent::FindOwnerMeshComponent(AActor* Owner) const
@@ -270,3 +379,179 @@ bool URPMovableComponent::IsRootPhysicsActive()
 void URPMovableComponent::OnPlaceComplete()
 {
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ------------------- Drop -------------------------------
+//UBoxComponent* RootBox = Cast<UBoxComponent>(GetOwner()->GetRootComponent());
+//UPrimitiveComponent* OwnerMesh = FindOwnerMeshComponent(GetOwner());
+//if (!RootBox || !OwnerMesh)
+//{
+//	return;
+//}
+//
+//UPrimitiveComponent* GrabbedComp = nullptr;
+//if (IsRootPhysicsActive())
+//{
+//	GrabbedComp = RootBox;
+//}
+//else if (OwnerMesh->IsSimulatingPhysics())
+//{
+//	GrabbedComp = OwnerMesh;
+//}
+
+//if (!GrabbedComp)
+//{
+//	GrabbedComp->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+//}
+//else
+//{
+//	if (Holder.IsValid())
+//	{
+//		if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
+//		{
+//			if (GrabComp->GetGrabbedComponent() == CacheGrabbedComp.Get())
+//			{
+//				GrabComp->ReleaseComponent();
+//
+//				if (OwnerMesh == GrabbedComp)
+//				{
+//					RootMode = ERPRootMode::Box;
+//					ApplyRootSwap(RootMode);
+//				}
+//			}
+//		}
+//	}
+//}
+
+
+
+
+// -------------------- Grab한 Actor의 회전 -----------------------------
+// 누적 : 이전 Rotation과 현재 Rotation의 차이를 구해서 Target에도 그 차이만큼 더해주면 됨
+// - 정확하게는 회전한 각만큼 Target도 회전시키면 됨
+//FQuat CurrAnchorRotation = GrabAnchor->GetComponentQuat();
+//CurrAnchorRotation.Normalize();										// 정규화를 하면 누적 오차를 줄일 수 있음
+//FQuat Delta = CurrAnchorRotation * PrevAnchorRotation.Inverse();	// 과거와 현재 회전의 차이 계산
+//Delta.Normalize();
+
+//FQuat CurrTargetRotation = GrabbedBox.Get()->GetComponentQuat();
+//CurrTargetRotation.Normalize();
+//FQuat NewTargetRotation = Delta * CurrTargetRotation;
+//NewTargetRotation.Normalize();
+//GrabComp->SetTargetLocationAndRotation(NewLocation, NewTargetRotation.Rotator());
+
+//PrevAnchorRotation = CurrAnchorRotation;
+
+
+
+
+// -------------- Constraint ----------------
+//float PrevBoxMass;
+//FVector PrevBoxInertiaScale;
+//FVector PrevSkelInertiaScale;
+
+// -------------- Constraint Grab ----------------
+//GrabComp->SetTargetLocationAndRotation(GrabLocation, GrabRotation);
+//
+//// Handle 튜닝 : Anchor와 Target 사이
+//GrabComp->bRotationConstrained = true;		// Physics Handle이 Target의 회전에 영향을 줄 수 있도록
+//GrabComp->LinearStiffness = 8000.f;
+//GrabComp->LinearDamping = 2500.f;
+//GrabComp->AngularStiffness = 12000.f;
+//GrabComp->AngularDamping = 6000.f;
+//GrabComp->InterpolationSpeed = 60.f;
+//
+//// --- 2) 속도/각속도 초기화(잔류 에너지 제거) ---
+//RootBox->SetPhysicsLinearVelocity(FVector::ZeroVector);
+//RootBox->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
+//OwnerMesh->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+//OwnerMesh->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+//
+//// Mesh의 Physics = true인 경우
+//// - 제약(Constraint)로 Mesh와 Root를 하나로 묶음
+//if (OwnerMesh->IsSimulatingPhysics())
+//{
+//	// Constraint 생성
+//	if (!CarryConstraint)
+//	{
+//		CarryConstraint = NewObject<UPhysicsConstraintComponent>(GetOwner());
+//		CarryConstraint->RegisterComponent();
+//		CarryConstraint->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+//	}
+//
+//	OwnerMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//
+//	// 두 바디(Box ↔ Mesh) 묶기
+//	CarryConstraint->SetConstrainedComponents(RootBox, NAME_None, OwnerMesh, FName("pelvis"));
+//
+//	// 두 바디 사이의 충돌 끄기
+//	CarryConstraint->SetDisableCollision(true);
+//
+//	// Constraint 튜닝 : Target과 Target의 Mesh 사이
+//	// - 제약 한계치 최소화 (둘이 겹치도록)
+//	//   - 축별 상대 위치 이동 한계 제한
+//	CarryConstraint->SetLinearXLimit(ELinearConstraintMotion::LCM_Limited, 1.f);	// 허용 거리 +-1cm
+//	CarryConstraint->SetLinearYLimit(ELinearConstraintMotion::LCM_Limited, 1.f);
+//	CarryConstraint->SetLinearZLimit(ELinearConstraintMotion::LCM_Limited, 1.f);
+//
+//	// - 드라이브(Anchor)로 목표점(Target)을 붙들어 두기
+//	CarryConstraint->SetLinearPositionDrive(true, true, true);
+//	// Stiffness / Damping / ForceLimit 
+//	// Stiffness(스프링 강성) : 클수록 목표 위치로 빠르고 강하게 당김
+//	// Damping(감쇠) : 클수록 출렁임/진동을 빨리 죽임
+//	// ForceLimit(최대 힘) : 0 = 무제한, n = 최대 n까지
+//	CarryConstraint->SetLinearDriveParams(50000.f, 10000.f, 0.f);
+//
+//	// - 회전 드라이브 추가
+//	CarryConstraint->SetAngularDriveMode(EAngularDriveMode::SLERP);		// SLERP : 두 바디의 회전을 통째로 일치
+//	CarryConstraint->SetAngularOrientationDrive(true, true);			// SLERP는 Twist/Swing 모두 켜야함
+//	CarryConstraint->SetAngularDriveParams(50000.f, 10000.f, 0.f);
+//
+//	// - Constraint Projection 활성화 : 지정한 오차값을 넘어갔을 때 설정한 Constraint 조건으로 강제로 맞춰줌
+//	CarryConstraint->SetProjectionEnabled(true);
+//	CarryConstraint->SetProjectionParams(1.0f, 1.0f, 30.0f, 60.0f);		// alpha(0~1) : 1에 가까울 수록 즉시 붙임, Tolerance : 오차 허용치
+//
+//  // - Box와 Skeletal Mesh의 질량 맞추기
+//	if (FBodyInstance* PelvisBodyInstance = OwnerMesh->GetBodyInstance(TEXT("pelvis")))
+//	{
+//		const float PelvisMass = PelvisBodyInstance->GetBodyMass();
+//
+//		PrevBoxMass = RootBox->GetMass();
+//		RootBox->SetMassOverrideInKg(NAME_None, PelvisMass, true);
+//	}
+//
+//	// --- 5) 관성 스케일 보정(회전 떨림 완화) + 원복 대비 백업 ---
+//	PrevBoxInertiaScale = RootBox->BodyInstance.InertiaTensorScale;
+//	PrevSkelInertiaScale = OwnerMesh->BodyInstance.InertiaTensorScale;
+//
+//	RootBox->BodyInstance.InertiaTensorScale = FVector(0.7f); // 0.5~0.9 테스트
+//	OwnerMesh->BodyInstance.InertiaTensorScale = FVector(0.5f); // 0.3~0.7 테스트
+//}
+
+// ----------------- Constraint Drop ---------------------
+//if (CarryConstraint)
+//{
+//	CarryConstraint->BreakConstraint();		// 제약 해제
+//	CarryConstraint->DestroyComponent();
+//	CarryConstraint = nullptr;
+//}
+//
+//RootBox->SetMassOverrideInKg(NAME_None, PrevBoxMass, false);
+//PrevBoxMass = 0.0f;
+//
+//OwnerMesh->SetCollisionProfileName(TEXT("ResetObjectSkeletal"));
+//RootBox->BodyInstance.InertiaTensorScale = PrevBoxInertiaScale;
+//OwnerMesh->BodyInstance.InertiaTensorScale = PrevSkelInertiaScale;

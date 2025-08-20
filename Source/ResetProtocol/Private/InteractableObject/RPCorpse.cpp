@@ -24,33 +24,42 @@ void ARPCorpse::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (SkeletalMeshComp->IsSimulatingPhysics())
+	if (MoveComp->RootMode == ERPRootMode::Box && SkeletalMeshComp->IsSimulatingPhysics())
 	{
-		FVector MeshLocation = SkeletalMeshComp->GetRelativeLocation();
-		FVector NewActorLocation = GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
+		FVector NewActorLocation = SkeletalMeshComp->GetSocketLocation("pelvis");
 		SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
 	}
 }
 
 void ARPCorpse::DragInteract_Implementation(AActor* Interactor)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab On"));
+
+	if (HasAuthority())
+	{
+		if (!MoveComp->GetIsHeld() && !(RagdollComp->bIsRagdollOn))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab Start"));
+			MoveComp->Server_Grab_Implementation(Interactor);
+		}
+	}
 }
 
 void ARPCorpse::DropInteract_Implementation(AActor* Interactor)
 {
-}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab Off"));
 
-void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Ragdoll On"));
-	
 	if (HasAuthority())
 	{
-		RagdollComp->Server_RagdollOn_Implementation();
+		if (MoveComp->GetIsHeld() && !(RagdollComp->bIsRagdollOn))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Drop Start"));
+			MoveComp->Server_Drop_Implementation();
+		}
 	}
 }
 
-void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
+void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Ragdoll Off"));
 
@@ -60,24 +69,17 @@ void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
 	}
 }
 
+void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Ragdoll On"));
+
+	if (HasAuthority())
+	{
+		RagdollComp->Server_RagdollOn_Implementation();
+	}
+}
+
 void ARPCorpse::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ARPCorpse::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	if (SkeletalMeshComp->IsSimulatingPhysics())
-	{
-		IRPKeyHoldInterface::Execute_KeyReleaseInteract(this, OtherActor);
-	}
-	else
-	{
-		IRPKeyHoldInterface::Execute_KeyHoldInteract(this, OtherActor);
-	}
 }

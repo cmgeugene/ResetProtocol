@@ -103,41 +103,39 @@ void URPInteractorComponent::Interact()
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
+		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
 			
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
 
-		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObjcet);
+		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
 		if (ClickInterface)
 		{
-
-			if (InteractableObjcet->ObjectType == EInteractObjectType::Trash)
+			if (InteractableObject->ObjectType == EInteractObjectType::Trash)
 			{
 				if (!IsValid(CleaningTool))
 				{
-					IRPClickInterface::Execute_ClickInteract(InteractableObjcet, GetOwner());
+					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
 				}
 			}
-			else if (InteractableObjcet->ObjectType == EInteractObjectType::Stain)
+			else if (InteractableObject->ObjectType == EInteractObjectType::Stain)
 			{
 				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
 				{
-					IRPClickInterface::Execute_ClickInteract(InteractableObjcet, GetOwner());
+					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
 				}
 			}
-
 		}
 
-		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObjcet);
+		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObject);
 		if (DragInterface)
 		{
-			if (InteractableObjcet->ObjectType == EInteractObjectType::ScatteredObject || InteractableObjcet->ObjectType == EInteractObjectType::Corpse)
+			if (InteractableObject->ObjectType == EInteractObjectType::ScatteredObject || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 			{
 				if (!IsValid(CleaningTool))
 				{
-					IRPDragInterface::Execute_DragInteract(InteractableObjcet, GetOwner());
+					IRPDragInterface::Execute_DragInteract(InteractableObject, GetOwner());
 					IsHoldingItem = true;
-					HoldingActor = InteractableObjcet;
+					HoldingActor = InteractableObject;
 				}
 			}
 		}

@@ -49,14 +49,4 @@ public:
 
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;
-
-
-// 테스트용
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UBoxComponent> CollisionBox;
-
-	UFUNCTION()
-	virtual void OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

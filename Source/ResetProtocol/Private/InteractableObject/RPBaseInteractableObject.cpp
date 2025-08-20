@@ -6,6 +6,7 @@
 
 #define ECC_ObjectRootBox ECC_GameTraceChannel2
 #define ECC_ObjectSkeletalMesh ECC_GameTraceChannel3
+#define ECC_ObjectStaticMesh ECC_GameTraceChannel4
 
 ARPBaseInteractableObject::ARPBaseInteractableObject()
 {
@@ -21,8 +22,7 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 	// StaticMesh는 Physics Off => Root의 Collision을 무시할 필요 없음
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
 	StaticMeshComp->SetupAttachment(RootComponent);
-	StaticMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	StaticMeshComp->SetCollisionProfileName(TEXT("PhysicsActor"));
+	StaticMeshComp->SetCollisionProfileName(TEXT("ResetObjectStatic"));
 	StaticMeshComp->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 	StaticMeshComp->SetIsReplicated(true);
 
@@ -31,14 +31,8 @@ ARPBaseInteractableObject::ARPBaseInteractableObject()
 	//SkeletalMeshComp->SetSimulatePhysics(true);
 	SkeletalMeshComp->SetupAttachment(RootComponent);
 	SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	SkeletalMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SkeletalMeshComp->SetCollisionProfileName(TEXT("ResetObjectSkeletal"));
-	SkeletalMeshComp->SetCollisionObjectType(ECC_ObjectSkeletalMesh);
-	//SkeletalMeshComp->SetCollisionResponseToChannel(ECC_ObjectRootBox, ECR_Ignore);		// Root의 Collision 무시
 	SkeletalMeshComp->SetIsReplicated(true);
-
-	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollsionBox"));
-	CollisionBox->SetupAttachment(RootComponent);
 }
 
 void ARPBaseInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -62,8 +56,6 @@ void ARPBaseInteractableObject::BeginPlay()
 		StaticMeshComp->SetVisibility(false);
 		ActiveMesh = SkeletalMeshComp;
 	}
-
-	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ARPBaseInteractableObject::OnObjectOverlap);
 }
 
 void ARPBaseInteractableObject::Highlight()
@@ -97,9 +89,4 @@ void ARPBaseInteractableObject::UnHighlight()
 			ActiveStaticMesh->SetRenderCustomDepth(false);
 		}
 	}
-}
-
-void ARPBaseInteractableObject::OnObjectOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-
 }

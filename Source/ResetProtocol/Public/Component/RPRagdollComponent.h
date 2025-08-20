@@ -31,12 +31,14 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void OnRep_IsRagdollOn();
+	void OnRep_bInitRagdoll();
 
 	void InitRagdoll(bool bOn);
 
 public:
-	UPROPERTY(ReplicatedUsing = OnRep_IsRagdollOn)
+	UPROPERTY(ReplicatedUsing = OnRep_bInitRagdoll)
+	bool bInitRagdoll;
+
 	bool bIsRagdollOn;
 	
 };
