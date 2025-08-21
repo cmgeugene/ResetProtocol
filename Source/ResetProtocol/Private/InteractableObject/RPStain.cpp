@@ -23,7 +23,7 @@ ARPStain::ARPStain()
 
 void ARPStain::ClickInteract_Implementation(AActor* Interactor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Ragdoll On"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, TEXT("Start Clean Stain"));
 
 	if (HasAuthority())
 	{

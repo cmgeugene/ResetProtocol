@@ -24,6 +24,7 @@ protected:
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	void CreateInteractWidget(AController* Controller);
@@ -38,63 +39,60 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void PickUpItem();
-	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PickUpItem(ARPBaseCleaningTool* TargetActor);
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void Interact();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_Interact();
+	UFUNCTION(Server, Reliable)
+	void Server_Interact(AActor* Target);
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void KeyHoldInteract();
-
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void KeyReleaseInteract();
-
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void KeyHoldTimerEnd();
+	UFUNCTION(Server, Reliable)
+	void Server_KeyHoldRPC(AActor* Target);
+	UFUNCTION(Server, Reliable)
+	void Server_KeyReleaseRPC();
 
+	UFUNCTION(Server, Reliable)
+	void Server_MouseReleaseInteract();
 public:
 	void UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet);
 
 public:
 	void OnLeftMouseButtonReleased();
 
+protected:
+	void SetOwnerInteractHitResult();
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FVector ViewVector;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Interact")
 	FVector InteractEnd;
-
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FRotator ViewRotation;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Interact")
 	float InteractionRange;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Interact")
 	TSubclassOf<UUserWidget> InteractWidgetClass;
-
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	URPInteractWidget* InteractWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* InteractActor;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	AActor* HoldingActor;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	bool IsHoldingItem;
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsKeyRelease;
-
 	UPROPERTY(VisibleAnywhere)
 	float KeyHoldingTime;
 

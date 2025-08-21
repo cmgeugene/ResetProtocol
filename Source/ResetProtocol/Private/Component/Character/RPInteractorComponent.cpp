@@ -23,6 +23,8 @@ URPInteractorComponent::URPInteractorComponent()
 	, KeyHoldingTime(5.f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -35,7 +37,24 @@ void URPInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	InteractCheck();
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	if (!IsValid(Pawn))
+	{
+		return;
+	}
+
+	if (Pawn->IsLocallyControlled())
+	{
+		InteractCheck();
+	}
+}
+
+void URPInteractorComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URPInteractorComponent, HoldingActor);
+	DOREPLIFETIME(URPInteractorComponent, IsHoldingItem);
 }
 
 void URPInteractorComponent::CreateInteractWidget(AController* Controller)
@@ -55,7 +74,6 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 void URPInteractorComponent::PickUpItem()
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-
 	if (IsValid(PlayerCharacter))
 	{
 		// 청소 도구.
@@ -72,13 +90,13 @@ bool URPInteractorComponent::Server_PickUpItem_Validate(ARPBaseCleaningTool* Tar
 	return IsValid(TargetActor);
 }
 
-
 void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningTool* TargetActor)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter) && IsValid(TargetActor))
 	{
-		FCleaningToolData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate([&](const FCleaningToolData& ItemData)
+		FCleaningToolData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate(
+			[&](const FCleaningToolData& ItemData)
 			{
 				return ItemData.Class == TargetActor->GetClass();
 			});
@@ -113,12 +131,34 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 
 void URPInteractorComponent::Interact()
 {
+	if (ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner()))
+	{
+		AActor* Target = PlayerCharacter->GetHitResult().GetActor();
+		if (Target)
+		{
+			Server_Interact(Target);
+		}
+	}
+}
+
+void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Mouse Left Button Down!"));
+	if (!IsValid(Target))
+	{
+		return;
+	}
+	
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
+	if (Distance > InteractionRange)
+	{
+		return;
+	}
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
-			
+		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
 
 		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
@@ -128,6 +168,7 @@ void URPInteractorComponent::Interact()
 			{
 				if (!IsValid(CleaningTool))
 				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Pick up Trash"));
 					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
 				}
 			}
@@ -135,6 +176,7 @@ void URPInteractorComponent::Interact()
 			{
 				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
 				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Clean Stain"));
 					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
 				}
 			}
@@ -147,56 +189,25 @@ void URPInteractorComponent::Interact()
 			{
 				if (!IsValid(CleaningTool))
 				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Grab Object"));
 					IRPDragInterface::Execute_DragInteract(InteractableObject, GetOwner());
 					IsHoldingItem = true;
 					HoldingActor = InteractableObject;
 				}
 			}
 		}
-
-
-		// KeyHold로 이전.
-		
-	
-
-		//bool HasClickInterface = PlayerCharacter->GetHitResult().GetActor()->Implements<URPClickInterface>();
 	}
 }
-
-bool URPInteractorComponent::Server_Interact_Validate()
-{
-	return true;
-}
-
-
-void URPInteractorComponent::Server_Interact_Implementation()
-{
-}
-
-
 
 void URPInteractorComponent::InteractCheck()
 {
+	SetOwnerInteractHitResult();
+
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-
-	if (IsValid(PlayerCharacter))
+	if (!IsValid(PlayerCharacter))
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
-
-		if (IsValid(PlayerController))
-		{
-			PlayerController->GetPlayerViewPoint(ViewVector, ViewRotation);
-		}
+		return;
 	}
-		
-	FVector VecDirection = ViewRotation.Vector() * InteractionRange;
-	
-	InteractEnd = ViewVector + VecDirection;
-
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(PlayerCharacter);
-	
-	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
 
 	if (InteractActor == PlayerCharacter->GetHitResult().GetActor())
 		return;
@@ -238,7 +249,6 @@ void URPInteractorComponent::InteractCheck()
 			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 
-
 		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
 		if (InteractableObjcet)
 		{
@@ -263,14 +273,60 @@ void URPInteractorComponent::InteractCheck()
 
 void URPInteractorComponent::KeyHoldInteract()
 {
+	if (ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner()))
+	{
+		AActor* Target = PlayerCharacter->GetHitResult().GetActor();
+		if (Target)
+		{
+			Server_KeyHoldRPC(Target);
+		}
+	}
+}
+
+void URPInteractorComponent::KeyReleaseInteract()
+{
+	if(ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner()))
+	{
+		if (HoldingActor) {
+			Server_KeyReleaseRPC_Implementation();
+		}
+	}
+}
+
+void URPInteractorComponent::KeyHoldTimerEnd()
+{
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (IsValid(PlayerCharacter) && KeyHoldTimerHandle.IsValid())
+	{
+		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
+		if (KeyHoldInterface)
+		{
+			IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+			IsHoldingItem = false;
+			HoldingActor = nullptr;
+		}
+	}
+}
+
+void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
+{
+	if (!IsValid(Target))
+	{
+		return;
+	}
+
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
+	if (Distance > InteractionRange)
+	{
+		return;
+	}
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
-
+		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
-		
+
 		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(InteractableObjcet);
 		if (KeyHoldInterface)
 		{
@@ -279,7 +335,7 @@ void URPInteractorComponent::KeyHoldInteract()
 				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Hammer)
 				{
 					IsHoldingItem = true;
-					HoldingActor = PlayerCharacter->GetHitResult().GetActor();
+					HoldingActor = InteractableObjcet;
 
 					GetWorld()->GetTimerManager().SetTimer(
 						KeyHoldTimerHandle,
@@ -294,7 +350,7 @@ void URPInteractorComponent::KeyHoldInteract()
 	}
 }
 
-void URPInteractorComponent::KeyReleaseInteract()
+void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 {
 	if (KeyHoldTimerHandle.IsValid())
 	{
@@ -304,20 +360,19 @@ void URPInteractorComponent::KeyReleaseInteract()
 	}
 }
 
-void URPInteractorComponent::KeyHoldTimerEnd()
+void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 {
-	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Mouse Left Button Released!"));
 
-	if (IsValid(PlayerCharacter) && KeyHoldTimerHandle.IsValid())
+	IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
+	if (DragInterface)
 	{
-		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
-		if (KeyHoldInterface)
-		{
-			IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
-			IsHoldingItem = false;
-			HoldingActor = nullptr;
-		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Execute_DropInteract"));
+		IRPDragInterface::Execute_DropInteract(HoldingActor, GetOwner());
 	}
+
+	IsHoldingItem = false;
+	HoldingActor = nullptr;
 }
 
 void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)
@@ -365,13 +420,34 @@ void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* Int
 
 void URPInteractorComponent::OnLeftMouseButtonReleased()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Mouse Left Button Released!"));
-
-	IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
-	if (DragInterface)
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (!PlayerCharacter)
 	{
-		IRPDragInterface::Execute_DropInteract(HoldingActor, GetOwner());
-		IsHoldingItem = false;
-		HoldingActor = nullptr;
+		return;
 	}
+
+	if (HoldingActor) {
+		Server_MouseReleaseInteract();
+	}
+}
+
+void URPInteractorComponent::SetOwnerInteractHitResult()
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (IsValid(PlayerCharacter))
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(PlayerCharacter->GetController());
+		if (IsValid(PlayerController))
+		{
+			PlayerController->GetPlayerViewPoint(ViewVector, ViewRotation);
+		}
+	}
+
+	FVector VecDirection = ViewRotation.Vector() * InteractionRange;
+	InteractEnd = ViewVector + VecDirection;
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(PlayerCharacter);
+
+	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
 }

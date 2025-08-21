@@ -212,6 +212,12 @@ void URPMovableComponent::Server_Drop_Implementation()
 								GetOwner()->ForceNetUpdate();
 							});
 					}
+					else
+					{
+						bIsHeld = false;
+						Holder = nullptr;
+						CacheGrabbedComp = nullptr;
+					}
 				}
 			}
 			else

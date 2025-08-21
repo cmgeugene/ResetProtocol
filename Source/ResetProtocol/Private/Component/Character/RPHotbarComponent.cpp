@@ -17,7 +17,6 @@ URPHotbarComponent::URPHotbarComponent()
 	CurrentSlotIndex = -1;
 }
 
-
 void URPHotbarComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -40,7 +39,6 @@ void URPHotbarComponent::BeginPlay()
 	//	}
 	//}
 }
-
 
 void URPHotbarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
@@ -125,7 +123,6 @@ void URPHotbarComponent::SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTo
 	CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
 }
-
 void URPHotbarComponent::DestroyActor_Implementation()
 {
 	CurrentCleaningTool->Destroy();
@@ -178,20 +175,28 @@ void URPHotbarComponent::UnEquip_Implementation()
 	CurrentSlotIndex = -1;
 }
 
-void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
+void URPHotbarComponent::AddItem(const FCleaningToolData& Data)
 {
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (!IsValid(PlayerCharacter))
+	{
+		return;
+	}
 
-	for (int i = 0; i < Inventory.Num();i++)
+	for (int i = 0; i < Inventory.Num(); i++)
 	{
 		if (!IsValid(Inventory[i].Class))
 		{
 			Inventory[i] = Data;
-			HotbarWidget->UpdateUI();
+			if (PlayerCharacter->IsLocallyControlled())
+			{
+				HotbarWidget->UpdateUI();
+			}
 
 			if (CurrentSlotIndex == -1)
 			{
 				return;
-			}	
+			}
 			else
 			{
 				if (i == CurrentSlotIndex)
@@ -208,7 +213,6 @@ void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Inventory Full"));
-	
 }
 
 bool URPHotbarComponent::CheckInventoryFull()

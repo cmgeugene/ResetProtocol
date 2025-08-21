@@ -84,7 +84,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<UUserWidget> HotbarWidgetClass;
-
 	UPROPERTY(VisibleAnywhere, Replicated, Category = "Inventory")
 	URPHotbarWidget* HotbarWidget;
 
