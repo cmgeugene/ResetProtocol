@@ -14,10 +14,9 @@ struct FPlayerInfo
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
 	FText PlayerName;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo") 
-	bool ReadyStatus;
+	bool ReadyStatus = false;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Struct|PlayerInfo")
 	int32 Bytes;
-
 
 	bool operator==(const FPlayerInfo& Other) const
 	{

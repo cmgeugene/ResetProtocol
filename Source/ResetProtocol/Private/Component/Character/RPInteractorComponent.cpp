@@ -431,12 +431,12 @@ void URPInteractorComponent::OnLeftMouseButtonReleased()
 		Server_MouseReleaseInteract();
 	}
 
-	//ARPPlayerController* PlayerController = Cast<ARPPlayerController>(GetOwner()->GetInstigatorController());
-	//if (PlayerController)
-	//{
-	//	PlayerController->SetInputMode(FInputModeGameOnly());
-	//	PlayerController->bShowMouseCursor = false;
-	//}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(GetOwner()->GetInstigatorController());
+	if (PlayerController)
+	{
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->bShowMouseCursor = false;
+	}
 }
 
 void URPInteractorComponent::SetOwnerInteractHitResult()
