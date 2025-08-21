@@ -1,5 +1,6 @@
 #include "Component/Character/RPInteractorComponent.h"
 #include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -428,6 +429,13 @@ void URPInteractorComponent::OnLeftMouseButtonReleased()
 
 	if (HoldingActor) {
 		Server_MouseReleaseInteract();
+	}
+
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(GetOwner()->GetInstigatorController());
+	if (PlayerController)
+	{
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->bShowMouseCursor = false;
 	}
 }
 
