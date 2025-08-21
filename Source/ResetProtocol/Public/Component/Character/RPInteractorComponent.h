@@ -9,6 +9,7 @@
 #include "RPInteractorComponent.generated.h"
 
 class URPInteractWidget;
+class URPRadialTimerWidget;
 class ARPBaseInteractableObject;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -69,6 +70,10 @@ public:
 protected:
 	void SetOwnerInteractHitResult();
 
+public:
+	UFUNCTION(Client, Reliable)
+	void SetRedialTimerWidget(bool IsVisibility);
+
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FVector ViewVector;
@@ -100,5 +105,11 @@ protected:
 		
 	UPROPERTY(EditDefaultsOnly, Category = "InteractUI")
 	URPInteractUIData* InteractUIData;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Redial")
+	TSubclassOf<UUserWidget> RedialTimerWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Redial")
+	URPRadialTimerWidget* RedialTimerWidget;
 
 };

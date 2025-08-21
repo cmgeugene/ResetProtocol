@@ -13,6 +13,7 @@
 
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "UI/Interact/RPInteractWidget.h"
+#include "UI/RPRadialTimerWidget.h"
 
 #include "Interface/RPClickInterface.h"
 #include "Interface/RPDragInterface.h"
@@ -68,6 +69,17 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 		{
 			InteractWidget->AddToViewport(0);
 			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+
+	if (IsValid(RedialTimerWidgetClass))
+	{
+		RedialTimerWidget = Cast<URPRadialTimerWidget>(CreateWidget(Cast<APlayerController>(Controller), RedialTimerWidgetClass));
+
+		if (IsValid(RedialTimerWidget))
+		{
+			RedialTimerWidget->AddToViewport(0);
+			RedialTimerWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }
@@ -345,6 +357,8 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 						KeyHoldingTime,
 						false
 					);
+
+					SetRedialTimerWidget(true);
 				}
 			}
 		}
@@ -358,6 +372,8 @@ void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 		KeyHoldTimerHandle.Invalidate();
 		IsHoldingItem = false;
 		HoldingActor = nullptr;
+
+		SetRedialTimerWidget(false);
 	}
 }
 
@@ -374,6 +390,9 @@ void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 
 	IsHoldingItem = false;
 	HoldingActor = nullptr;
+
+	SetRedialTimerWidget(false);
+
 }
 
 void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)
@@ -458,4 +477,16 @@ void URPInteractorComponent::SetOwnerInteractHitResult()
 	QueryParams.AddIgnoredActor(PlayerCharacter);
 
 	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
+}
+
+void URPInteractorComponent::SetRedialTimerWidget_Implementation(bool IsVisibility)
+{
+	if (IsVisibility)
+	{
+		RedialTimerWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+	else
+	{
+		RedialTimerWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
