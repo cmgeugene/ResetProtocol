@@ -49,6 +49,9 @@ public:
 	UFUNCTION()
 	void OnRep_Inventory();
 
+	UFUNCTION()
+	void OnRep_CurrentCleaningTool();
+
 	UFUNCTION(Client, Reliable)
 	void AddItem(const FCleaningToolData& Data);
 
@@ -57,11 +60,16 @@ public:
 
 // Item
 public:
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void SpawnActor(TSubclassOf<ARPBaseCleaningTool> ActorClass);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void DestroyActor();
+
+	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void SelectItem(int SelectedNum);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void UnEquip();
 
 protected:
@@ -77,12 +85,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<UUserWidget> HotbarWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(VisibleAnywhere, Replicated, Category = "Inventory")
 	URPHotbarWidget* HotbarWidget;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Replicated)
 	int CurrentSlotIndex;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentCleaningTool)
 	ARPBaseCleaningTool* CurrentCleaningTool;
 };

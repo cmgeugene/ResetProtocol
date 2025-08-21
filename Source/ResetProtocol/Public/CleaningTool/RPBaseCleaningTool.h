@@ -18,6 +18,16 @@ enum class ECleaningToolState : uint8
 	Max
 };
 
+UENUM(BlueprintType)
+enum class EPurchaseState : uint8
+{
+	Purchased UMETA(DisplayName = "Purchased"),
+
+	NotPurchased UMETA(DisplayName = "NotPurchased"),
+	
+	Max
+};
+
 UCLASS()
 class RESETPROTOCOL_API ARPBaseCleaningTool : public AActor
 {
@@ -33,11 +43,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	ECleaningToolState GetCleaningToolState() { return eCleaningTool; }
+	ECleaningToolState GetCleaningToolState() { return eCleaningToolState; }
 
 	UStaticMeshComponent* GetMesh() { return StaticMeshComp; }
 
+	EPurchaseState GetPurchaseState() { return ePurchaseState; }
 
+protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
 protected:
@@ -48,5 +61,8 @@ protected:
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Variable")
-	ECleaningToolState eCleaningTool;
+	ECleaningToolState eCleaningToolState;
+
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Variable")
+	EPurchaseState ePurchaseState;
 };

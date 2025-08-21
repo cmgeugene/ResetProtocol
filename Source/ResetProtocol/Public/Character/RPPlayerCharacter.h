@@ -5,6 +5,7 @@
 #include "Component/Character/RPInteractorComponent.h"
 #include "Component/Character/RPInventoryComponent.h"
 #include "Component/Character/RPHotbarComponent.h"
+#include "Component/PlayerInfoComponent.h"
 #include "Data/ItemDataBase.h"
 #include "Net/UnrealNetwork.h"
 #include "RPPlayerCharacter.generated.h"
@@ -40,9 +41,25 @@ public:
 
 	URPInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 
+	FPlayerInfo GetPlayerInfo() { return PlayerInfo; }
+
+public:
+	UFUNCTION(BlueprintCallable)
+	bool SpendBytes(int Bytes);
+
 public:
 	void OnLeftMouseButtonReleased();
 
+
+public:
+	UFUNCTION()
+	void OnRep_PlayerInfo();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnPlayerInfoChanged();
+
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "RPGameState")
+	void Server_UpdatePlayerInfo();
 
 // Component
 protected:
@@ -64,5 +81,8 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	FHitResult InteractHitResult;
+
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerInfo, BlueprintReadWrite)
+	FPlayerInfo PlayerInfo;
 
 };

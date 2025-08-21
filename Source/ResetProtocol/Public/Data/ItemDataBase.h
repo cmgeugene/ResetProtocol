@@ -22,6 +22,9 @@ struct FItemData
 	FName ItemName;
 
 	UPROPERTY(EditDefaultsOnly)
+	int Price;
+
+	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* Icon;
 
 	UPROPERTY(EditDefaultsOnly)

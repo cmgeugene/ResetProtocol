@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "TimerManager.h"
+#include "Data/RPInteractUIData.h"
 #include "RPInteractorComponent.generated.h"
 
 class URPInteractWidget;
-
+class ARPBaseInteractableObject;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RESETPROTOCOL_API URPInteractorComponent : public UActorComponent
@@ -57,7 +58,11 @@ public:
 	void KeyHoldTimerEnd();
 
 public:
+	void UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet);
+
+public:
 	void OnLeftMouseButtonReleased();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
@@ -95,4 +100,7 @@ protected:
 
 	FTimerHandle KeyHoldTimerHandle;
 		
+	UPROPERTY(EditDefaultsOnly, Category = "InteractUI")
+	URPInteractUIData* InteractUIData;
+
 };

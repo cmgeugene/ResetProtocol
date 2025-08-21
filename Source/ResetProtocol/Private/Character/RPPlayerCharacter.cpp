@@ -2,6 +2,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 #include "UI/Inventory/InventoryWidget.h"
 #include "RPTestItemActor.h"
@@ -49,9 +50,41 @@ void ARPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void ARPPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPPlayerCharacter, PlayerInfo);
+}
+
+bool ARPPlayerCharacter::SpendBytes(int Bytes)
+{
+	if (PlayerInfo.Bytes < Bytes)
+	{
+		return false;
+	}
+	else
+	{
+		PlayerInfo.Bytes -= Bytes;
+
+		Server_UpdatePlayerInfo();
+		return true;
+	}
 }
 
 void ARPPlayerCharacter::OnLeftMouseButtonReleased()
 {
 	InteractorComponent->OnLeftMouseButtonReleased();
 }
+
+void ARPPlayerCharacter::OnRep_PlayerInfo()
+{
+	BP_OnPlayerInfoChanged();
+}
+
+void ARPPlayerCharacter::Server_UpdatePlayerInfo_Implementation()
+{
+	if (HasAuthority())
+	{
+		BP_OnPlayerInfoChanged();
+	}
+}
+
+

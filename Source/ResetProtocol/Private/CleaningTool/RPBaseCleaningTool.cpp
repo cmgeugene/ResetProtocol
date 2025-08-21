@@ -1,4 +1,5 @@
 #include "CleaningTool/RPBaseCleaningTool.h"
+#include "Net/UnrealNetwork.h"
 
 ARPBaseCleaningTool::ARPBaseCleaningTool()
 {
@@ -21,6 +22,8 @@ ARPBaseCleaningTool::ARPBaseCleaningTool()
 void ARPBaseCleaningTool::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ePurchaseState = EPurchaseState::NotPurchased;
 	
 }
 
@@ -28,5 +31,12 @@ void ARPBaseCleaningTool::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ARPBaseCleaningTool::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPBaseCleaningTool, ePurchaseState);
 }
 

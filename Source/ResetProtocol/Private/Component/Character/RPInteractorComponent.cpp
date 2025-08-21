@@ -85,13 +85,27 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 
 		if (Data != nullptr)
 		{
-			PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
-
 			bool CanPickUp = PlayerCharacter->GetHotbarComponent()->CheckInventoryFull();
-		
 			if (CanPickUp)
 			{
-				TargetActor->Destroy();
+				if (TargetActor->GetPurchaseState() == EPurchaseState::NotPurchased)
+				{
+					// 구매 로직 
+					int Price = Data->Price;
+
+					if (PlayerCharacter->SpendBytes(Price))
+					{
+						PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
+
+						TargetActor->Destroy();
+					}
+				}
+				else
+				{
+					PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
+
+					TargetActor->Destroy();
+				}
 			}
 		}
 	}
@@ -192,6 +206,8 @@ void URPInteractorComponent::InteractCheck()
 		if (!IsValid(PlayerCharacter->GetHitResult().GetActor()) || IsHoldingItem)
 		{
 			InteractActor = nullptr;
+			InteractWidget->RefreshWidget();
+			InteractWidget->InvisiblePrice();
 			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 
@@ -200,8 +216,26 @@ void URPInteractorComponent::InteractCheck()
 		{
 			InteractWidget->SetText(TEXT("PickUp CleaningTool"));
 
+			if (CleaningTool->GetPurchaseState() == EPurchaseState::NotPurchased)
+			{
+				FCleaningToolData* Data = PlayerCharacter->GetHotbarComponent()->GetItemDataBase()->Items.FindByPredicate([&](const FCleaningToolData& ItemData)
+					{
+						return ItemData.Class == CleaningTool->GetClass();
+					});
+
+				InteractWidget->VisiblePrice(Data->Price);
+			}
+
+			FInteractUIData Data = InteractUIData->FindItem("PickUp");
+
+			TArray<FInteractUIData> Datas;
+			Datas.Add(Data);
+
+			InteractWidget->AddList(Datas);
+
+
 			InteractActor = CleaningTool;
-			InteractWidget->SetVisibility(ESlateVisibility::Visible);
+			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 
 
@@ -217,8 +251,12 @@ void URPInteractorComponent::InteractCheck()
 				InteractWidget->SetText(EnumString);
 			}
 
+			InteractWidget->InvisiblePrice();
+
+			UpdateInteractWidget(InteractableObjcet);
+
 			InteractActor = InteractableObjcet;
-			InteractWidget->SetVisibility(ESlateVisibility::Visible);			
+			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 	}
 }
@@ -280,6 +318,49 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 			HoldingActor = nullptr;
 		}
 	}
+}
+
+void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)
+{
+	TArray<FInteractUIData> Datas;
+	FInteractUIData Data = InteractUIData->FindItem("PickUp");
+
+	EInteractObjectType Type = InteractableObjcet->ObjectType;
+
+	if (Type == EInteractObjectType::Trash)
+	{
+		Data = InteractUIData->FindItem("Handle");
+		Datas.Add(Data);
+	}
+	else if (Type == EInteractObjectType::Stain)
+	{
+		Data = InteractUIData->FindItem("PickUp");
+		Datas.Add(Data);
+
+		Data = InteractUIData->FindItem("Clean");
+		Datas.Add(Data);
+	}
+	else if (Type == EInteractObjectType::ScatteredObject)
+	{
+		Data = InteractUIData->FindItem("Handle");
+		Datas.Add(Data);
+	}
+	else if (Type == EInteractObjectType::Trap)
+	{
+		Data = InteractUIData->FindItem("Repair");
+		Datas.Add(Data);
+	}
+	else if (Type == EInteractObjectType::Corpse)
+	{
+		Data = InteractUIData->FindItem("Handle");
+		Datas.Add(Data);
+
+		Data = InteractUIData->FindItem("Repair");
+		Datas.Add(Data);
+	}
+
+
+	InteractWidget->AddList(Datas);
 }
 
 void URPInteractorComponent::OnLeftMouseButtonReleased()
