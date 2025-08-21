@@ -27,9 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// RPC
-	UFUNCTION(Server, Reliable)
-	void Server_Pickup();
+	void Pickup();
 	UFUNCTION(Server, Reliable)
 	void Server_Grab(AActor* Interactor);
 	UFUNCTION(Server, Reliable)

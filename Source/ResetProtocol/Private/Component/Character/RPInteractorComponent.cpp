@@ -114,14 +114,14 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 
 					if (PlayerCharacter->SpendBytes(Price))
 					{
-						PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
+						PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data);
 
 						TargetActor->Destroy();
 					}
 				}
 				else
 				{
-					PlayerCharacter->GetHotbarComponent()->AddItem(*Data);
+					PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data);
 
 					TargetActor->Destroy();
 				}
@@ -431,12 +431,12 @@ void URPInteractorComponent::OnLeftMouseButtonReleased()
 		Server_MouseReleaseInteract();
 	}
 
-	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(GetOwner()->GetInstigatorController());
-	if (PlayerController)
-	{
-		PlayerController->SetInputMode(FInputModeGameOnly());
-		PlayerController->bShowMouseCursor = false;
-	}
+	//ARPPlayerController* PlayerController = Cast<ARPPlayerController>(GetOwner()->GetInstigatorController());
+	//if (PlayerController)
+	//{
+	//	PlayerController->SetInputMode(FInputModeGameOnly());
+	//	PlayerController->bShowMouseCursor = false;
+	//}
 }
 
 void URPInteractorComponent::SetOwnerInteractHitResult()

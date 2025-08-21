@@ -56,7 +56,7 @@ void URPHotbarComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(URPHotbarComponent, HotbarWidget);
 }
 
-void URPHotbarComponent::CreateHotbarWidget_Implementation(AController* Controller)
+void URPHotbarComponent::Client_CreateHotbarWidget_Implementation(AController* Controller)
 {
 	//if (Controller->IsLocalPlayerController())
 	//{
@@ -118,7 +118,7 @@ void URPHotbarComponent::OnRep_CurrentCleaningTool()
 	}
 }
 
-void URPHotbarComponent::SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass)
+void URPHotbarComponent::Server_SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass)
 {
 	CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
@@ -139,18 +139,18 @@ void URPHotbarComponent::SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTo
 	}
 
 }
-void URPHotbarComponent::DestroyActor_Implementation()
+void URPHotbarComponent::Server_DestroyActor_Implementation()
 {
 	CurrentCleaningTool->Destroy();
 }
 
-void URPHotbarComponent::SelectItem_Implementation(int SelectedNum)
+void URPHotbarComponent::Client_SelectItem_Implementation(int SelectedNum)
 {
 	HotbarWidget->OnHighlight(SelectedNum, CurrentSlotIndex);
 
 	if (IsValid(CurrentCleaningTool))
 	{
-		DestroyActor();
+		Server_DestroyActor();
 		//CurrentCleaningTool->Destroy();
 	}
 
@@ -158,16 +158,14 @@ void URPHotbarComponent::SelectItem_Implementation(int SelectedNum)
 
 	if (IsValid(Inventory[SelectedNum].Class) && IsValid(PlayerCharacter))
 	{
-		SpawnActor(Inventory[SelectedNum].Class);
+		Server_SpawnActor(Inventory[SelectedNum].Class);
 		//CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(Inventory[SelectedNum].Class, FVector::ZeroVector, FRotator::ZeroRotator);
-		
-
 	}
 
 	CurrentSlotIndex = SelectedNum;
 }
 
-void URPHotbarComponent::UnEquip_Implementation()
+void URPHotbarComponent::Client_UnEquip_Implementation()
 {
 	HotbarWidget->OffHighlight(CurrentSlotIndex);
 
@@ -179,7 +177,7 @@ void URPHotbarComponent::UnEquip_Implementation()
 	CurrentSlotIndex = -1;
 }
 
-void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
+void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& Data)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (!IsValid(PlayerCharacter))
@@ -205,7 +203,7 @@ void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
 			{
 				if (i == CurrentSlotIndex)
 				{
-					SelectItem(i);
+					Client_SelectItem(i);
 				}
 				else
 				{

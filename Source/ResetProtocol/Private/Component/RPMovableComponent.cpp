@@ -62,7 +62,7 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 }
 
-void URPMovableComponent::Server_Pickup_Implementation()
+void URPMovableComponent::Pickup()
 {
 	FTimerHandle DestoryTimerHandle;
 	if (AActor* OwnerActor = GetOwner())

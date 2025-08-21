@@ -30,7 +30,7 @@ void ARPPlayerCharacter::BeginPlay()
 	{
 		InteractorComponent->CreateInteractWidget(GetController());
 		InventoryComponent->CreateInventoryWidget(GetController());
-		HotbarComponent->CreateHotbarWidget(GetController());
+		HotbarComponent->Client_CreateHotbarWidget(GetController());
 	}
 }
 

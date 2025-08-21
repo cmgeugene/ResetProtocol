@@ -39,7 +39,7 @@ public:
 // Widget
 public:
 	UFUNCTION(Client, Reliable)
-	void CreateHotbarWidget(AController* Controller);
+	void Client_CreateHotbarWidget(AController* Controller);
 
 // Inventory Function
 public:
@@ -48,12 +48,11 @@ public:
 
 	UFUNCTION()
 	void OnRep_Inventory();
-
 	UFUNCTION()
 	void OnRep_CurrentCleaningTool();
 
 	UFUNCTION(Client, Reliable)
-	void AddItem(const FCleaningToolData& Data);
+	void Client_AddItem(const FCleaningToolData& Data);
 
 	UFUNCTION()
 	bool CheckInventoryFull();
@@ -61,16 +60,16 @@ public:
 // Item
 public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void SpawnActor(TSubclassOf<ARPBaseCleaningTool> ActorClass);
+	void Server_SpawnActor(TSubclassOf<ARPBaseCleaningTool> ActorClass);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void DestroyActor();
+	void Server_DestroyActor();
 
 	UFUNCTION(Client, Reliable, BlueprintCallable)
-	void SelectItem(int SelectedNum);
+	void Client_SelectItem(int SelectedNum);
 
 	UFUNCTION(Client, Reliable, BlueprintCallable)
-	void UnEquip();
+	void Client_UnEquip();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
