@@ -8,6 +8,7 @@
 
 #define CUSTOM_DEPTH_RED 250
 class UBoxComponent;
+class UGlitchNoiseComponent;
 
 UENUM(BlueprintType)
 enum class EInteractObjectType : uint8
@@ -43,9 +44,14 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGlitchNoiseComponent> GlitchNoiseComp;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type")
 	EInteractObjectType ObjectType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
+	bool bIsBug = false;
 
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;

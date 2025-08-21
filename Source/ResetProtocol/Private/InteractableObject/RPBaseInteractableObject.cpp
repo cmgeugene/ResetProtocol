@@ -2,6 +2,7 @@
 
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "Components/BoxComponent.h"
+#include "Component/GlitchNoiseComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #define ECC_ObjectRootBox ECC_GameTraceChannel2
@@ -40,6 +41,7 @@ void ARPBaseInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARPBaseInteractableObject, ObjectType);
+	DOREPLIFETIME(ARPBaseInteractableObject, bIsBug);
 }
 
 void ARPBaseInteractableObject::BeginPlay()
@@ -55,6 +57,13 @@ void ARPBaseInteractableObject::BeginPlay()
 	{
 		StaticMeshComp->SetVisibility(false);
 		ActiveMesh = SkeletalMeshComp;
+	}
+
+	GlitchNoiseComp = NewObject<UGlitchNoiseComponent>(this, TEXT("GlitchNoiseComp"));
+	if (GlitchNoiseComp)
+	{
+		GlitchNoiseComp->SetupAttachment(RootComponent);
+		GlitchNoiseComp->RegisterComponent();
 	}
 }
 

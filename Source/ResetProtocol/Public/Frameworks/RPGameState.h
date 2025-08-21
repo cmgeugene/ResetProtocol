@@ -57,11 +57,13 @@ public:
 	UFUNCTION()
 	void OnRep_MatchPhase();
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "RPGameState")
-	void SetMatchPhaseTo(const EMatchPhase NewPhase);
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "RPGameState")
+	void Server_SetMatchPhaseTo(const EMatchPhase NewPhase);
+	void Server_SetMatchPhaseTo_Implementation(const EMatchPhase NewPhase);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "RPGameState")
-	void OnRepMatchPhaseProcess();
+	UFUNCTION(BlueprintNativeEvent, Category = "RPGameState")
+	void OnMatchPhaseUpdated(const EMatchPhase NewPhase);
+	void OnMatchPhaseUpdated_Implementation(const EMatchPhase NewPhase);
 	
 	/*
 	*	상호 작용 완료시 호출되는 함수

@@ -12,12 +12,22 @@ const TArray<APlayerState*>& ARPGameState::GetPlayerList() const
 void ARPGameState::OnRep_MatchPhase()
 {
 	// 블루프린트에서 구현
-	OnRepMatchPhaseProcess();
+	OnMatchPhaseUpdated(MatchPhase);
 }
 
-void ARPGameState::SetMatchPhaseTo(const EMatchPhase NewPhase)
+void ARPGameState::Server_SetMatchPhaseTo_Implementation(const EMatchPhase NewPhase)
 {
 	MatchPhase = NewPhase;
+
+	if (HasAuthority())
+	{
+		OnMatchPhaseUpdated(MatchPhase);
+	}
+}
+
+void ARPGameState::OnMatchPhaseUpdated_Implementation(const EMatchPhase NewPhase)
+{
+
 }
 
 void ARPGameState::OnResetSuccess_Implementation(const EInteractObjectType Type)
