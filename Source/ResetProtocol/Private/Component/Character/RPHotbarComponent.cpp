@@ -31,13 +31,13 @@ void URPHotbarComponent::BeginPlay()
 	//	}
 	//}
 
-	//if (GetOwner()->HasAuthority() )
-	//{
-	//	for (int i = 0; i < TotalItems; i++)
-	//	{
-	//		Inventory.Add(FCleaningToolData());
-	//	}
-	//}
+	if (GetOwner()->HasAuthority() )
+	{
+		for (int i = 0; i < TotalItems; i++)
+		{
+			Inventory.Add(FCleaningToolData());
+		}
+	}
 }
 
 void URPHotbarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -58,13 +58,13 @@ void URPHotbarComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 void URPHotbarComponent::CreateHotbarWidget_Implementation(AController* Controller)
 {
-	if (Controller->IsLocalPlayerController())
-	{
-		for (int i = 0; i < TotalItems; i++)
-		{
-			Inventory.Add(FCleaningToolData());
-		}
-	}
+	//if (Controller->IsLocalPlayerController())
+	//{
+	//	for (int i = 0; i < TotalItems; i++)
+	//	{
+	//		Inventory.Add(FCleaningToolData());
+	//	}
+	//}
 
 	if (IsValid(HotbarWidgetClass) && Controller->IsLocalPlayerController())
 	{
@@ -122,6 +122,22 @@ void URPHotbarComponent::SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTo
 {
 	CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	USkeletalMeshComponent* PlayerMesh = PlayerCharacter->GetMesh();
+	if (IsValid(PlayerMesh))
+	{
+		if (PlayerMesh->DoesSocketExist(FName("CleaningToolSocket")))
+		{
+			CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
+			CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+			CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+			CurrentCleaningTool->GetMesh()->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
+		}
+	}
+
 }
 void URPHotbarComponent::DestroyActor_Implementation()
 {
@@ -145,19 +161,7 @@ void URPHotbarComponent::SelectItem_Implementation(int SelectedNum)
 		SpawnActor(Inventory[SelectedNum].Class);
 		//CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(Inventory[SelectedNum].Class, FVector::ZeroVector, FRotator::ZeroRotator);
 		
-		USkeletalMeshComponent* PlayerMesh = PlayerCharacter->GetMesh();
-		if (IsValid(PlayerMesh))
-		{
-			if (PlayerMesh->DoesSocketExist(FName("CleaningToolSocket")))
-			{
-				CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
-				CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-				CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-				CurrentCleaningTool->GetMesh()->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
-			}
-		}
 	}
 
 	CurrentSlotIndex = SelectedNum;
@@ -175,7 +179,7 @@ void URPHotbarComponent::UnEquip_Implementation()
 	CurrentSlotIndex = -1;
 }
 
-void URPHotbarComponent::AddItem(const FCleaningToolData& Data)
+void URPHotbarComponent::AddItem_Implementation(const FCleaningToolData& Data)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (!IsValid(PlayerCharacter))

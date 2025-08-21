@@ -90,6 +90,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Replicated)
 	int CurrentSlotIndex;
 
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentCleaningTool)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CurrentCleaningTool)
 	ARPBaseCleaningTool* CurrentCleaningTool;
 };
