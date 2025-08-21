@@ -14,12 +14,15 @@ class RESETPROTOCOL_API URPRepairableComponent : public UActorComponent
 public:	
 	URPRepairableComponent();
 
-	void Repair();
-	void Break();
-
-	void CompleteRepair();
+	void Repair(AActor* Interactor);
+	void Break(AActor* Interactor);
 
 protected:
 	virtual void BeginPlay() override;
+
+	void OnCompleteRepair(AActor* Interactor);
+
+private:
+	bool bIsRepaired;
 	
 };

@@ -21,6 +21,6 @@ void ARPTrash::ClickInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		MoveComp->Pickup();
+		MoveComp->Pickup(Interactor);
 	}
 }

@@ -65,7 +65,7 @@ void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RagdollComp->RagdollOff();
+		RagdollComp->RagdollOff(Interactor);
 	}
 }
 

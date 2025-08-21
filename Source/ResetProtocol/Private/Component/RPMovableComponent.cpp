@@ -3,6 +3,8 @@
 #include "Component/RPMovableComponent.h"
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "InteractableObject/RPTrap.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
@@ -23,6 +25,7 @@ URPMovableComponent::URPMovableComponent()
 
 	RootMode = ERPRootMode::Box;
 	bSwappingRoot = false;
+	bIsPickup = false;
 }
 
 void URPMovableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -62,24 +65,35 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 }
 
-void URPMovableComponent::Pickup()
+void URPMovableComponent::Pickup(AActor* Interactor)
 {
-	FTimerHandle DestoryTimerHandle;
-	if (AActor* OwnerActor = GetOwner())
+	if (!Interactor)
 	{
-		TWeakObjectPtr<AActor> WeakOwnerActor = OwnerActor;
+		return;
+	}
 
-		GetWorld()->GetTimerManager().SetTimer(DestoryTimerHandle,
-			[WeakOwnerActor]()
-			{
-				if (WeakOwnerActor.IsValid())
+	if (!bIsPickup)
+	{
+		bIsPickup = true;
+
+		FTimerHandle DestoryTimerHandle;
+		if (AActor* OwnerActor = GetOwner())
+		{
+			TWeakObjectPtr<AActor> WeakOwnerActor = OwnerActor;
+
+			OnPickupComplete(Interactor);
+			GetWorld()->GetTimerManager().SetTimer(DestoryTimerHandle,
+				[WeakOwnerActor]()
 				{
-					WeakOwnerActor->Destroy();
-				}
-			},
-			0.5f,
-			false
-		);
+					if (WeakOwnerActor.IsValid())
+					{
+						WeakOwnerActor->Destroy();
+					}
+				},
+				0.5f,
+				false
+			);
+		}
 	}
 }
 
@@ -380,6 +394,25 @@ bool URPMovableComponent::IsRootPhysicsActive()
 	}
 
 	return false;
+}
+
+void URPMovableComponent::OnPickupComplete(AActor* Interactor)
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
+	{
+		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+	}
 }
 
 void URPMovableComponent::OnPlaceComplete()

@@ -2,46 +2,82 @@
 
 #include "Component/RPRepairableComponent.h"
 #include "InteractableObject/RPTrap.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 
 URPRepairableComponent::URPRepairableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
+
+	bIsRepaired = false;
 }
 
-void URPRepairableComponent::Repair()
+void URPRepairableComponent::Repair(AActor* Interactor)
 {
-	if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
+	if (!Interactor)
 	{
-		if (OwnerActor->ActiveMesh == OwnerActor->BrokenMesh)
-		{
-			OwnerActor->BrokenMesh->SetVisibility(false);
-			OwnerActor->StaticMeshComp->SetVisibility(true);
+		return;
+	}
 
-			OwnerActor->ActiveMesh = OwnerActor->StaticMeshComp;
-			OwnerActor->bIsBroken = false;
+	if (!bIsRepaired) 
+	{
+		bIsRepaired = true;
+
+		if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
+		{
+			if (OwnerActor->ActiveMesh == OwnerActor->BrokenMesh)
+			{
+				OwnerActor->BrokenMesh->SetVisibility(false);
+				OwnerActor->StaticMeshComp->SetVisibility(true);
+
+				OwnerActor->ActiveMesh = OwnerActor->StaticMeshComp;
+				OwnerActor->bIsBroken = false;
+
+				OnCompleteRepair(Interactor);
+			}
 		}
 	}
 }
 
-void URPRepairableComponent::Break()
+void URPRepairableComponent::Break(AActor* Interactor)
 {
-	// 부서진 메시로 변경
-	if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
+	if (bIsRepaired)
 	{
-		if (OwnerActor->ActiveMesh == OwnerActor->StaticMeshComp)
-		{
-			OwnerActor->StaticMeshComp->SetVisibility(false);
-			OwnerActor->BrokenMesh->SetVisibility(true);
+		bIsRepaired = false;
 
-			OwnerActor->ActiveMesh = OwnerActor->BrokenMesh;
-			OwnerActor->bIsBroken = true;
+		// 부서진 메시로 변경
+		if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
+		{
+			if (OwnerActor->ActiveMesh == OwnerActor->StaticMeshComp)
+			{
+				OwnerActor->StaticMeshComp->SetVisibility(false);
+				OwnerActor->BrokenMesh->SetVisibility(true);
+
+				OwnerActor->ActiveMesh = OwnerActor->BrokenMesh;
+				OwnerActor->bIsBroken = true;
+			}
 		}
 	}
 }
 
-void URPRepairableComponent::CompleteRepair()
+void URPRepairableComponent::OnCompleteRepair(AActor* Interactor)
 {
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
+	{
+		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+	}
 }
 
 void URPRepairableComponent::BeginPlay()

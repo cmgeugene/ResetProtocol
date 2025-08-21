@@ -18,14 +18,15 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void Cleaning();
-	void Completecleaning();
+	void Cleaning(AActor* Interactor);
 
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnRep_DirtAmount();
+
+	void OnCleaningComplete(AActor* Interactor);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Clean|Delegate")
@@ -34,4 +35,6 @@ public:
 protected:
 	UPROPERTY(ReplicatedUsing = "OnRep_DirtAmount")
 	float DirtAmount;
+
+	bool bIsClean;
 };

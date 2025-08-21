@@ -37,7 +37,7 @@ void ARPTrap::KeyHoldInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RepairComp->Repair();
+		RepairComp->Repair(Interactor);
 	}
 }
 

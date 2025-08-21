@@ -27,7 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void Pickup();
+	void Pickup(AActor* Interactor);
 	void Grab(AActor* Interactor);
 	void Drop();
 
@@ -47,6 +47,7 @@ protected:
 	USceneComponent* FindAnchor(AActor* Interactor) const;
 	bool IsRootPhysicsActive();	
 
+	void OnPickupComplete(AActor* Interactor);
 	void OnPlaceComplete();
 
 public:
@@ -69,4 +70,5 @@ private:
 
 	FQuat DeltaAnchorTarget;
 	bool bSwappingRoot;
+	bool bIsPickup;
 };

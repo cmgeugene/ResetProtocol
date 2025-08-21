@@ -27,7 +27,7 @@ void ARPStain::ClickInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		CleanComp->Cleaning();
+		CleanComp->Cleaning(Interactor);
 	}
 }
 
@@ -80,6 +80,22 @@ void ARPStain::HandleDirtChanged(float NewValue)
 
 	if (NewValue <= 0.0f)
 	{
-		Destroy();
+		if (HasAuthority())
+		{
+			TWeakObjectPtr<AActor> WeakActor = this;
+
+			FTimerHandle DestoryHandle;
+			GetWorld()->GetTimerManager().SetTimer(DestoryHandle,
+				[WeakActor]()
+				{
+					if (WeakActor.IsValid())
+					{
+						WeakActor->Destroy();
+					}
+				},
+				0.5f,
+				false
+			);
+		}
 	}
 }

@@ -17,8 +17,8 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void RagdollOn();
-	void RagdollOff();
+	void RagdollOn(AActor* Interactor);
+	void RagdollOff(AActor* Interactor);
 
 	// RPC
 	UFUNCTION(NetMulticast, Reliable)
@@ -33,6 +33,8 @@ protected:
 	void OnRep_bInitRagdoll();
 
 	void InitRagdoll(bool bOn);
+
+	void OnRagdollOffComplete(AActor* Interactor);
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_bInitRagdoll)

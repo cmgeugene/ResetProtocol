@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Component/RPRagdollComponent.h"
-#include "Components/BoxComponent.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 #include "InteractableObject/RPCorpse.h"
+#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
 
 URPRagdollComponent::URPRagdollComponent()
@@ -21,14 +23,31 @@ void URPRagdollComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(URPRagdollComponent, bInitRagdoll);
 }
 
-void URPRagdollComponent::RagdollOn()
+void URPRagdollComponent::RagdollOn(AActor* Interactor)
 {
-	Multicast_RagdollOn();
+	if (!Interactor)
+	{
+		return;
+	}
+
+	if (!bIsRagdollOn)
+	{
+		Multicast_RagdollOn();
+	}
 }
 
-void URPRagdollComponent::RagdollOff()
+void URPRagdollComponent::RagdollOff(AActor* Interactor)
 {
-	Multicast_RagdollOff();
+	if (!Interactor)
+	{
+		return;
+	}
+
+	if (bIsRagdollOn)
+	{
+		Multicast_RagdollOff();
+		OnRagdollOffComplete(Interactor);
+	}
 }
 
 void URPRagdollComponent::Multicast_RagdollOn_Implementation()
@@ -63,6 +82,25 @@ void URPRagdollComponent::Multicast_RagdollOff_Implementation()
 		OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, -90.0f, 0.0f));
 
 		bIsRagdollOn = false;
+	}
+}
+
+void URPRagdollComponent::OnRagdollOffComplete(AActor* Interactor)
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
+	{
+		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
 	}
 }
 
@@ -121,6 +159,9 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 		}
 	}
 }
+
+
+
 
 // --------- Ragdoll On -----------
 // OwnerActor->SkeletalMeshComp->SetPhysicsBlendWeight(0.0f);	// 애니 100%, 물리 0%
