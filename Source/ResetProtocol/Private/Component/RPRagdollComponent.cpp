@@ -21,12 +21,12 @@ void URPRagdollComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(URPRagdollComponent, bInitRagdoll);
 }
 
-void URPRagdollComponent::Server_RagdollOn_Implementation()
+void URPRagdollComponent::RagdollOn()
 {
 	Multicast_RagdollOn();
 }
 
-void URPRagdollComponent::Server_RagdollOff_Implementation()
+void URPRagdollComponent::RagdollOff()
 {
 	Multicast_RagdollOff();
 }

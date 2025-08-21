@@ -18,7 +18,7 @@ void URPCleanableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(URPCleanableComponent, DirtAmount);
 }
 
-void URPCleanableComponent::Server_StartCleaning_Implementation()
+void URPCleanableComponent::Cleaning()
 {
 	// 3 ~ 4번 상호작용을 해야 지울 수 있도록
 	DirtAmount -= FMath::FRandRange(0.3, 0.4);
@@ -28,10 +28,6 @@ void URPCleanableComponent::Server_StartCleaning_Implementation()
 	{
 		OnDirtChanged.Broadcast(DirtAmount);
 	}
-}
-
-void URPCleanableComponent::StopCleaning()
-{
 }
 
 void URPCleanableComponent::Completecleaning()

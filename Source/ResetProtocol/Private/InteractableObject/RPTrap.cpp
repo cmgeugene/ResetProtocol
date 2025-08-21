@@ -37,18 +37,12 @@ void ARPTrap::KeyHoldInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RepairComp->Server_StartRepair_Implementation();
+		RepairComp->Repair();
 	}
 }
 
 void ARPTrap::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Broken"));
-
-	if (HasAuthority())
-	{
-		RepairComp->Server_StopRepair_Implementation();
-	}
 }
 
 void ARPTrap::BeginPlay()

@@ -9,7 +9,7 @@ URPRepairableComponent::URPRepairableComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void URPRepairableComponent::Server_StartRepair_Implementation()
+void URPRepairableComponent::Repair()
 {
 	if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
 	{
@@ -24,9 +24,9 @@ void URPRepairableComponent::Server_StartRepair_Implementation()
 	}
 }
 
-void URPRepairableComponent::Server_StopRepair_Implementation()
+void URPRepairableComponent::Break()
 {
-	// 테스트를 위해 다시 부서진 메시로 변경
+	// 부서진 메시로 변경
 	if (ARPTrap* OwnerActor = Cast<ARPTrap>(GetOwner()))
 	{
 		if (OwnerActor->ActiveMesh == OwnerActor->StaticMeshComp)

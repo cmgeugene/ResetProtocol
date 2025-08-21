@@ -83,7 +83,7 @@ void URPMovableComponent::Pickup()
 	}
 }
 
-void URPMovableComponent::Server_Grab_Implementation(AActor* Interactor)
+void URPMovableComponent::Grab(AActor* Interactor)
 {
 	// 캐릭터 앞에 붙이기
 	if (!GetOwner())
@@ -163,7 +163,7 @@ void URPMovableComponent::Server_Grab_Implementation(AActor* Interactor)
 	}	
 }
 
-void URPMovableComponent::Server_Drop_Implementation()
+void URPMovableComponent::Drop()
 {
 	// 캐릭터에서 때기
 	if (!GetOwner())

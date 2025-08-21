@@ -18,9 +18,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(Server, Reliable)
-	void Server_StartCleaning();
-	void StopCleaning();
+	void Cleaning();
 	void Completecleaning();
 
 protected:

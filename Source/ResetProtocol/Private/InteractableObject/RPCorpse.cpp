@@ -40,7 +40,7 @@ void ARPCorpse::DragInteract_Implementation(AActor* Interactor)
 		if (!MoveComp->GetIsHeld() && !(RagdollComp->bIsRagdollOn))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab Start"));
-			MoveComp->Server_Grab_Implementation(Interactor);
+			MoveComp->Grab(Interactor);
 		}
 	}
 }
@@ -54,7 +54,7 @@ void ARPCorpse::DropInteract_Implementation(AActor* Interactor)
 		if (MoveComp->GetIsHeld() && !(RagdollComp->bIsRagdollOn))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Drop Start"));
-			MoveComp->Server_Drop_Implementation();
+			MoveComp->Drop();
 		}
 	}
 }
@@ -65,18 +65,12 @@ void ARPCorpse::KeyHoldInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		RagdollComp->Server_RagdollOff_Implementation();
+		RagdollComp->RagdollOff();
 	}
 }
 
 void ARPCorpse::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Ragdoll On"));
-
-	if (HasAuthority())
-	{
-		RagdollComp->Server_RagdollOn_Implementation();
-	}
 }
 
 void ARPCorpse::BeginPlay()

@@ -27,7 +27,7 @@ void ARPStain::ClickInteract_Implementation(AActor* Interactor)
 
 	if (HasAuthority())
 	{
-		CleanComp->Server_StartCleaning_Implementation();
+		CleanComp->Cleaning();
 	}
 }
 

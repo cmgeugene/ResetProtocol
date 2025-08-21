@@ -289,7 +289,7 @@ void URPInteractorComponent::KeyReleaseInteract()
 	if(ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner()))
 	{
 		if (HoldingActor) {
-			Server_KeyReleaseRPC_Implementation();
+			Server_KeyReleaseRPC();
 		}
 	}
 }

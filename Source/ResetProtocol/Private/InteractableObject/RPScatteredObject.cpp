@@ -20,7 +20,7 @@ void ARPScatteredObject::DragInteract_Implementation(AActor* Interactor)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab On"));
 
-		MoveComp->Server_Grab_Implementation(Interactor);
+		MoveComp->Grab(Interactor);
 	}
 }
 
@@ -30,6 +30,6 @@ void ARPScatteredObject::DropInteract_Implementation(AActor* Interactor)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grab Off"));
 
-		MoveComp->Server_Drop_Implementation();
+		MoveComp->Drop();
 	}
 }

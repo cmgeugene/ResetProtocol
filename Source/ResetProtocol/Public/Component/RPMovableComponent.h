@@ -28,10 +28,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Pickup();
-	UFUNCTION(Server, Reliable)
-	void Server_Grab(AActor* Interactor);
-	UFUNCTION(Server, Reliable)
-	void Server_Drop();
+	void Grab(AActor* Interactor);
+	void Drop();
 
 	bool GetIsHeld() { return bIsHeld; }
 

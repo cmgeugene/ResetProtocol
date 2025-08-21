@@ -17,11 +17,10 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void RagdollOn();
+	void RagdollOff();
+
 	// RPC
-	UFUNCTION(Server, Reliable)
-	void Server_RagdollOn();
-	UFUNCTION(Server, Reliable)
-	void Server_RagdollOff();
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_RagdollOn();
 	UFUNCTION(NetMulticast, Reliable)

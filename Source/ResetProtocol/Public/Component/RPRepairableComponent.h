@@ -14,10 +14,8 @@ class RESETPROTOCOL_API URPRepairableComponent : public UActorComponent
 public:	
 	URPRepairableComponent();
 
-	UFUNCTION(Server, Reliable)
-	void Server_StartRepair();
-	UFUNCTION(Server, Reliable)
-	void Server_StopRepair();
+	void Repair();
+	void Break();
 
 	void CompleteRepair();
 
