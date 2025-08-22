@@ -22,6 +22,7 @@ ARPTrap::ARPTrap()
 	bIsBroken = true;
 
 	ObjectType = EInteractObjectType::Trap;
+	ObjectName = "Trap";
 }
 
 void ARPTrap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -19,6 +19,7 @@ ARPStain::ARPStain()
 	CleanComp->SetIsReplicated(true);
 
 	ObjectType = EInteractObjectType::Stain;
+	ObjectName = "Stain";
 }
 
 void ARPStain::ClickInteract_Implementation(AActor* Interactor)

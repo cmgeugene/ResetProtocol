@@ -18,6 +18,7 @@ ARPCorpse::ARPCorpse()
 	RagdollComp->SetIsReplicated(true);
 
 	ObjectType = EInteractObjectType::Corpse;
+	ObjectName = "Corpse";
 }
 
 void ARPCorpse::Tick(float DeltaTime)

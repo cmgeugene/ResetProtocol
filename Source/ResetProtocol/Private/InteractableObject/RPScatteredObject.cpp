@@ -12,6 +12,7 @@ ARPScatteredObject::ARPScatteredObject()
 	MoveComp->SetIsReplicated(true);
 
 	ObjectType = EInteractObjectType::ScatteredObject;
+	ObjectName = "Scattered";
 }
 
 void ARPScatteredObject::DragInteract_Implementation(AActor* Interactor)

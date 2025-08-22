@@ -205,6 +205,7 @@ void URPMovableComponent::Drop()
 
 					if (CacheOwnerMesh.Get() == GrabbedComp)
 					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Grab Physics On Skeletal Mesh"));
 						// 1) 핸들 릴리즈 이후
 						const FTransform MeshTransform = CacheOwnerMesh->GetComponentTransform();
 
@@ -228,6 +229,12 @@ void URPMovableComponent::Drop()
 					}
 					else
 					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Grab RootBox, Mesh's Physics Off"));
+						// 이 부분이 없으면 클라쪽에서 새롭게 물건을 들 때 한 번 클릭을 하고나서 Grab할 수 있음
+						// - 이유 : 잡고 있던걸 Release 하면서 IsHeld값을 false로 바꾸지 않음
+						//          그래서 다음 클릭에 Grab이 안되고 Drop만 되는데, Drop할때 Grab한 것이 없어서 아래에 Detach 쪽 로직을 실행
+						//          Detatch 쪽 로직을 실행하면서 IsHeld가 False가 되어서 다음 클릭에 Grab을 할 수 있게됨
+						// - 주 원인 : RootBox를 들었을 때의 상황을 고려하지 않았던 것(Scattered나 Ragdoll이 Off인 Corpse)
 						bIsHeld = false;
 						Holder = nullptr;
 						CacheGrabbedComp = nullptr;
@@ -236,6 +243,7 @@ void URPMovableComponent::Drop()
 			}
 			else
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Detach"));
 				CacheRootBox->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
 				bIsHeld = false;

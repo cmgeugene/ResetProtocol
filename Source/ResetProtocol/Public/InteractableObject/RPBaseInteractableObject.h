@@ -14,6 +14,7 @@ UENUM(BlueprintType)
 enum class EInteractObjectType : uint8
 {
 	None				UMETA(DisplayName = "None"),
+	SomethingElse       UMETA(DisplayName = "SomethingElse"),
 	Trash				UMETA(DisplayName = "Trash"),
 	ScatteredObject		UMETA(DisplayName = "ScatteredObject"),
 	Corpse				UMETA(DisplayName = "Corpse"),
@@ -49,6 +50,8 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type")
 	EInteractObjectType ObjectType;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type|Name")
+	FName ObjectName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
 	bool bIsBug = false;

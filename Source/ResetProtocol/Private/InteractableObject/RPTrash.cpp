@@ -13,6 +13,7 @@ ARPTrash::ARPTrash()
 	MoveComp->SetIsReplicated(true);
 
 	ObjectType = EInteractObjectType::Trash;
+	ObjectName = "Trash";
 }
 
 void ARPTrash::ClickInteract_Implementation(AActor* Interactor)

@@ -174,10 +174,10 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
 
-		IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
-		if (ClickInterface)
+		//IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
+		if (InteractableObject->GetClass()->ImplementsInterface(URPClickInterface::StaticClass()))
 		{
-			if (InteractableObject->ObjectType == EInteractObjectType::Trash)
+			if (InteractableObject->ObjectType == EInteractObjectType::Trash || InteractableObject->ObjectType == EInteractObjectType::SomethingElse)
 			{
 				if (!IsValid(CleaningTool))
 				{
@@ -195,8 +195,8 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 			}
 		}
 
-		IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObject);
-		if (DragInterface)
+		//IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObject);
+		if (InteractableObject->GetClass()->ImplementsInterface(URPDragInterface::StaticClass()))
 		{
 			if (InteractableObject->ObjectType == EInteractObjectType::ScatteredObject || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 			{
@@ -311,8 +311,8 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter) && KeyHoldTimerHandle.IsValid())
 	{
-		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
-		if (KeyHoldInterface)
+		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
+		if (HoldingActor->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
 		{
 			IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
 			IsHoldingItem = false;
@@ -337,18 +337,18 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{
-		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(Target);
+		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
 
-		IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(InteractableObjcet);
-		if (KeyHoldInterface)
+		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(InteractableObject);
+		if (InteractableObject->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
 		{
-			if (InteractableObjcet->ObjectType == EInteractObjectType::Trap || InteractableObjcet->ObjectType == EInteractObjectType::Corpse)
+			if (InteractableObject->ObjectType == EInteractObjectType::Trap || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 			{
 				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Hammer)
 				{
 					IsHoldingItem = true;
-					HoldingActor = InteractableObjcet;
+					HoldingActor = InteractableObject;
 
 					GetWorld()->GetTimerManager().SetTimer(
 						KeyHoldTimerHandle,
@@ -381,8 +381,8 @@ void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Mouse Left Button Released!"));
 
-	IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
-	if (DragInterface)
+	//IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
+	if (HoldingActor->GetClass()->ImplementsInterface(URPDragInterface::StaticClass()))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Execute_DropInteract"));
 		IRPDragInterface::Execute_DropInteract(HoldingActor, GetOwner());
