@@ -61,6 +61,13 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "RPGameState")
 	void Server_UpdatePlayerInfo();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowRedialTimerWidget(float Number_of_Block);
+
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HideRedialTimerWidget();
+
 // Component
 protected:
 	

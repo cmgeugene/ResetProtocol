@@ -34,6 +34,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	FVector GetInteractEnd() { return InteractEnd; }
 
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	URPRadialTimerWidget* GetRedialTimerWidget() { return RedialTimerWidget; };
+
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Interact")
 	void InteractCheck();
@@ -72,7 +76,7 @@ protected:
 
 public:
 	UFUNCTION(Client, Reliable)
-	void SetRedialTimerWidget(bool IsVisibility);
+	void ShowRedialTimerWidget(bool IsVisibility, float Time = 0.0f);
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Interact")
@@ -109,7 +113,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Redial")
 	TSubclassOf<UUserWidget> RedialTimerWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Redial")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite ,Category = "Redial")
 	URPRadialTimerWidget* RedialTimerWidget;
 
 };

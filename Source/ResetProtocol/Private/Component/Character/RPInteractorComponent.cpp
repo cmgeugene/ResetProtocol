@@ -312,11 +312,16 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 	if (IsValid(PlayerCharacter) && KeyHoldTimerHandle.IsValid())
 	{
 		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(HoldingActor);
-		if (HoldingActor->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
+		if (IsValid(HoldingActor))
 		{
-			IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
-			IsHoldingItem = false;
-			HoldingActor = nullptr;
+			if (HoldingActor->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
+			{
+				IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+				IsHoldingItem = false;
+				HoldingActor = nullptr;
+
+				ShowRedialTimerWidget(false);
+			}
 		}
 	}
 }
@@ -357,8 +362,7 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 						KeyHoldingTime,
 						false
 					);
-
-					SetRedialTimerWidget(true);
+					ShowRedialTimerWidget(true, KeyHoldingTime);
 				}
 			}
 		}
@@ -369,17 +373,21 @@ void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 {
 	if (KeyHoldTimerHandle.IsValid())
 	{
+		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
 		KeyHoldTimerHandle.Invalidate();
 		IsHoldingItem = false;
 		HoldingActor = nullptr;
 
-		SetRedialTimerWidget(false);
+		ShowRedialTimerWidget(false);
 	}
 }
 
 void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Mouse Left Button Released!"));
+
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
 	//IRPDragInterface* DragInterface = Cast<IRPDragInterface>(HoldingActor);
 	if (HoldingActor->GetClass()->ImplementsInterface(URPDragInterface::StaticClass()))
@@ -391,8 +399,7 @@ void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 	IsHoldingItem = false;
 	HoldingActor = nullptr;
 
-	SetRedialTimerWidget(false);
-
+	ShowRedialTimerWidget(false);
 }
 
 void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)
@@ -479,14 +486,24 @@ void URPInteractorComponent::SetOwnerInteractHitResult()
 	GetWorld()->LineTraceSingleByChannel(PlayerCharacter->GetHitResult(), ViewVector, InteractEnd, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
 }
 
-void URPInteractorComponent::SetRedialTimerWidget_Implementation(bool IsVisibility)
+void URPInteractorComponent::ShowRedialTimerWidget_Implementation(bool IsVisibility, float Time)
 {
-	if (IsVisibility)
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	if (IsValid(PlayerCharacter))
 	{
-		RedialTimerWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	}
-	else
-	{
-		RedialTimerWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (IsVisibility)
+		{
+			PlayerCharacter->ShowRedialTimerWidget(Time);
+			RedialTimerWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+		}
+		else
+		{
+			PlayerCharacter->HideRedialTimerWidget();
+			RedialTimerWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
 	}
 }
+
+
