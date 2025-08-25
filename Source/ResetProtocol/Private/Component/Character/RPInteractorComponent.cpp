@@ -241,7 +241,6 @@ void URPInteractorComponent::InteractCheck()
 		ARPBaseCleaningTool* CleaningTool = Cast<ARPBaseCleaningTool>(PlayerCharacter->GetHitResult().GetActor());
 		if (CleaningTool)
 		{
-			InteractWidget->SetText(TEXT("PickUp CleaningTool"));
 
 			if (CleaningTool->GetPurchaseState() == EPurchaseState::NotPurchased)
 			{
@@ -251,8 +250,10 @@ void URPInteractorComponent::InteractCheck()
 					});
 
 				InteractWidget->VisiblePrice(Data->Price);
+				InteractWidget->SetText(Data->ItemName.ToString());
 			}
 
+			
 			FInteractUIData Data = InteractUIData->FindItem("PickUp");
 
 			TArray<FInteractUIData> Datas;
@@ -268,14 +269,16 @@ void URPInteractorComponent::InteractCheck()
 		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
 		if (InteractableObjcet)
 		{
-			EInteractObjectType Type = InteractableObjcet->ObjectType;
+			FName ObjectName = InteractableObjcet->ObjectName;
+			InteractWidget->SetText(ObjectName.ToString());
+
+			/*EInteractObjectType Type = InteractableObjcet->ObjectType;
 
 			UEnum* EnumPtr = StaticEnum<EInteractObjectType>();
 			if (EnumPtr)
 			{
 				FString EnumString = EnumPtr->GetNameStringByValue((int64)Type);
-				InteractWidget->SetText(EnumString);
-			}
+			}*/
 
 			InteractWidget->InvisiblePrice();
 
