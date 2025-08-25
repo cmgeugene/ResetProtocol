@@ -347,6 +347,10 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 	{
 		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
+		if (!InteractableObject)
+		{
+			return;
+		}
 
 		//IRPKeyHoldInterface* KeyHoldInterface = Cast<IRPKeyHoldInterface>(InteractableObject);
 		if (InteractableObject->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))

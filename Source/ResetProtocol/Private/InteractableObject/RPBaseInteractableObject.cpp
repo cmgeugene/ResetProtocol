@@ -2,6 +2,8 @@
 
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "Components/BoxComponent.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 #include "Component/GlitchNoiseComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -9,7 +11,8 @@
 #define ECC_ObjectSkeletalMesh ECC_GameTraceChannel3
 #define ECC_ObjectStaticMesh ECC_GameTraceChannel4
 
-ARPBaseInteractableObject::ARPBaseInteractableObject()
+ARPBaseInteractableObject::ARPBaseInteractableObject() :
+	bIsBug(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
@@ -59,11 +62,42 @@ void ARPBaseInteractableObject::BeginPlay()
 		ActiveMesh = SkeletalMeshComp;
 	}
 
-	GlitchNoiseComp = NewObject<UGlitchNoiseComponent>(this, TEXT("GlitchNoiseComp"));
-	if (GlitchNoiseComp)
+	if (bIsBug)
 	{
-		GlitchNoiseComp->SetupAttachment(RootComponent);
-		GlitchNoiseComp->RegisterComponent();
+		GlitchNoiseComp = NewObject<UGlitchNoiseComponent>(this, TEXT("GlitchNoiseComp"));
+		if (GlitchNoiseComp)
+		{
+			GlitchNoiseComp->SetupAttachment(RootComponent);
+			GlitchNoiseComp->RegisterComponent();
+		}
+	}
+}
+
+void ARPBaseInteractableObject::OnResetComplete(AActor* Interactor)
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+	ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner());
+	if (!OwnerActor)
+	{
+		return;
+	}
+
+	if (!bIsBug)
+	{
+		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+	}
+	else
+	{
+		PlayerController->Server_OnResetSuccessHandle(EInteractObjectType::BugObject);
 	}
 }
 

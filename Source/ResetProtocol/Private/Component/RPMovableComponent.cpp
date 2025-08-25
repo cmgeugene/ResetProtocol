@@ -11,7 +11,8 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Net/UnrealNetwork.h"
 
-URPMovableComponent::URPMovableComponent()
+URPMovableComponent::URPMovableComponent() : 
+	GrabRange(125.0f)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
@@ -51,7 +52,7 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		{
 			if (USceneComponent* GrabAnchor = FindAnchor(Holder.Get()))
 			{
-				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * 250.0f;
+				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * GrabRange;
 				
 				// 누적 방법이 잘 안됨
 				// - Anchor 대비 Target의 상대 회전을 사용
@@ -406,20 +407,9 @@ bool URPMovableComponent::IsRootPhysicsActive()
 
 void URPMovableComponent::OnPickupComplete(AActor* Interactor)
 {
-	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
-	if (!PlayerCharacter)
-	{
-		return;
-	}
-	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
-	if (!PlayerController)
-	{
-		return;
-	}
-
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
-		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+		OwnerActor->OnResetComplete(Interactor);
 	}
 }
 

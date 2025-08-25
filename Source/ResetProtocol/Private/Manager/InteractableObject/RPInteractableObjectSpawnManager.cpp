@@ -3,6 +3,7 @@
 #include "Manager/InteractableObject/RPInteractableObjectSpawnManager.h"
 #include "Manager/InteractableObject/RPSpawnGroupAsset.h"
 #include "Manager/InteractableObject/RPSpawnPoint.h"
+#include "InteractableObject/RPBaseInteractableObject.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -60,6 +61,8 @@ void ARPInteractableObjectSpawnManager::BeginPlay()
 	{
 		return;
 	}
+
+	RandomSeed = FMath::RandRange(0, 9999);
 
 	LoadAllGroupsOnce();
 
@@ -119,7 +122,8 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 		return;
 	}
 
-	FRandomStream Stream(RandomSeed);
+	FRandomStream Stream;
+	Stream.Initialize(RandomSeed);
 
 	TArray<AActor*> SpawnPoints;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARPSpawnPoint::StaticClass(), SpawnPoints);
@@ -227,11 +231,26 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	Params.Owner = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	AActor* SpawnActor = GetWorld()->SpawnActor<AActor>(SpawnActorClass, SpawnTransform, Params);
+	//AActor* SpawnActor = GetWorld()->SpawnActor<AActor>(SpawnActorClass, SpawnTransform, Params);
+	//if (!SpawnActor)
+	//{
+	//	return false;
+	//}
+
+	AActor* SpawnActor = GetWorld()->SpawnActorDeferred<AActor>(SpawnActorClass, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 	if (!SpawnActor)
 	{
 		return false;
 	}
+	ARPBaseInteractableObject* BaseObject = Cast<ARPBaseInteractableObject>(SpawnActor);
+	if(!BaseObject)
+	{
+		return false;
+	}
+
+	// 스폰 액터가 Bug 오브젝트인지
+	BaseObject->bIsBug = GetIsBugged();
+	UGameplayStatics::FinishSpawningActor(SpawnActor, SpawnTransform);
 
 	SpawnedToPoint.Add(SpawnActor, Point);
 
@@ -266,6 +285,18 @@ bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point,
 	//}
 
 	Out = FTransform(PointRotation, PointLocation);
+
+	return true;
+}
+
+bool ARPInteractableObjectSpawnManager::GetIsBugged() const
+{
+	int bug = FMath::RandRange(1, 100);
+
+	if (bug > 50)
+	{
+		return false;
+	}
 
 	return true;
 }

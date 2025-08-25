@@ -19,7 +19,8 @@ enum class EInteractObjectType : uint8
 	ScatteredObject		UMETA(DisplayName = "ScatteredObject"),
 	Corpse				UMETA(DisplayName = "Corpse"),
 	Trap				UMETA(DisplayName = "Trap"),
-	Stain				UMETA(DisplayName = "Stain")
+	Stain				UMETA(DisplayName = "Stain"),
+	BugObject           UMETA(DisplayName = "BugObject")
 };
 
 UCLASS()
@@ -34,6 +35,8 @@ public:
 	
 	void Highlight();
 	void UnHighlight();
+
+	void OnResetComplete(AActor* Interactor);
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,7 +57,7 @@ public:
 	FName ObjectName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
-	bool bIsBug = false;
+	bool bIsBug;
 
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;

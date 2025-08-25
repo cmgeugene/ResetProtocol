@@ -10,6 +10,26 @@
 UGlitchNoiseComponent::UGlitchNoiseComponent()
 {
 	bAutoActivate = false;
+
+	SoundRange = CreateDefaultSubobject<USphereComponent>(TEXT("SoundRange"));
+	SoundRange->SetSphereRadius(100.0f);
+}
+
+void UGlitchNoiseComponent::GlitchMeshUpdate()
+{
+	OwnerActor = Cast<ARPBaseInteractableObject>(this->GetOwner());
+
+	if (OwnerActor)
+	{
+		if (OwnerActor->bIsBug)
+		{
+			if (IsValid(OwnerActor->ActiveMesh))
+			{
+				OwnerActor->ActiveMesh->SetRenderCustomDepth(true);
+				OwnerActor->ActiveMesh->SetCustomDepthStencilValue(1);
+			}
+		}
+	}
 }
 
 void UGlitchNoiseComponent::BeginPlay()
@@ -30,16 +50,14 @@ void UGlitchNoiseComponent::BeginPlay()
 		}
 	}
 
-	SoundRange = Cast<USphereComponent>(GetOwner()->GetComponentByClass(USphereComponent::StaticClass()));
-
-	if (SoundRange)
+	bool OwnerBug = OwnerActor->bIsBug;
+	if (OwnerBug)
 	{
 		SoundRange->OnComponentBeginOverlap.AddDynamic(this, &UGlitchNoiseComponent::OnOverlapBegin);
 		SoundRange->OnComponentEndOverlap.AddDynamic(this, &UGlitchNoiseComponent::OnOverlapEnd);
 	}
 	else
 	{
-		
 		UE_LOG(LogTemp, Warning, TEXT("[UGlitchNoiseComponent] : 스피어 콜리전 없음"), *GetOwner()->GetName());
 	}
 }

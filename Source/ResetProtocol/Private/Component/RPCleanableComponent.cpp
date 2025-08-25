@@ -50,20 +50,9 @@ void URPCleanableComponent::Cleaning(AActor* Interactor)
 
 void URPCleanableComponent::OnCleaningComplete(AActor* Interactor)
 {
-	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);
-	if (!PlayerCharacter)
-	{
-		return;
-	}
-	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
-	if (!PlayerController)
-	{
-		return;
-	}
-
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
-		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+		OwnerActor->OnResetComplete(Interactor);
 	}
 }
 

@@ -55,6 +55,9 @@ public:
 	ERPRootMode RootMode;
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	float GrabRange;
+
 	// Physics Handle 사용
 	UPROPERTY(Transient)
 	TWeakObjectPtr<AActor> Holder;

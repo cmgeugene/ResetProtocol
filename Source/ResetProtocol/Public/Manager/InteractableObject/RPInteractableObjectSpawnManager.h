@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetAll();
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetSpawnedActorCounts() { return SpawnedToPoint.Num(); }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -39,6 +42,7 @@ private:
 	// 각 포인트에서 랜덤으로 스폰
 	bool SpawnFromPoint(ARPSpawnPoint* Point, FRandomStream& Stream);
 	bool FindSpawnTransform(ARPSpawnPoint* Point, FTransform& Out) const;
+	bool GetIsBugged() const;
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Spawn|Timing")

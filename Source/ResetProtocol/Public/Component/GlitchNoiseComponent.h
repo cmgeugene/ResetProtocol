@@ -20,6 +20,8 @@ class RESETPROTOCOL_API UGlitchNoiseComponent : public UAudioComponent
 public:
 	UGlitchNoiseComponent();
 
+	void GlitchMeshUpdate();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Glitch Noise Component")
 	TObjectPtr<USphereComponent> SoundRange;
 
