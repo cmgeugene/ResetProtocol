@@ -162,50 +162,53 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 		return;
 	}
 	
-	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-	const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
-	if (Distance > InteractionRange)
-	{
-		return;
-	}
+	//const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
+	//if (Distance > InteractionRange)
+	//{
+	//	return;
+	//}
 
-	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (IsValid(PlayerCharacter) && !IsValid(HoldingActor))
 	{
 		ARPBaseInteractableObject* InteractableObject = Cast<ARPBaseInteractableObject>(Target);
 		ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
 
-		//IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
-		if (InteractableObject->GetClass()->ImplementsInterface(URPClickInterface::StaticClass()))
+		if (IsValid(InteractableObject))
 		{
-			if (InteractableObject->ObjectType == EInteractObjectType::Trash || InteractableObject->ObjectType == EInteractObjectType::SomethingElse)
+			//IRPClickInterface* ClickInterface = Cast<IRPClickInterface>(InteractableObject);
+			if (InteractableObject->GetClass()->ImplementsInterface(URPClickInterface::StaticClass()))
 			{
-				if (!IsValid(CleaningTool))
+				if (InteractableObject->ObjectType == EInteractObjectType::Trash || InteractableObject->ObjectType == EInteractObjectType::SomethingElse)
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Pick up Trash"));
-					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+					if (!IsValid(CleaningTool))
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Pick up Trash"));
+						IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+					}
+				}
+				else if (InteractableObject->ObjectType == EInteractObjectType::Stain)
+				{
+					if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Clean Stain"));
+						IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+					}
 				}
 			}
-			else if (InteractableObject->ObjectType == EInteractObjectType::Stain)
-			{
-				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Clean Stain"));
-					IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
-				}
-			}
-		}
 
-		//IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObject);
-		if (InteractableObject->GetClass()->ImplementsInterface(URPDragInterface::StaticClass()))
-		{
-			if (InteractableObject->ObjectType == EInteractObjectType::ScatteredObject || InteractableObject->ObjectType == EInteractObjectType::Corpse)
+			//IRPDragInterface* DragInterface = Cast<IRPDragInterface>(InteractableObject);
+			if (InteractableObject->GetClass()->ImplementsInterface(URPDragInterface::StaticClass()))
 			{
-				if (!IsValid(CleaningTool))
+				if (InteractableObject->ObjectType == EInteractObjectType::ScatteredObject || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Grab Object"));
-					IRPDragInterface::Execute_DragInteract(InteractableObject, GetOwner());
-					IsHoldingItem = true;
-					HoldingActor = InteractableObject;
+					if (!IsValid(CleaningTool))
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Grab Object"));
+						IRPDragInterface::Execute_DragInteract(InteractableObject, GetOwner());
+						IsHoldingItem = true;
+						HoldingActor = InteractableObject;
+					}
 				}
 			}
 		}
