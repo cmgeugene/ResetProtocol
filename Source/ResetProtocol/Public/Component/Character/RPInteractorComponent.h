@@ -116,4 +116,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite ,Category = "Redial")
 	URPRadialTimerWidget* RedialTimerWidget;
 
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	bool IsHoldingDragObject;
+
 };

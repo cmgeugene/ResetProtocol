@@ -23,6 +23,7 @@ URPInteractorComponent::URPInteractorComponent()
 	: IsHoldingItem(false)
 	, IsKeyRelease(false)
 	, KeyHoldingTime(5.f)
+	, IsHoldingDragObject(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
@@ -57,6 +58,7 @@ void URPInteractorComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 
 	DOREPLIFETIME(URPInteractorComponent, HoldingActor);
 	DOREPLIFETIME(URPInteractorComponent, IsHoldingItem);
+	DOREPLIFETIME(URPInteractorComponent, IsHoldingDragObject);
 }
 
 void URPInteractorComponent::CreateInteractWidget(AController* Controller)
@@ -206,6 +208,7 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 					{
 						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Grab Object"));
 						IRPDragInterface::Execute_DragInteract(InteractableObject, GetOwner());
+						IsHoldingDragObject = true;
 						IsHoldingItem = true;
 						HoldingActor = InteractableObject;
 					}
@@ -236,6 +239,8 @@ void URPInteractorComponent::InteractCheck()
 			InteractWidget->RefreshWidget();
 			InteractWidget->InvisiblePrice();
 			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			return;
 		}
 
 		ARPBaseCleaningTool* CleaningTool = Cast<ARPBaseCleaningTool>(PlayerCharacter->GetHitResult().GetActor());
@@ -406,6 +411,7 @@ void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 		IRPDragInterface::Execute_DropInteract(HoldingActor, GetOwner());
 	}
 
+	IsHoldingDragObject = false;
 	IsHoldingItem = false;
 	HoldingActor = nullptr;
 
