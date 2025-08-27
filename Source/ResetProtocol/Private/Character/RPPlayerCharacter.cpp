@@ -7,7 +7,6 @@
 #include "UI/Inventory/InventoryWidget.h"
 #include "RPTestItemActor.h"
 
-
 ARPPlayerCharacter::ARPPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -44,7 +43,6 @@ void ARPPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("LeftMouseButton", EInputEvent::IE_Released, this, &ARPPlayerCharacter::OnLeftMouseButtonReleased);
-
 }
 
 void ARPPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

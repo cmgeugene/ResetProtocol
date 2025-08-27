@@ -23,6 +23,8 @@ URPMovableComponent::URPMovableComponent() :
 	CacheOwnerMesh = nullptr;
 
 	bIsHeld = false;
+	UserYawDeg = 0.f;
+	UserPitchDeg = 0.f;
 
 	RootMode = ERPRootMode::Box;
 	bSwappingRoot = false;
@@ -35,6 +37,8 @@ void URPMovableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(URPMovableComponent, bIsHeld);
 	DOREPLIFETIME(URPMovableComponent, RootMode);
+	DOREPLIFETIME(URPMovableComponent, UserYawDeg);
+	DOREPLIFETIME(URPMovableComponent, UserPitchDeg);
 }
 
 void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -53,12 +57,14 @@ void URPMovableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 			if (USceneComponent* GrabAnchor = FindAnchor(Holder.Get()))
 			{
 				FVector NewLocation = GrabAnchor->GetComponentLocation() + GrabAnchor->GetForwardVector() * GrabRange;
-				
+				//GrabComp->SetTargetLocation(NewLocation);
+
 				// 누적 방법이 잘 안됨
 				// - Anchor 대비 Target의 상대 회전을 사용
 				//  - Grab 시 상대 회전을 구하고, Tick에서 갱신
 				FQuat CurrAnchorRotation = GrabAnchor->GetComponentQuat();
-				FQuat Expected = (CurrAnchorRotation * DeltaAnchorTarget).GetNormalized();
+				FQuat UserDelta = MakeUserDeltaQuatYawPitch(UserYawDeg, UserPitchDeg, GrabAnchor);
+				FQuat Expected = (CurrAnchorRotation * UserDelta  * DeltaAnchorTarget).GetNormalized();
 
 				GrabComp->SetTargetLocationAndRotation(NewLocation, Expected.Rotator());
 			}
@@ -162,13 +168,7 @@ void URPMovableComponent::Grab(AActor* Interactor)
 			FRotator GrabRotation = BeGrabbedComp->GetComponentRotation();
 			GrabComp->GrabComponentAtLocationWithRotation(BeGrabbedComp, NAME_None, GrabLocation, GrabRotation);
 
-			// 상대 회전 저장
-			FQuat AnchorRotation = FindAnchor(Interactor)->GetComponentQuat();
-			FQuat BeGrabbedCompRotation = BeGrabbedComp->GetComponentQuat();
-			DeltaAnchorTarget = (AnchorRotation.Inverse() * BeGrabbedCompRotation).GetNormalized();
-
-			CacheGrabbedComp = BeGrabbedComp;
-			bIsHeld = true;
+			OnGrabStart(Interactor, BeGrabbedComp);
 
 			if (CacheOwnerMesh.Get() == BeGrabbedComp)
 			{
@@ -221,9 +221,7 @@ void URPMovableComponent::Drop()
 								RootMode = ERPRootMode::Box;
 								ApplyRootSwap(RootMode, CacheRootBox.Get(), CacheOwnerMesh.Get());
 
-								bIsHeld = false;
-								Holder = nullptr;
-								CacheGrabbedComp = nullptr;
+								OnDropStart();
 
 								GetOwner()->ForceNetUpdate();
 							});
@@ -236,9 +234,7 @@ void URPMovableComponent::Drop()
 						//          그래서 다음 클릭에 Grab이 안되고 Drop만 되는데, Drop할때 Grab한 것이 없어서 아래에 Detach 쪽 로직을 실행
 						//          Detatch 쪽 로직을 실행하면서 IsHeld가 False가 되어서 다음 클릭에 Grab을 할 수 있게됨
 						// - 주 원인 : RootBox를 들었을 때의 상황을 고려하지 않았던 것(Scattered나 Ragdoll이 Off인 Corpse)
-						bIsHeld = false;
-						Holder = nullptr;
-						CacheGrabbedComp = nullptr;
+						OnDropStart();
 					}
 				}
 			}
@@ -247,9 +243,7 @@ void URPMovableComponent::Drop()
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Detach"));
 				CacheRootBox->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
-				bIsHeld = false;
-				Holder = nullptr;
-				CacheGrabbedComp = nullptr;
+				OnDropStart();
 			}
 		}
 	}
@@ -403,6 +397,103 @@ bool URPMovableComponent::IsRootPhysicsActive()
 	}
 
 	return false;
+}
+
+//void URPMovableComponent::RotateObject(float X, float Y)
+//{
+//	if (!GetOwner() || !GetOwner()->HasAuthority() || !bIsHeld || !Holder.IsValid())
+//	{
+//		return;
+//	}
+//
+//	if (UPhysicsHandleComponent* GrabComp = (Holder.Get())->FindComponentByClass<UPhysicsHandleComponent>())
+//	{
+//		if (GrabComp->GetGrabbedComponent() == CacheGrabbedComp.Get())
+//		{
+//			FVector CurrTargetLocation;
+//			FRotator CurrTargetRotation;
+//			GrabComp->GetTargetLocationAndRotation(CurrTargetLocation, CurrTargetRotation);
+//
+//			float newYaw = CurrTargetRotation.Yaw + X;
+//			float newPitch = CurrTargetRotation.Pitch + Y;
+//			FRotator NewTargetRotation = FRotator(newPitch, newYaw, CurrTargetRotation.Roll);
+//
+//			GrabComp->SetTargetRotation(NewTargetRotation);
+//		}
+//	}
+//}
+
+void URPMovableComponent::RotateYaw(float DeltaYawDeg)
+{
+	// 360도 회전
+	UserYawDeg = NormalizeYaw(UserYawDeg + DeltaYawDeg);
+}
+
+void URPMovableComponent::RotatePitch(float DeltaPitchDeg)
+{
+	// Gimbal Lock 방지
+	UserPitchDeg = FMath::Clamp(UserPitchDeg + DeltaPitchDeg, -80.f, 80.f);
+}
+
+float URPMovableComponent::NormalizeYaw(float InDeg) const
+{
+	float Y = FMath::Fmod(InDeg, 360.f);
+	if (Y > 180.f)  Y -= 360.f;
+	if (Y < -180.f) Y += 360.f;
+
+	return Y;
+}
+
+FQuat URPMovableComponent::MakeUserDeltaQuatYawPitch(float YawDeg, float PitchDeg, USceneComponent* Anchor) const
+{
+	if (!Anchor || !Holder.IsValid())
+	{
+		return FQuat::Identity;
+	}
+
+	// 축 설정
+	const FVector UpAxis = Anchor->GetUpVector();     // Yaw 기준 축
+	const FVector RightAxis = Anchor->GetRightVector();  // Pitch 기준 축
+
+	// 각각을 회전 쿼터니언로 변환
+	const FQuat YawQuat = FQuat(UpAxis, FMath::DegreesToRadians(YawDeg));
+	const FQuat PitchQuat = FQuat(RightAxis, FMath::DegreesToRadians(PitchDeg));
+
+	// 조합 (Yaw → Pitch 순서)
+	return (YawQuat * PitchQuat).GetNormalized();
+}
+
+void URPMovableComponent::OnGrabStart(AActor* Interactor, UPrimitiveComponent* BeGrabbedComp)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	// 상대 회전 저장
+	FQuat AnchorRotation = FindAnchor(Interactor)->GetComponentQuat();
+	FQuat BeGrabbedCompRotation = BeGrabbedComp->GetComponentQuat();
+	DeltaAnchorTarget = (AnchorRotation.Inverse() * BeGrabbedCompRotation).GetNormalized();
+
+	CacheGrabbedComp = BeGrabbedComp;
+	bIsHeld = true;
+	UserYawDeg = 0.0f;
+	UserPitchDeg = 0.0f;
+}
+
+void URPMovableComponent::OnDropStart()
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	bIsHeld = false;
+	Holder = nullptr;
+	CacheGrabbedComp.Reset();
+	DeltaAnchorTarget = FQuat::Identity;
+	UserYawDeg = 0.0f;
+	UserPitchDeg = 0.0f;
 }
 
 void URPMovableComponent::OnPickupComplete(AActor* Interactor)

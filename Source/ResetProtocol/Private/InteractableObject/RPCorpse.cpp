@@ -27,7 +27,7 @@ void ARPCorpse::Tick(float DeltaTime)
 
 	if (MoveComp->RootMode == ERPRootMode::Box && SkeletalMeshComp->IsSimulatingPhysics())
 	{
-		FVector NewActorLocation = SkeletalMeshComp->GetSocketLocation("pelvis");
+		FVector NewActorLocation = SkeletalMeshComp->GetSocketLocation("Hips");
 		SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
 	}
 }

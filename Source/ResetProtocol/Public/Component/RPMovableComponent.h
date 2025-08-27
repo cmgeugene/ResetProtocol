@@ -33,12 +33,17 @@ public:
 
 	bool GetIsHeld() { return bIsHeld; }
 
+	//void RotateObject(float X, float Y);
+	void RotateYaw(float DeltaYawDeg);
+	void RotatePitch(float DeltaPitchDeg);
+
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnRep_RootMode();
 
+private:
 	void ApplyRootSwap(ERPRootMode Mode, UPrimitiveComponent* NewRoot, UPrimitiveComponent* Other);
 
 	// Mesh를 할당한 MeshComponent 찾기
@@ -46,6 +51,12 @@ protected:
 	// 액터를 부착할 Interactor의 컴포넌트 찾기
 	USceneComponent* FindAnchor(AActor* Interactor) const;
 	bool IsRootPhysicsActive();	
+
+	void OnGrabStart(AActor* Interactor, UPrimitiveComponent* BeGrabbedComp);
+	void OnDropStart();
+
+	float NormalizeYaw(float InDeg) const;
+	FQuat MakeUserDeltaQuatYawPitch(float YawDeg, float PitchDeg, USceneComponent* Anchor) const;
 
 	void OnPickupComplete(AActor* Interactor);
 	void OnPlaceComplete();
@@ -70,6 +81,11 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bIsHeld;
+	// 사용자 누적 회전 (deg, -180~180 정규화)
+	UPROPERTY(Replicated)
+	float UserYawDeg;
+	UPROPERTY(Replicated)
+	float UserPitchDeg;
 
 	FQuat DeltaAnchorTarget;
 	bool bSwappingRoot;

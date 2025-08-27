@@ -11,6 +11,7 @@
 class URPInteractWidget;
 class URPRadialTimerWidget;
 class ARPBaseInteractableObject;
+struct FInputActionValue;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RESETPROTOCOL_API URPInteractorComponent : public UActorComponent
@@ -65,6 +66,16 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_MouseReleaseInteract();
+
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void RotateGrabObject2D(const FInputActionValue& Value);
+	UFUNCTION(Server, Reliable)
+	void Server_RotateGrabObject2D(float DeltaYawDeg, float DeltaPitchDeg);
+	
+	//void Rotate(float DeltaYawDeg, float DeltaPitchDeg);
+	void AddYaw(float DeltaYawDeg);
+	void AddPitch(float DeltaPitchDeg);
+
 public:
 	void UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet);
 
@@ -99,6 +110,12 @@ protected:
 	AActor* HoldingActor;
 	UPROPERTY(Replicated, VisibleAnywhere)
 	bool IsHoldingItem;
+
+	// 회전 감도
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float YawSpeedDegPerSec;
+	UPROPERTY(EditAnywhere, Category = "Rotate")
+	float PitchSpeedDegPerSec;
 
 	UPROPERTY(VisibleAnywhere)
 	bool IsKeyRelease;
