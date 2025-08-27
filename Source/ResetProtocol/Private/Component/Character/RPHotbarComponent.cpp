@@ -106,39 +106,100 @@ void URPHotbarComponent::OnRep_CurrentCleaningTool()
 	if (CurrentCleaningTool && GetOwner())
 	{
 		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-		if (PlayerCharacter && PlayerCharacter->GetMesh()->DoesSocketExist("CleaningToolSocket"))
-		{
-			CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
-			CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-			CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-			CurrentCleaningTool->GetMesh()->AttachToComponent(PlayerCharacter->GetMesh(), AttachRules, FName("CleaningToolSocket"));;
+		USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(
+			PlayerCharacter->GetDefaultSubobjectByName(TEXT("RTG_Character"))
+		);
+
+		if (IsValid(ChildMesh))
+		{
+			if (ChildMesh->DoesSocketExist(FName("CleaningToolSocket")))
+			{
+				CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
+				CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+				CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+				FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
+				CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
+				
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true); // Snap + KeepRelative
+				CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("CleaningToolSocket"));
+
+				FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
+
+				CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
+			}
 		}
 	}
 }
 
 void URPHotbarComponent::Server_SpawnActor_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass)
 {
-	CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+	FActorSpawnParameters Params;
+	Params.Owner = GetOwner();
+	Params.Instigator = Cast<APawn>(GetOwner());
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	Params.bDeferConstruction = false; 
+
+	CurrentCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator, Params);
 
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-	USkeletalMeshComponent* PlayerMesh = PlayerCharacter->GetMesh();
-	if (IsValid(PlayerMesh))
+	USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(
+		PlayerCharacter->GetDefaultSubobjectByName(TEXT("RTG_Character"))
+	);
+
+	if (IsValid(ChildMesh))
 	{
-		if (PlayerMesh->DoesSocketExist(FName("CleaningToolSocket")))
+		if (ChildMesh->DoesSocketExist(FName("CleaningToolSocket")))
 		{
 			CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
 			CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 			CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
-			CurrentCleaningTool->GetMesh()->AttachToComponent(PlayerMesh, AttachRules, FName("CleaningToolSocket"));
+			FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
+			CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
+
+			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true); // Snap + KeepRelative
+			CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("CleaningToolSocket"));
+
+			FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
+
+			CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
+		}
+	}
+}
+
+void URPHotbarComponent::Multicast_AttachTool_Implementation(ARPBaseCleaningTool* SpawnedTool)
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(
+		PlayerCharacter->GetDefaultSubobjectByName(TEXT("RTG_Character"))
+	);
+
+	if (IsValid(ChildMesh))
+	{
+		if (ChildMesh->DoesSocketExist(FName("CleaningToolSocket")))
+		{
+			SpawnedTool->GetMesh()->SetSimulatePhysics(false);
+			SpawnedTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+			SpawnedTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			FAttachmentTransformRules AttachRules(EAttachmentRule::KeepRelative, true); // Snap + KeepRelative
+			SpawnedTool->GetMesh()->AttachToComponent(ChildMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("CleaningToolSocket"));
+
+			FVector Scale = SpawnedTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
+			FRotator Rotator = SpawnedTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeRotation();
+
+			SpawnedTool->GetMesh()->SetRelativeScale3D(Scale);
+			SpawnedTool->GetMesh()->SetRelativeRotation(Rotator);
 		}
 	}
 
 }
+
+
 void URPHotbarComponent::Server_DestroyActor_Implementation()
 {
 	CurrentCleaningTool->Destroy();
@@ -229,3 +290,4 @@ bool URPHotbarComponent::CheckInventoryFull()
 
 	return false;
 }
+

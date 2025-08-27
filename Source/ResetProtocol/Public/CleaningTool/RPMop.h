@@ -13,5 +13,11 @@ UCLASS()
 class RESETPROTOCOL_API ARPMop : public ARPBaseCleaningTool
 {
 	GENERATED_BODY()
-	
+
+	ARPMop();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> BottomMeshComp;
+
 };

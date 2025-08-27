@@ -13,5 +13,6 @@ UCLASS()
 class RESETPROTOCOL_API ARPHammer : public ARPBaseCleaningTool
 {
 	GENERATED_BODY()
-	
+
+
 };

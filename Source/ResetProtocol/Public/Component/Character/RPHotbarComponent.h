@@ -63,6 +63,9 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_SpawnActor(TSubclassOf<ARPBaseCleaningTool> ActorClass);
 
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void Multicast_AttachTool(ARPBaseCleaningTool* SpawnedTool);
+
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_DestroyActor();
 
@@ -91,5 +94,6 @@ protected:
 	int CurrentSlotIndex;
 
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CurrentCleaningTool)
+	//UPROPERTY(Replicated)
 	ARPBaseCleaningTool* CurrentCleaningTool;
 };
