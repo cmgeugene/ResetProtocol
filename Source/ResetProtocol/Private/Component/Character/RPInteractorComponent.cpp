@@ -9,6 +9,7 @@
 #include "Data/RPCleaningToolData.h"
 #include "CleaningTool/RPBaseCleaningTool.h"
 #include "Component/Character/RPHotbarComponent.h"
+#include "Component/RPMovableComponent.h"
 #include "ResetProtocol/ResetProtocol.h"
 
 #include "InteractableObject/RPBaseInteractableObject.h"
@@ -19,8 +20,13 @@
 #include "Interface/RPDragInterface.h"
 #include "Interface/RPKeyHoldInterface.h"
 
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "EnhancedInputComponent.h"
+
 URPInteractorComponent::URPInteractorComponent()
 	: IsHoldingItem(false)
+	, YawSpeedDegPerSec(120.0f)
+	, PitchSpeedDegPerSec(120.0f)
 	, IsKeyRelease(false)
 	, KeyHoldingTime(5.f)
 	, IsHoldingDragObject(false)
@@ -416,6 +422,81 @@ void URPInteractorComponent::Server_MouseReleaseInteract_Implementation()
 	HoldingActor = nullptr;
 
 	ShowRedialTimerWidget(false);
+}
+
+void URPInteractorComponent::RotateGrabObject2D(const FInputActionValue& Value)
+{
+	if (ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner()))
+	{
+		const FVector2D Axis = Value.Get<FVector2D>();				// X=Yaw, Y=Pitch
+		const float DeltaTime = GetWorld()->GetDeltaSeconds();
+
+		const float DeltaYawDeg = Axis.X * YawSpeedDegPerSec * DeltaTime;
+		const float DeltaPitchDeg = Axis.Y * PitchSpeedDegPerSec * DeltaTime;
+		Server_RotateGrabObject2D(DeltaYawDeg, DeltaPitchDeg);
+	}
+}
+
+void URPInteractorComponent::Server_RotateGrabObject2D_Implementation(float DeltaYawDeg, float DeltaPitchDeg)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+	if (!IsHoldingDragObject || !HoldingActor)
+	{
+		return;
+	}
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	UPhysicsHandleComponent* GrabComp = PlayerCharacter->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!GrabComp)
+	{
+		return;
+	}
+	UPrimitiveComponent* GrabbedComp = GrabComp->GetGrabbedComponent();
+	if (!GrabbedComp)
+	{
+		return;
+	}
+
+	if (GrabbedComp->GetOwner() == HoldingActor)
+	{
+		if (FMath::Abs(DeltaYawDeg) > KINDA_SMALL_NUMBER) AddYaw(DeltaYawDeg);
+		if (FMath::Abs(DeltaPitchDeg) > KINDA_SMALL_NUMBER) AddPitch(DeltaPitchDeg);
+
+		//Rotate(DeltaYawDeg, DeltaPitchDeg);
+	}
+}
+
+//void URPInteractorComponent::Rotate(float DeltaYawDeg, float DeltaPitchDeg)
+//{
+//	URPMovableComponent* MoveComp = HoldingActor->FindComponentByClass<URPMovableComponent>();
+//	if (MoveComp)
+//	{
+//		MoveComp->RotateObject(DeltaYawDeg, DeltaPitchDeg); // 최종 누적은 MoveComp가 소유
+//	}
+//}
+
+void URPInteractorComponent::AddYaw(float DeltaYawDeg)
+{
+	URPMovableComponent* MoveComp = HoldingActor->FindComponentByClass<URPMovableComponent>();
+	if (MoveComp)
+	{
+		MoveComp->RotateYaw(DeltaYawDeg); // 최종 누적은 MoveComp가 소유
+	}
+}
+
+void URPInteractorComponent::AddPitch(float DeltaPitchDeg)
+{
+	URPMovableComponent* MoveComp = HoldingActor->FindComponentByClass<URPMovableComponent>();
+	if (MoveComp)
+	{
+		MoveComp->RotatePitch(DeltaPitchDeg);
+	}
 }
 
 void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)

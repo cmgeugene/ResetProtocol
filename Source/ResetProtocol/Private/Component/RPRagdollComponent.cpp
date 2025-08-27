@@ -73,7 +73,9 @@ void URPRagdollComponent::Multicast_RagdollOff_Implementation()
 		OwnerActor->SkeletalMeshComp->SetSimulatePhysics(false);
 		// Ragdoll을 키면 움직임의 제어권이 물리 엔진으로 넘어감
 		// - Ragdoll을 껐을 때 넘어간 제어권을 EAnimationMode로 가져오는 것
-		OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		//OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		OwnerActor->SkeletalMeshComp->Play(true);
 
 		// 위치 보정(Root가 SceneComp인 경우)
 		FVector MeshLocation = OwnerActor->SkeletalMeshComp->GetRelativeLocation();
@@ -123,6 +125,7 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 			OwnerActor->RootBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(true);
 			OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			OwnerActor->SkeletalMeshComp->Stop();
 			OwnerActor->SkeletalMeshComp->RegisterComponent();
 		}
 		else
@@ -132,7 +135,8 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(false);
 			// Ragdoll을 키면 움직임의 제어권이 물리 엔진으로 넘어감
 			// - Ragdoll을 껐을 때 넘어간 제어권을 EAnimationMode로 가져오는 것
-			OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+			OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+			OwnerActor->SkeletalMeshComp->Play(true);
 
 			if (OwnerActor->HasAuthority())
 			{
@@ -144,7 +148,7 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 				OwnerActor->ForceNetUpdate();
 			}
 
-			OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, -90.0f, 0.0f));
+			OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -30.0f), FRotator(0.0f, 0.0f, 0.0f));
 		}
 	}
 }
