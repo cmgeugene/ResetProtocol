@@ -34,6 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetHotbarWidget(URPHotbarWidget* Widget) { HotbarWidget = Widget; }
 
+	UFUNCTION(BlueprintCallable)
 	ARPBaseCleaningTool* GetCurrentCleaningTool() { return CurrentCleaningTool; }
 
 // Widget

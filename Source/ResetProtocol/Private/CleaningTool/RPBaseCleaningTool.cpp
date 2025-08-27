@@ -38,5 +38,6 @@ void ARPBaseCleaningTool::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARPBaseCleaningTool, ePurchaseState);
+	DOREPLIFETIME(ARPBaseCleaningTool, eCleaningToolState);
 }
 

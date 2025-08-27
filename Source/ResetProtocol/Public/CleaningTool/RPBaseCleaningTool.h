@@ -43,6 +43,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	UFUNCTION(BlueprintCallable)
 	ECleaningToolState GetCleaningToolState() { return eCleaningToolState; }
 
 	UStaticMeshComponent* GetMesh() { return StaticMeshComp; }
@@ -60,7 +61,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComp;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Variable")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Variable")
 	ECleaningToolState eCleaningToolState;
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Variable")
