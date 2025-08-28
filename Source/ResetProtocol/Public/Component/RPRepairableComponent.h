@@ -20,6 +20,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void AfterRepairProcess();
+	void AfterRepairProcess_Implementation();
+
 	void OnCompleteRepair(AActor* Interactor);
 
 private:
