@@ -64,12 +64,12 @@ void ARPTrap::BeginPlay()
 			BrokenMesh->SetVisibility(true);
 			ActiveMesh = BrokenMesh;
 
+			if (GlitchNoiseComp)
+			{
+				GlitchNoiseComp->GlitchMeshUpdate();
+			}
+
 			bIsBroken = true;
 		}
-	}
-
-	if (GlitchNoiseComp)
-	{
-		GlitchNoiseComp->GlitchMeshUpdate();
 	}
 }

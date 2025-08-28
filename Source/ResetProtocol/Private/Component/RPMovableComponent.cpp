@@ -1,12 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Component/RPMovableComponent.h"
+#include "Component/Hologram/RPHologramComponent.h"
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "InteractableObject/RPTrap.h"
 #include "Character/RPPlayerCharacter.h"
 #include "Frameworks/RPPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "Character/RPPlayerCharacter.h"
+#include "Frameworks/RPPlayerController.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -23,10 +26,14 @@ URPMovableComponent::URPMovableComponent() :
 	CacheOwnerMesh = nullptr;
 
 	bIsHeld = false;
+	bCanHold = true;
+
 	UserYawDeg = 0.f;
 	UserPitchDeg = 0.f;
 
 	RootMode = ERPRootMode::Box;
+	HologramComp = nullptr;
+
 	bSwappingRoot = false;
 	bIsPickup = false;
 }
@@ -111,10 +118,24 @@ void URPMovableComponent::Grab(AActor* Interactor)
 	{
 		return;
 	}
+	if (!bCanHold) {
+		return;
+	}
 
 	if (GetOwner()->HasAuthority()) 
 	{
 		Holder = Interactor;
+		// Hologram에 사용
+		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Holder);
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+		ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+		if (!PlayerController)
+		{
+			return;
+		}
 
 		CacheRootBox = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent());
 		CacheOwnerMesh = FindOwnerMeshComponent(GetOwner());
@@ -175,6 +196,9 @@ void URPMovableComponent::Grab(AActor* Interactor)
 				GetOwner()->ForceNetUpdate();
 			}
 		}
+
+		// Hologram
+		PlayerController->Client_ActivateHologram(GetOwner());
 	}	
 }
 
@@ -253,6 +277,11 @@ void URPMovableComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!HologramComp)
+	{
+		HologramComp = NewObject<URPHologramComponent>(GetOwner(), URPHologramComponent::StaticClass(), TEXT("HologramComp"));
+		if (HologramComp) HologramComp->RegisterComponent();
+	}
 }
 
 void URPMovableComponent::OnRep_RootMode()
@@ -487,7 +516,32 @@ void URPMovableComponent::OnDropStart()
 	{
 		return;
 	}
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Holder);
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+	ARPPlayerController* PlayerController = Cast<ARPPlayerController>(PlayerCharacter->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
 
+	// Hologram 관련 처리
+	FTransform DropTransform = FTransform::Identity;
+	if (HologramComp->ConfirmInPlace(DropTransform))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("ConfirmInPlace"));
+
+		OnPlaceComplete(Holder.Get());
+
+		GetOwner()->SetActorTransform(DropTransform, false, nullptr, ETeleportType::TeleportPhysics);
+
+	}
+
+	PlayerController->Client_DeactivateHologram(GetOwner());
+
+	// Grab 관련 변수 초기화
 	bIsHeld = false;
 	Holder = nullptr;
 	CacheGrabbedComp.Reset();
@@ -504,8 +558,15 @@ void URPMovableComponent::OnPickupComplete(AActor* Interactor)
 	}
 }
 
-void URPMovableComponent::OnPlaceComplete()
+void URPMovableComponent::OnPlaceComplete(AActor* Interactor)
 {
+	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
+	{
+		OwnerActor->OnResetComplete(Interactor);
+
+		bCanHold = false;
+		HologramComp->UpdateSlotOccupation();
+	}
 }
 
 

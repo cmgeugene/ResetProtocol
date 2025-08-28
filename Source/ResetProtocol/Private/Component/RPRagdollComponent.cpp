@@ -81,7 +81,7 @@ void URPRagdollComponent::Multicast_RagdollOff_Implementation()
 		FVector MeshLocation = OwnerActor->SkeletalMeshComp->GetRelativeLocation();
 		FVector NewActorLocation = OwnerActor->GetActorLocation() + FVector(MeshLocation.X, MeshLocation.Y, 0.0f);
 		OwnerActor->SetActorLocation(NewActorLocation, false, nullptr, ETeleportType::None);
-		OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, -90.0f, 0.0f));
+		OwnerActor->SkeletalMeshComp->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -35.0f), FRotator(0.0f, 0.0f, 0.0f));
 
 		bIsRagdollOn = false;
 	}

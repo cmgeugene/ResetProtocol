@@ -9,6 +9,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Character/RPPlayerCharacter.h"
 #include "Frameworks/RPGameMode.h"
+#include "Component/RPMovableComponent.h"
+#include "Component/Hologram/RPHologramComponent.h"
 
 void ARPPlayerController::Server_OnResetSuccessHandle_Implementation(const EInteractObjectType Type)
 {
@@ -102,9 +104,42 @@ void ARPPlayerController::Server_NotifyClientReady_Implementation()
 
 }
 
+void ARPPlayerController::Client_ActivateHologram_Implementation(const AActor* GrabbedActor)
+{
+	if (!GrabbedActor)
+	{
+		return;
+	}
 
+	URPMovableComponent* MoveComp = GrabbedActor->FindComponentByClass<URPMovableComponent>();
+	if (!MoveComp)
+	{
+		return;
+	}
 
+	if (MoveComp->HologramComp)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Client_ActivateHologram 호출"));
+		MoveComp->HologramComp->ActivateHologram();
+	}
+}
 
+void ARPPlayerController::Client_DeactivateHologram_Implementation(const AActor* GrabbedActor)
+{
+	if (!GrabbedActor)
+	{
+		return;
+	}
 
+	URPMovableComponent* MoveComp = GrabbedActor->FindComponentByClass<URPMovableComponent>();
+	if (!MoveComp)
+	{
+		return;
+	}
 
-
+	if (MoveComp->HologramComp)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Client_DeactivateHologram 호출"));
+		MoveComp->HologramComp->DeactivateHologram();
+	}
+}
