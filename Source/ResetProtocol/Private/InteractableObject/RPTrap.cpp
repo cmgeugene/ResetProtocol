@@ -3,6 +3,7 @@
 #include "InteractableObject/RPTrap.h"
 #include "Component/RPRepairableComponent.h"
 #include "Component/GlitchNoiseComponent.h"
+#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
 
 ARPTrap::ARPTrap()
@@ -51,17 +52,24 @@ void ARPTrap::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
-	{
-		StaticMeshComp->SetVisibility(false);
-		BrokenMesh->SetVisibility(true);
-		ActiveMesh = BrokenMesh;
-		
-		if (GlitchNoiseComp)
-		{
-			GlitchNoiseComp->GlitchMeshUpdate();
-		}
+	RootBox->SetSimulatePhysics(false);
 
-		bIsBroken = true;
+	int32 BrokenProbability = FMath::RandRange(0, 100);
+
+	if (BrokenProbability < 30)
+	{
+		if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
+		{
+			StaticMeshComp->SetVisibility(false);
+			BrokenMesh->SetVisibility(true);
+			ActiveMesh = BrokenMesh;
+
+			bIsBroken = true;
+		}
+	}
+
+	if (GlitchNoiseComp)
+	{
+		GlitchNoiseComp->GlitchMeshUpdate();
 	}
 }
