@@ -8,6 +8,7 @@
 
 class UBoxComponent;
 class UPhysicsConstraintComponent;
+class URPHologramComponent;
 
 UENUM()
 enum class ERPRootMode : uint8
@@ -59,11 +60,14 @@ private:
 	FQuat MakeUserDeltaQuatYawPitch(float YawDeg, float PitchDeg, USceneComponent* Anchor) const;
 
 	void OnPickupComplete(AActor* Interactor);
-	void OnPlaceComplete();
+	void OnPlaceComplete(AActor* Interactor);
 
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_RootMode)
 	ERPRootMode RootMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components|Hologram")
+	TObjectPtr<URPHologramComponent> HologramComp;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
@@ -81,6 +85,9 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bIsHeld;
+	UPROPERTY(Replicated)
+	bool bCanHold;
+
 	// 사용자 누적 회전 (deg, -180~180 정규화)
 	UPROPERTY(Replicated)
 	float UserYawDeg;
@@ -90,4 +97,5 @@ private:
 	FQuat DeltaAnchorTarget;
 	bool bSwappingRoot;
 	bool bIsPickup;
+	
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "RPBaseInteractableObject.generated.h"
 
 #define CUSTOM_DEPTH_RED 250
@@ -55,6 +56,10 @@ public:
 	EInteractObjectType ObjectType;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type|Name")
 	FName ObjectName;
+
+	// 제자리 놓기에 사용할 Tag
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Type|Tag")
+	FGameplayTag HologramSlotTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
 	bool bIsBug;

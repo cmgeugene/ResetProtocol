@@ -51,6 +51,14 @@ public:
 	void Server_OnResetSuccessHandle(const EInteractObjectType Type);
 	void Server_OnResetSuccessHandle_Implementation(const EInteractObjectType Type);
 
+	// Hologram
+	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "RPPlayerController|Hologram")
+	void Client_ActivateHologram(const AActor* GrabbedActor);
+	void Client_ActivateHologram_Implementation(const AActor* GrabbedActor);
+	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "RPPlayerController|Hologram")
+	void Client_DeactivateHologram(const AActor* GrabbedActor);
+	void Client_DeactivateHologram_Implementation(const AActor* GrabbedActor);
+
 private:
 
 	UPROPERTY()
