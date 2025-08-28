@@ -13,6 +13,7 @@
 #include "ResetProtocol/ResetProtocol.h"
 
 #include "InteractableObject/RPBaseInteractableObject.h"
+#include "CleaningTool/RPCleaningStore.h"
 #include "UI/Interact/RPInteractWidget.h"
 #include "UI/RPRadialTimerWidget.h"
 
@@ -30,6 +31,7 @@ URPInteractorComponent::URPInteractorComponent()
 	, IsKeyRelease(false)
 	, KeyHoldingTime(5.f)
 	, IsHoldingDragObject(false)
+	, IsStoreWidgetVisible(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
@@ -90,10 +92,24 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 			RedialTimerWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+
+	if (IsValid(StoreWidgetClass))
+	{
+		StoreWidget = Cast<UUserWidget>(CreateWidget(Cast<APlayerController>(Controller), StoreWidgetClass));
+
+		if (IsValid(StoreWidget))
+		{
+			StoreWidget->AddToViewport(10);
+			StoreWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 }
 
 void URPInteractorComponent::PickUpItem()
 {
+	if (IsStoreWidgetVisible)
+		return;
+
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter))
 	{
@@ -103,6 +119,26 @@ void URPInteractorComponent::PickUpItem()
 		{
 			Server_PickUpItem(CleaningTool);
 		}
+
+		ARPCleaningStore* CleaningStore = Cast<ARPCleaningStore>(PlayerCharacter->GetHitResult().GetActor());
+		if (IsValid(CleaningStore))
+		{
+			InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			IsStoreWidgetVisible = true;
+			StoreWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+			if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()))
+			{
+				FInputModeUIOnly InputMode;
+				InputMode.SetWidgetToFocus(StoreWidget->TakeWidget());
+				InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+				PC->SetInputMode(InputMode);
+				PC->bShowMouseCursor = true;
+			}
+		}
+
 	}
 }
 
@@ -239,7 +275,7 @@ void URPInteractorComponent::InteractCheck()
 
 	if (IsValid(InteractWidget))
 	{
-		if (!IsValid(PlayerCharacter->GetHitResult().GetActor()) || IsHoldingItem)
+		if (!IsValid(PlayerCharacter->GetHitResult().GetActor()) || IsHoldingItem || IsStoreWidgetVisible)
 		{
 			InteractActor = nullptr;
 			InteractWidget->RefreshWidget();
@@ -275,6 +311,8 @@ void URPInteractorComponent::InteractCheck()
 
 			InteractActor = CleaningTool;
 			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+			return;
 		}
 
 		ARPBaseInteractableObject* InteractableObjcet = Cast<ARPBaseInteractableObject>(PlayerCharacter->GetHitResult().GetActor());
@@ -297,7 +335,31 @@ void URPInteractorComponent::InteractCheck()
 
 			InteractActor = InteractableObjcet;
 			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+			return;
 		}
+
+		ARPCleaningStore* CleaningStore = Cast<ARPCleaningStore>(PlayerCharacter->GetHitResult().GetActor());
+		if (IsValid(CleaningStore))
+		{
+			FInteractUIData Data = InteractUIData->FindItem("Store");
+
+			TArray<FInteractUIData> Datas;
+			Datas.Add(Data);
+			InteractActor = CleaningStore;
+			InteractWidget->SetText("CleaningTool Store");
+			InteractWidget->AddList(Datas);
+			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+			return;
+		}
+		
+		//InteractActor = nullptr;
+		//InteractWidget->RefreshWidget();
+		//InteractWidget->InvisiblePrice();
+		//InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+		//return;
 	}
 }
 
@@ -540,6 +602,22 @@ void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* Int
 
 
 	InteractWidget->AddList(Datas);
+}
+
+void URPInteractorComponent::HideStoreWidget()
+{
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+
+	if (APlayerController* PC = Cast<APlayerController>(PlayerCharacter->GetController()))
+	{
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	}
+
+	IsStoreWidgetVisible = false;
+
+	StoreWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void URPInteractorComponent::OnLeftMouseButtonReleased()

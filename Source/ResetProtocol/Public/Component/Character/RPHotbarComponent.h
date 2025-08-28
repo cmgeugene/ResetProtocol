@@ -28,6 +28,8 @@ public:
 // Get & Set
 public:
 	URPHotbarWidget* GetInventoryWidget() { return HotbarWidget; }
+
+	UFUNCTION(BlueprintCallable)
 	URPCleaningToolData* GetItemDataBase() { return ItemDataBase; }
 	TArray<FCleaningToolData>& GetInventory() { return Inventory; }
 
@@ -52,7 +54,7 @@ public:
 	UFUNCTION()
 	void OnRep_CurrentCleaningTool();
 
-	UFUNCTION(Client, Reliable)
+	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_AddItem(const FCleaningToolData& Data);
 
 	UFUNCTION()

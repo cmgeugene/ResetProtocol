@@ -79,6 +79,9 @@ public:
 public:
 	void UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet);
 
+	UFUNCTION(BlueprintCallable)
+	void HideStoreWidget();
+
 public:
 	void OnLeftMouseButtonReleased();
 
@@ -135,5 +138,13 @@ protected:
 
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool IsHoldingDragObject;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Interact")
+	TSubclassOf<UUserWidget> StoreWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "Interact")
+	UUserWidget* StoreWidget;
+
+	bool IsStoreWidgetVisible;
 
 };
