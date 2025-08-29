@@ -17,6 +17,11 @@ public:
 	void Repair(AActor* Interactor);
 	void Break(AActor* Interactor);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Repair();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Break();
+
 protected:
 	virtual void BeginPlay() override;
 
