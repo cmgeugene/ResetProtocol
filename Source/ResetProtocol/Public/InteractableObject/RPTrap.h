@@ -22,6 +22,10 @@ public:
 	virtual void KeyHoldInteract_Implementation(AActor* Interactor) override;
 	virtual void KeyReleaseInteract_Implementation(AActor* Interactor) override;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void AfterRepairProcess();
+	void AfterRepairProcess_Implementation();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -29,7 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> BrokenMesh;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "State")
 	bool bIsBroken;
 
 protected:

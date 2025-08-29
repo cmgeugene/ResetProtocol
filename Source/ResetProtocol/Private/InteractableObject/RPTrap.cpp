@@ -48,6 +48,10 @@ void ARPTrap::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
 }
 
+void ARPTrap::AfterRepairProcess_Implementation()
+{
+}
+
 void ARPTrap::BeginPlay()
 {
 	Super::BeginPlay();

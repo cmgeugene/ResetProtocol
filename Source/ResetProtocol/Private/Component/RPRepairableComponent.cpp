@@ -61,17 +61,16 @@ void URPRepairableComponent::Break(AActor* Interactor)
 	}
 }
 
-void URPRepairableComponent::AfterRepairProcess_Implementation()
-{
-}
-
 void URPRepairableComponent::OnCompleteRepair(AActor* Interactor)
 {
-	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
+	if (ARPBaseInteractableObject* OwnerObject = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
-		AfterRepairProcess();
+		if (ARPTrap* OwnerActor = Cast<ARPTrap>(OwnerObject))
+		{
+			OwnerActor->AfterRepairProcess();
+		}
 
-		OwnerActor->OnResetComplete(Interactor);
+		OwnerObject->OnResetComplete(Interactor);
 	}
 }
 
