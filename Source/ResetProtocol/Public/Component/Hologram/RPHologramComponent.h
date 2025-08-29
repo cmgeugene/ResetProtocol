@@ -18,8 +18,6 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void RefreshSlots();
-
 	void ActivateHologram();
 	void DeactivateHologram();
 
@@ -31,6 +29,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void RefreshSlots();
 	void FindAllMatchingSlots();
 	void PickClosestSlot();
 
