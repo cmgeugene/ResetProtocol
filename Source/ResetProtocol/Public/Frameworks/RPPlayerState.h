@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "Component/PlayerInfoComponent.h"
+#include "Data/RPCleaningToolData.h"
 #include "RPPlayerState.generated.h"
 
 /**
@@ -27,7 +28,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPlayerInfoComponent> InfoComponent;
 
+public:
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "RPPlayerState")
+	TArray<FCleaningToolData> Inventory;
+
+	UFUNCTION(BlueprintCallable)
+	void StoreInventory(const TArray<FCleaningToolData>& NewInventory);
 	
+	UFUNCTION(BlueprintPure, Category = "PlayerState")
+	FORCEINLINE TArray<FCleaningToolData> GetInventory() const { return Inventory; }
 
 public:
 	UFUNCTION(BlueprintPure, Category = "PlayerState")

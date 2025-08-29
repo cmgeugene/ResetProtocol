@@ -68,6 +68,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HideRedialTimerWidget();
 
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void SyncInventory();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPGameState")
+	void Server_UpdateInventory();
+
+
 // Component
 protected:
 	

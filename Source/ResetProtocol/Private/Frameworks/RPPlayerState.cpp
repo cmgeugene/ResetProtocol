@@ -25,6 +25,8 @@ void ARPPlayerState::BeginPlay()
 	}*/
 }
 
+
+
 void ARPPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
@@ -32,9 +34,16 @@ void ARPPlayerState::CopyProperties(APlayerState* PlayerState)
 	if (ARPPlayerState* NewPlayerState = Cast<ARPPlayerState>(PlayerState))
 	{
 		NewPlayerState->StoredPlayerInfo = this->StoredPlayerInfo;
+		NewPlayerState->Inventory = this->Inventory;
 
 		UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] CopyProperties : 속성 카피, current byte : %d"), NewPlayerState->StoredPlayerInfo.Bytes);
 	}
+}
+
+void ARPPlayerState::StoreInventory(const TArray<FCleaningToolData>& NewInventory)
+{
+	Inventory = NewInventory;
+	UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] Stored Inventory : Length (%d)"), Inventory.Num());
 }
 
 void ARPPlayerState::StorePlayerInfo(const FPlayerInfo& NewPlayerInfo)

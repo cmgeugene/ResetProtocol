@@ -31,13 +31,6 @@ void URPHotbarComponent::BeginPlay()
 	//	}
 	//}
 
-	if (GetOwner()->HasAuthority() )
-	{
-		for (int i = 0; i < TotalItems; i++)
-		{
-			Inventory.Add(FCleaningToolData());
-		}
-	}
 }
 
 void URPHotbarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -272,6 +265,7 @@ void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& 
 				}
 				return;
 			}
+
 		}
 	}
 
@@ -289,5 +283,16 @@ bool URPHotbarComponent::CheckInventoryFull()
 	}
 
 	return false;
+}
+
+void URPHotbarComponent::FillInventory()
+{
+	if (GetOwner()->HasAuthority())
+	{
+		for (int i = 0; i < TotalItems; i++)
+		{
+			Inventory.Add(FCleaningToolData());
+		}
+	}
 }
 

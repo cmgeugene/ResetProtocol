@@ -60,6 +60,9 @@ public:
 	UFUNCTION()
 	bool CheckInventoryFull();
 
+	UFUNCTION(BlueprintCallable)
+	void FillInventory();
+
 // Item
 public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -84,7 +87,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	URPCleaningToolData* ItemDataBase;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Inventory, VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(ReplicatedUsing = OnRep_Inventory, VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<FCleaningToolData> Inventory;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")

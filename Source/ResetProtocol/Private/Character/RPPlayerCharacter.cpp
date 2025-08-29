@@ -86,3 +86,12 @@ void ARPPlayerCharacter::Server_UpdatePlayerInfo_Implementation()
 }
 
 
+void ARPPlayerCharacter::Server_UpdateInventory_Implementation()
+{
+	if (HasAuthority())
+	{
+		SyncInventory();
+	}
+}
+
+
