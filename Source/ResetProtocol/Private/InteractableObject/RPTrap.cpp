@@ -22,6 +22,7 @@ ARPTrap::ARPTrap()
 	RepairComp->SetIsReplicated(true);
 
 	bIsBroken = false;
+	BrokenProbability = 70;
 
 	ObjectType = EInteractObjectType::Trap;
 	ObjectName = "Trap";
@@ -54,19 +55,23 @@ void ARPTrap::AfterRepairProcess_Implementation()
 
 void ARPTrap::OnRep_IsBroken()
 {
-	if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
+	if (bIsBroken)
 	{
-		StaticMeshComp->SetVisibility(false);
-		BrokenMesh->SetVisibility(true);
-		ActiveMesh = BrokenMesh;
-
-		if (GlitchNoiseComp)
+		if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
 		{
-			GlitchNoiseComp->GlitchMeshUpdate();
-		}
+			StaticMeshComp->SetVisibility(false);
+			BrokenMesh->SetVisibility(true);
+			ActiveMesh = BrokenMesh;
 
-		AfterBeginPlayProcess();
+			if (GlitchNoiseComp)
+			{
+				GlitchNoiseComp->GlitchMeshUpdate();
+			}
+
+			AfterBeginPlayProcess();
+		}
 	}
+	
 }
 
 void ARPTrap::BeginPlay()
@@ -77,9 +82,7 @@ void ARPTrap::BeginPlay()
 
 	if (HasAuthority())
 	{
-		int32 BrokenProbability = FMath::RandRange(0, 100);
-
-		if (BrokenProbability < 80)
+		if (FMath::RandRange(0, 100) < BrokenProbability)
 		{
 			bIsBroken = true;
 			OnRep_IsBroken();

@@ -45,4 +45,7 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<URPRepairableComponent> RepairComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	int32 BrokenProbability;
 };
