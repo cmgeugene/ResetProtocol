@@ -247,14 +247,12 @@ bool ARPPlacementSlot::IsInPlaceRangeAndScore(const AActor* Actor, const FVector
 	const float HorizontalDist = FVector::Dist2D(DropLocation, SlotLoc);
 	if (HorizontalDist > CaptureRadius)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("HorizontalDist : %f"), HorizontalDist));
 		return false;
 	}
 
 	const float VerticalDelta = FMath::Abs(DropLocation.Z - SlotLoc.Z);
 	if (VerticalDelta > HeightTolerance)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("VerticalDelta : %f"), VerticalDelta));
 		return false;
 	}
 
@@ -269,8 +267,8 @@ bool ARPPlacementSlot::IsInPlaceRangeAndScore(const AActor* Actor, const FVector
 	//		return false;
 	//	}
 	//}
-
-	// 단순 스코어: 수평 거리 + 수직 보정(가벼운 가중치)
+	
+	// 단순 스코어: 수평 거리 + 수직 보정
 	OutScore = HorizontalDist + VerticalDelta;
 
 	return true;

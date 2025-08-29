@@ -25,25 +25,6 @@ void URPHologramComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 }
 
-void URPHologramComponent::RefreshSlots()
-{
-	CachedAllSlots.Reset();
-
-	TArray<AActor*> Slots;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARPPlacementSlot::StaticClass(), Slots);
-	
-	CachedAllSlots.Reserve(Slots.Num());
-	for (AActor* Slot : Slots)
-	{
-		if (ARPPlacementSlot* PlacementSlot = Cast<ARPPlacementSlot>(Slot))
-		{
-			CachedAllSlots.Add(PlacementSlot);
-		}
-	}
-
-	FindAllMatchingSlots();
-}
-
 void URPHologramComponent::ActivateHologram()
 {
 	AActor* Owner = GetOwner();
@@ -101,7 +82,6 @@ bool URPHologramComponent::ConfirmInPlace(FTransform& OutTransform)
 	{
 		if (ClosestSlot->IsInPlaceRangeAndScore(Owner, Owner->GetActorLocation(), Score))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("Score : %f"), Score));
 			if (Score < 100.0f)
 			{
 				ClosestSlot->TryGetSnapTransform(Owner, OutTransform);
@@ -116,6 +96,25 @@ bool URPHologramComponent::ConfirmInPlace(FTransform& OutTransform)
 void URPHologramComponent::UpdateSlotOccupation()
 {
 	ClosestSlot->bIsOccupied = true;
+}
+
+void URPHologramComponent::RefreshSlots()
+{
+	CachedAllSlots.Reset();
+
+	TArray<AActor*> Slots;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARPPlacementSlot::StaticClass(), Slots);
+
+	CachedAllSlots.Reserve(Slots.Num());
+	for (AActor* Slot : Slots)
+	{
+		if (ARPPlacementSlot* PlacementSlot = Cast<ARPPlacementSlot>(Slot))
+		{
+			CachedAllSlots.Add(PlacementSlot);
+		}
+	}
+
+	FindAllMatchingSlots();
 }
 
 void URPHologramComponent::FindAllMatchingSlots()
@@ -173,4 +172,3 @@ void URPHologramComponent::PickClosestSlot()
 	
 	return;
 }
-

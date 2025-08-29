@@ -47,6 +47,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Placement|Components")
 	TObjectPtr<UArrowComponent> PlaceArrow;
 
+	// 홀로그램
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Placement|Hologram")
 	TObjectPtr<UStaticMeshComponent> StaticHologram;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Placement|Hologram")

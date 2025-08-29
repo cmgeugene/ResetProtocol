@@ -21,7 +21,7 @@ ARPTrap::ARPTrap()
 	RepairComp = CreateDefaultSubobject<URPRepairableComponent>(TEXT("RepairComp"));
 	RepairComp->SetIsReplicated(true);
 
-	bIsBroken = true;
+	bIsBroken = false;
 
 	ObjectType = EInteractObjectType::Trap;
 	ObjectName = "Trap";
@@ -48,28 +48,41 @@ void ARPTrap::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
 }
 
+void ARPTrap::AfterRepairProcess_Implementation()
+{
+}
+
+void ARPTrap::OnRep_IsBroken()
+{
+	if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
+	{
+		StaticMeshComp->SetVisibility(false);
+		BrokenMesh->SetVisibility(true);
+		ActiveMesh = BrokenMesh;
+
+		if (GlitchNoiseComp)
+		{
+			GlitchNoiseComp->GlitchMeshUpdate();
+		}
+
+		AfterBeginPlayProcess();
+	}
+}
+
 void ARPTrap::BeginPlay()
 {
 	Super::BeginPlay();
 
 	RootBox->SetSimulatePhysics(false);
 
-	int32 BrokenProbability = FMath::RandRange(0, 100);
-
-	if (BrokenProbability < 30)
+	if (HasAuthority())
 	{
-		if (StaticMeshComp && StaticMeshComp->GetStaticMesh())
+		int32 BrokenProbability = FMath::RandRange(0, 100);
+
+		if (BrokenProbability < 80)
 		{
-			StaticMeshComp->SetVisibility(false);
-			BrokenMesh->SetVisibility(true);
-			ActiveMesh = BrokenMesh;
-
-			if (GlitchNoiseComp)
-			{
-				GlitchNoiseComp->GlitchMeshUpdate();
-			}
-
 			bIsBroken = true;
+			OnRep_IsBroken();
 		}
 	}
 }

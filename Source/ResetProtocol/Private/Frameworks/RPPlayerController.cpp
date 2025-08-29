@@ -110,7 +110,6 @@ void ARPPlayerController::Client_ActivateHologram_Implementation(const AActor* G
 	{
 		return;
 	}
-
 	URPMovableComponent* MoveComp = GrabbedActor->FindComponentByClass<URPMovableComponent>();
 	if (!MoveComp)
 	{
@@ -130,7 +129,6 @@ void ARPPlayerController::Client_DeactivateHologram_Implementation(const AActor*
 	{
 		return;
 	}
-
 	URPMovableComponent* MoveComp = GrabbedActor->FindComponentByClass<URPMovableComponent>();
 	if (!MoveComp)
 	{
