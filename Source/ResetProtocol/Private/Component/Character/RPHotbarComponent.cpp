@@ -71,19 +71,35 @@ void URPHotbarComponent::Client_CreateHotbarWidget_Implementation(AController* C
 	}
 }
 
-bool URPHotbarComponent::Server_DropItem_Validate(const FCleaningToolData& DroppedItem)
+void URPHotbarComponent::Client_DropItem_Implementation()
 {
-	return DroppedItem.Class != nullptr;
+	if (CurrentSlotIndex == -1)
+		return;
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	FVector InteractEnd = PlayerCharacter->GetInteractorComponent()->GetInteractEnd();
+
+	TSubclassOf<ARPBaseCleaningTool> ActorClass = Inventory[CurrentSlotIndex].Class;
+	Server_SpawnCleaningTool(ActorClass, InteractEnd);
+
+	FCleaningToolData ItemData;
+	Inventory[CurrentSlotIndex] = ItemData;
+	
+	HotbarWidget->UpdateUI();
 }
 
-void URPHotbarComponent::Server_DropItem_Implementation(const FCleaningToolData& DroppedItem)
+void URPHotbarComponent::Server_SpawnCleaningTool_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass, FVector SpawnLocation)
 {
+	CurrentCleaningTool->Destroy();
+
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-	if (IsValid(DroppedItem.Class) && IsValid(PlayerCharacter))
+	if (IsValid(ActorClass) && IsValid(PlayerCharacter))
 	{
-		GetWorld()->SpawnActor<ARPTestItemActor>(DroppedItem.Class, PlayerCharacter->GetInteractorComponent()->GetInteractEnd(), FRotator::ZeroRotator);
+		ARPBaseCleaningTool* DropedCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, SpawnLocation, FRotator::ZeroRotator);
+		DropedCleaningTool->Server_SetPurchaseState(EPurchaseState::Purchased);
 	}
+
+	PlayerCharacter->Server_UpdateInventory();
 }
 
 void URPHotbarComponent::OnRep_Inventory()
@@ -296,3 +312,12 @@ void URPHotbarComponent::FillInventory_Implementation()
 	}
 }
 
+void URPHotbarComponent::SetCurrentIndex_Implementation(int Index)
+{
+	CurrentSlotIndex = Index;
+}
+
+void URPHotbarComponent::UpdateUI_Implementation()
+{
+	HotbarWidget->UpdateUI();
+}

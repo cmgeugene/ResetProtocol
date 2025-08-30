@@ -88,6 +88,8 @@ public:
 protected:
 	void SetOwnerInteractHitResult();
 
+	
+
 public:
 	UFUNCTION(Client, Reliable)
 	void ShowRedialTimerWidget(bool IsVisibility, float Time = 0.0f);

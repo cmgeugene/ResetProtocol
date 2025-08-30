@@ -34,6 +34,11 @@ void ARPBaseCleaningTool::Tick(float DeltaTime)
 
 }
 
+void ARPBaseCleaningTool::Server_SetPurchaseState_Implementation(EPurchaseState State)
+{
+	ePurchaseState = State;
+}
+
 void ARPBaseCleaningTool::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

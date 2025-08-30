@@ -49,6 +49,9 @@ public:
 	UStaticMeshComponent* GetMesh() { return StaticMeshComp; }
 
 	EPurchaseState GetPurchaseState() { return ePurchaseState; }
+	
+	UFUNCTION(Server, Reliable)
+	void Server_SetPurchaseState(EPurchaseState State);
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

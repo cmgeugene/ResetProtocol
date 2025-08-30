@@ -39,6 +39,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ARPBaseCleaningTool* GetCurrentCleaningTool() { return CurrentCleaningTool; }
 
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void SetCurrentIndex(int Index);
+
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void UpdateUI();
+
 // Widget
 public:
 	UFUNCTION(Client, Reliable)
@@ -46,8 +52,11 @@ public:
 
 // Inventory Function
 public:
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_DropItem(const FCleaningToolData& DroppedItem);
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void Client_DropItem();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_SpawnCleaningTool(TSubclassOf<ARPBaseCleaningTool> ActorClass, FVector SpawnLocation);
 
 	UFUNCTION()
 	void OnRep_Inventory();

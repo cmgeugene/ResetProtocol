@@ -17,7 +17,7 @@ void URPHotbarSlot::SetData(const FCleaningToolData& _ItemData, int _SlotIndexs)
 	ItemData = _ItemData;
 	SlotIndexs = _SlotIndexs;
 
-	if (IsValid(_ItemData.Icon))
+	if (IsValid(_ItemData.Class))
 	{
 		IconImage->SetBrushFromTexture(_ItemData.Icon);
 		IconImage->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
