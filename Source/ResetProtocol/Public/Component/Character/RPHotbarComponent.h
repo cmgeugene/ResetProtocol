@@ -60,7 +60,7 @@ public:
 	UFUNCTION()
 	bool CheckInventoryFull();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void FillInventory();
 
 // Item

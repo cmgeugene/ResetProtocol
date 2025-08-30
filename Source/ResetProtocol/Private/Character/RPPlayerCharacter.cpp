@@ -23,14 +23,7 @@ void ARPPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-	if (IsValid(PlayerController) && PlayerController->IsLocalController())
-	{
-		InteractorComponent->CreateInteractWidget(GetController());
-		InventoryComponent->CreateInventoryWidget(GetController());
-		HotbarComponent->Client_CreateHotbarWidget(GetController());
-	}
 }
 
 void ARPPlayerCharacter::Tick(float DeltaTime)
@@ -50,6 +43,18 @@ void ARPPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARPPlayerCharacter, PlayerInfo);
+}
+
+void ARPPlayerCharacter::CreateComponentWidget()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (IsValid(PlayerController) && PlayerController->IsLocalController())
+	{
+		InteractorComponent->CreateInteractWidget(GetController());
+		InventoryComponent->CreateInventoryWidget(GetController());
+		HotbarComponent->Client_CreateHotbarWidget(GetController());
+	}
 }
 
 bool ARPPlayerCharacter::SpendBytes(int Bytes)

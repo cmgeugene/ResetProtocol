@@ -285,7 +285,7 @@ bool URPHotbarComponent::CheckInventoryFull()
 	return false;
 }
 
-void URPHotbarComponent::FillInventory()
+void URPHotbarComponent::FillInventory_Implementation()
 {
 	if (GetOwner()->HasAuthority())
 	{

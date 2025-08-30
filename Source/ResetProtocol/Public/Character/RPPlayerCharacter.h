@@ -43,6 +43,9 @@ public:
 
 	FPlayerInfo GetPlayerInfo() { return PlayerInfo; }
 
+	UFUNCTION(BlueprintCallable)
+	void CreateComponentWidget();
+
 public:
 	UFUNCTION(BlueprintCallable)
 	bool SpendBytes(int Bytes);

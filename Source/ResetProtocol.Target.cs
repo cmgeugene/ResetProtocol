@@ -11,5 +11,8 @@ public class ResetProtocolTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("ResetProtocol");
-	}
+
+        bOverrideBuildEnvironment = true;
+        AdditionalCompilerArguments = "/Zm500"; // PCH heap limit ´Ã¸®±â (±âº» 100)
+    }
 }
