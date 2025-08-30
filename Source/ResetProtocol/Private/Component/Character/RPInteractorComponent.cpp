@@ -182,7 +182,6 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 					TargetActor->Destroy();
 				}
 
-				PlayerCharacter->Server_UpdateInventory();
 
 			}
 		}

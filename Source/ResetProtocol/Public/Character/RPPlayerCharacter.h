@@ -73,10 +73,10 @@ public:
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void SyncInventory();
+	void SyncInventory(const TArray<FCleaningToolData>& InventoryData);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPGameState")
-	void Server_UpdateInventory();
+	void Server_UpdateInventory(const TArray<FCleaningToolData>& InventoryData);
 
 
 // Component

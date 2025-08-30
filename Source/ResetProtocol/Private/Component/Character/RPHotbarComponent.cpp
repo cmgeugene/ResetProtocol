@@ -84,6 +84,7 @@ void URPHotbarComponent::Client_DropItem_Implementation()
 	FCleaningToolData ItemData;
 	Inventory[CurrentSlotIndex] = ItemData;
 	
+	PlayerCharacter->Server_UpdateInventory(Inventory);
 	HotbarWidget->UpdateUI();
 }
 
@@ -98,8 +99,6 @@ void URPHotbarComponent::Server_SpawnCleaningTool_Implementation(TSubclassOf<ARP
 		ARPBaseCleaningTool* DropedCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, SpawnLocation, FRotator::ZeroRotator);
 		DropedCleaningTool->Server_SetPurchaseState(EPurchaseState::Purchased);
 	}
-
-	PlayerCharacter->Server_UpdateInventory();
 }
 
 void URPHotbarComponent::OnRep_Inventory()
@@ -281,6 +280,7 @@ void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& 
 				}
 				return;
 			}
+			PlayerCharacter->Server_UpdateInventory(Inventory);
 
 		}
 	}

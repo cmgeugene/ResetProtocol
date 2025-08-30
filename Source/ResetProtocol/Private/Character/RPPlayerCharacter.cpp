@@ -91,11 +91,11 @@ void ARPPlayerCharacter::Server_UpdatePlayerInfo_Implementation()
 }
 
 
-void ARPPlayerCharacter::Server_UpdateInventory_Implementation()
+void ARPPlayerCharacter::Server_UpdateInventory_Implementation(const TArray<FCleaningToolData>& InventoryData)
 {
 	if (HasAuthority())
 	{
-		SyncInventory();
+		SyncInventory(InventoryData);
 	}
 }
 
