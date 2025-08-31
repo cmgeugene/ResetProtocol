@@ -10,9 +10,8 @@
 #include "Components/Image.h"
 #include "Components/Button.h"
 #include "Components/Overlay.h"
+#include "Components/ProgressBar.h"
 #include "RPHotbarSlot.generated.h"
-
-
 
 UCLASS()
 class RESETPROTOCOL_API URPHotbarSlot : public UUserWidget
@@ -40,9 +39,6 @@ protected:
 	UTextBlock* Text_KeyIndex;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Text_Durability;
-
-	UPROPERTY(meta = (BindWidget))
 	UButton* Button_Slot;
 
 	UPROPERTY(meta = (BindWidget))
@@ -53,6 +49,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* IconImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DurabilityBar;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	FCleaningToolData ItemData;

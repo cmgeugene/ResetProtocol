@@ -1,5 +1,7 @@
 #include "UI/Inventory/RPHotbarSlot.h"
 #include "Styling/SlateBrush.h"
+#include "CleaningTool/RPBaseCleaningTool.h"
+
 
 URPHotbarSlot::URPHotbarSlot(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -22,16 +24,21 @@ void URPHotbarSlot::SetData(const FCleaningToolData& _ItemData, int _SlotIndexs)
 		IconImage->SetBrushFromTexture(_ItemData.Icon);
 		IconImage->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
 
+		float Percent = (float)_ItemData.CurrentDurability / (float)_ItemData.Durability;
+		DurabilityBar->SetPercent(Percent);
+		DurabilityBar->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		IconImage->SetBrushFromTexture(nullptr);
 		IconImage->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
-
+		DurabilityBar->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	Text_KeyIndex->SetText(FText::AsNumber(SlotIndexs));
-	Text_Durability->SetText(FText::AsNumber(ItemData.Durability));
+
+
+	Text_KeyIndex->SetText(FText::AsNumber(SlotIndexs + 1));
+	
 }
 
 void URPHotbarSlot::HighlightOn()

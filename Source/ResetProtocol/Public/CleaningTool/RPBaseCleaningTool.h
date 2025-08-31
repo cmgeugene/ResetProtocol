@@ -1,8 +1,9 @@
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RPBaseCleaningTool.generated.h"
+
+class URPCleaningToolData;
 
 UENUM(BlueprintType)
 enum class ECleaningToolState : uint8
@@ -76,4 +77,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Variable")
 	int Durability;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	URPCleaningToolData* ItemDataBase;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Variable")
+	FName ItemName;
 };

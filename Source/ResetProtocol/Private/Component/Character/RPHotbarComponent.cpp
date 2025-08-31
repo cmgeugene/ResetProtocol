@@ -79,7 +79,7 @@ void URPHotbarComponent::Client_DropItem_Implementation()
 	FVector InteractEnd = PlayerCharacter->GetInteractorComponent()->GetInteractEnd();
 
 	TSubclassOf<ARPBaseCleaningTool> ActorClass = Inventory[CurrentSlotIndex].Class;
-	Server_SpawnCleaningTool(ActorClass, Inventory[CurrentSlotIndex].Durability, InteractEnd);
+	Server_SpawnCleaningTool(ActorClass, Inventory[CurrentSlotIndex].CurrentDurability, InteractEnd);
 
 	Inventory[CurrentSlotIndex] = FCleaningToolData();
 	
@@ -259,8 +259,8 @@ void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& 
 		if (!IsValid(Inventory[i].Class))
 		{
 			Inventory[i] = Data;
-			Inventory[i].Durability = Durability;
-			Server_SetCleaningToolDurability(i, Inventory[i].Durability);
+			Inventory[i].CurrentDurability = Durability;
+			Server_SetCleaningToolDurability(i, Inventory[i].CurrentDurability);
 			PlayerCharacter->Server_UpdateInventory(Inventory);
 			
 			if (PlayerCharacter->IsLocallyControlled())
@@ -327,17 +327,18 @@ void URPHotbarComponent::UpdateUI_Implementation()
 
 void URPHotbarComponent::Client_DecresedDurability_Implementation()
 {
-	if (Inventory[CurrentSlotIndex].Durability < 1)
+	if (Inventory[CurrentSlotIndex].CurrentDurability < 1)
 		return;
 
-	Inventory[CurrentSlotIndex].Durability--;
+	Inventory[CurrentSlotIndex].CurrentDurability--;
 	HotbarWidget->UpdateUI();
-	Server_SetCleaningToolDurability(CurrentSlotIndex, Inventory[CurrentSlotIndex].Durability);
+	HotbarWidget->OnHighlight(CurrentSlotIndex, CurrentSlotIndex);
+	Server_SetCleaningToolDurability(CurrentSlotIndex, Inventory[CurrentSlotIndex].CurrentDurability);
 }
 
 void URPHotbarComponent::Server_SetCleaningToolDurability_Implementation(int Index, int Durability)
 {
-	Inventory[Index].Durability = Durability;
+	Inventory[Index].CurrentDurability = Durability;
 
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	PlayerCharacter->Server_UpdateInventory(Inventory);
@@ -345,7 +346,7 @@ void URPHotbarComponent::Server_SetCleaningToolDurability_Implementation(int Ind
 
 bool URPHotbarComponent::CheckDurability()
 {
-	if (Inventory[CurrentSlotIndex].Durability > 0)
+	if (Inventory[CurrentSlotIndex].CurrentDurability > 0)
 		return true;
 	else
 		return false;

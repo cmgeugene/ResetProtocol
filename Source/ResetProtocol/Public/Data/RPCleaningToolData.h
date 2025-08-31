@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -26,6 +24,9 @@ struct FCleaningToolData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Durability;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentDurability;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Icon = nullptr;

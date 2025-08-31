@@ -1,5 +1,6 @@
 #include "CleaningTool/RPBaseCleaningTool.h"
 #include "Net/UnrealNetwork.h"
+#include "Data/RPCleaningToolData.h"
 
 ARPBaseCleaningTool::ARPBaseCleaningTool()
 	:	Durability(30)
@@ -26,8 +27,17 @@ void ARPBaseCleaningTool::BeginPlay()
 	Super::BeginPlay();
 
 	ePurchaseState = EPurchaseState::NotPurchased;
-	
-}
+
+
+	FCleaningToolData* Data = ItemDataBase->Items.FindByPredicate(
+		[&](const FCleaningToolData& ItemData)
+		{
+			return ItemData.ItemName == ItemName;
+		});
+
+	Durability = Data->Durability;
+}	
+
 
 void ARPBaseCleaningTool::Tick(float DeltaTime)
 {
