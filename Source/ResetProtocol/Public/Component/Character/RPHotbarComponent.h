@@ -56,7 +56,7 @@ public:
 	void Client_DropItem();
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void Server_SpawnCleaningTool(TSubclassOf<ARPBaseCleaningTool> ActorClass, FVector SpawnLocation);
+	void Server_SpawnCleaningTool(TSubclassOf<ARPBaseCleaningTool> ActorClass, int Durability, FVector SpawnLocation);
 
 	UFUNCTION()
 	void OnRep_Inventory();
@@ -64,7 +64,7 @@ public:
 	void OnRep_CurrentCleaningTool();
 
 	UFUNCTION(Client, Reliable, BlueprintCallable)
-	void Client_AddItem(const FCleaningToolData& Data);
+	void Client_AddItem(const FCleaningToolData& Data, int Durability);
 
 	UFUNCTION()
 	bool CheckInventoryFull();
@@ -89,6 +89,14 @@ public:
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_UnEquip();
 
+	UFUNCTION(Client, Reliable)
+	void Client_DecresedDurability();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetCleaningToolDurability(int Index, int Durability);
+
+	UFUNCTION()
+	bool CheckDurability();
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int TotalItems;

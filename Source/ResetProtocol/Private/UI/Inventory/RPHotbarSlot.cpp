@@ -31,6 +31,7 @@ void URPHotbarSlot::SetData(const FCleaningToolData& _ItemData, int _SlotIndexs)
 	}
 
 	Text_KeyIndex->SetText(FText::AsNumber(SlotIndexs));
+	Text_Durability->SetText(FText::AsNumber(ItemData.Durability));
 }
 
 void URPHotbarSlot::HighlightOn()

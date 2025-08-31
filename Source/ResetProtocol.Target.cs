@@ -13,6 +13,6 @@ public class ResetProtocolTarget : TargetRules
 		ExtraModuleNames.Add("ResetProtocol");
 
         bOverrideBuildEnvironment = true;
-        AdditionalCompilerArguments = "/Zm500"; // PCH heap limit ´Ã¸®±â (±âº» 100)
+		AdditionalCompilerArguments = "/Zm500";
     }
 }

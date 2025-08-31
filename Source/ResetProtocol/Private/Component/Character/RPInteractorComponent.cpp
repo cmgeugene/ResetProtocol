@@ -170,14 +170,14 @@ void URPInteractorComponent::Server_PickUpItem_Implementation(ARPBaseCleaningToo
 
 					if (PlayerCharacter->SpendBytes(Price))
 					{
-						PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data);
+						PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data, TargetActor->GetDurability());
 
 						TargetActor->Destroy();
 					}
 				}
 				else
 				{
-					PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data);
+					PlayerCharacter->GetHotbarComponent()->Client_AddItem(*Data, TargetActor->GetDurability());
 
 					TargetActor->Destroy();
 				}
@@ -237,8 +237,12 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 				{
 					if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Mop)
 					{
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Clean Stain"));
-						IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+						if (PlayerCharacter->GetHotbarComponent()->CheckDurability())
+						{
+							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Clean Stain"));
+							IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+							PlayerCharacter->GetHotbarComponent()->Client_DecresedDurability();
+						}
 					}
 				}
 			}
@@ -397,11 +401,15 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 		{
 			if (HoldingActor->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
 			{
-				IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
-				IsHoldingItem = false;
-				HoldingActor = nullptr;
+				if (PlayerCharacter->GetHotbarComponent()->CheckDurability())
+				{
+					IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+					IsHoldingItem = false;
+					HoldingActor = nullptr;
 
-				ShowRedialTimerWidget(false);
+					ShowRedialTimerWidget(false);
+					PlayerCharacter->GetHotbarComponent()->Client_DecresedDurability();
+				}
 			}
 		}
 	}
@@ -415,11 +423,11 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 	}
 
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
-	const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
-	if (Distance > InteractionRange)
-	{
-		return;
-	}
+	//const float Distance = FVector::Dist(PlayerCharacter->GetActorLocation(), Target->GetActorLocation());
+	//if (Distance > InteractionRange)
+	//{
+	//	return;
+	//}
 
 	if (IsValid(PlayerCharacter) && HoldingActor == nullptr)
 	{

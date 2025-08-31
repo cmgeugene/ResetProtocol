@@ -79,16 +79,15 @@ void URPHotbarComponent::Client_DropItem_Implementation()
 	FVector InteractEnd = PlayerCharacter->GetInteractorComponent()->GetInteractEnd();
 
 	TSubclassOf<ARPBaseCleaningTool> ActorClass = Inventory[CurrentSlotIndex].Class;
-	Server_SpawnCleaningTool(ActorClass, InteractEnd);
+	Server_SpawnCleaningTool(ActorClass, Inventory[CurrentSlotIndex].Durability, InteractEnd);
 
-	FCleaningToolData ItemData;
-	Inventory[CurrentSlotIndex] = ItemData;
+	Inventory[CurrentSlotIndex] = FCleaningToolData();
 	
 	PlayerCharacter->Server_UpdateInventory(Inventory);
 	HotbarWidget->UpdateUI();
 }
 
-void URPHotbarComponent::Server_SpawnCleaningTool_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass, FVector SpawnLocation)
+void URPHotbarComponent::Server_SpawnCleaningTool_Implementation(TSubclassOf<ARPBaseCleaningTool> ActorClass, int Durability, FVector SpawnLocation)
 {
 	CurrentCleaningTool->Destroy();
 
@@ -98,6 +97,7 @@ void URPHotbarComponent::Server_SpawnCleaningTool_Implementation(TSubclassOf<ARP
 	{
 		ARPBaseCleaningTool* DropedCleaningTool = GetWorld()->SpawnActor<ARPBaseCleaningTool>(ActorClass, SpawnLocation, FRotator::ZeroRotator);
 		DropedCleaningTool->Server_SetPurchaseState(EPurchaseState::Purchased);
+		DropedCleaningTool->SetDurability(Durability);
 	}
 }
 
@@ -246,7 +246,7 @@ void URPHotbarComponent::Client_UnEquip_Implementation()
 	CurrentSlotIndex = -1;
 }
 
-void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& Data)
+void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& Data, int Durability)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (!IsValid(PlayerCharacter))
@@ -259,6 +259,10 @@ void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& 
 		if (!IsValid(Inventory[i].Class))
 		{
 			Inventory[i] = Data;
+			Inventory[i].Durability = Durability;
+			Server_SetCleaningToolDurability(i, Inventory[i].Durability);
+			PlayerCharacter->Server_UpdateInventory(Inventory);
+			
 			if (PlayerCharacter->IsLocallyControlled())
 			{
 				HotbarWidget->UpdateUI();
@@ -280,7 +284,6 @@ void URPHotbarComponent::Client_AddItem_Implementation(const FCleaningToolData& 
 				}
 				return;
 			}
-			PlayerCharacter->Server_UpdateInventory(Inventory);
 
 		}
 	}
@@ -320,4 +323,30 @@ void URPHotbarComponent::SetCurrentIndex_Implementation(int Index)
 void URPHotbarComponent::UpdateUI_Implementation()
 {
 	HotbarWidget->UpdateUI();
+}
+
+void URPHotbarComponent::Client_DecresedDurability_Implementation()
+{
+	if (Inventory[CurrentSlotIndex].Durability < 1)
+		return;
+
+	Inventory[CurrentSlotIndex].Durability--;
+	HotbarWidget->UpdateUI();
+	Server_SetCleaningToolDurability(CurrentSlotIndex, Inventory[CurrentSlotIndex].Durability);
+}
+
+void URPHotbarComponent::Server_SetCleaningToolDurability_Implementation(int Index, int Durability)
+{
+	Inventory[Index].Durability = Durability;
+
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
+	PlayerCharacter->Server_UpdateInventory(Inventory);
+}	
+
+bool URPHotbarComponent::CheckDurability()
+{
+	if (Inventory[CurrentSlotIndex].Durability > 0)
+		return true;
+	else
+		return false;
 }

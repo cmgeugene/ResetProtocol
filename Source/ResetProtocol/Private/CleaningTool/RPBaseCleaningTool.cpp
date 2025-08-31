@@ -2,6 +2,7 @@
 #include "Net/UnrealNetwork.h"
 
 ARPBaseCleaningTool::ARPBaseCleaningTool()
+	:	Durability(30)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bAlwaysRelevant = true;

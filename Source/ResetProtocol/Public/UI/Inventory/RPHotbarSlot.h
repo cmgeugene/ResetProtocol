@@ -40,6 +40,9 @@ protected:
 	UTextBlock* Text_KeyIndex;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Text_Durability;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* Button_Slot;
 
 	UPROPERTY(meta = (BindWidget))

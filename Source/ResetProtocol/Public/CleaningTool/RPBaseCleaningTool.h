@@ -50,6 +50,10 @@ public:
 
 	EPurchaseState GetPurchaseState() { return ePurchaseState; }
 	
+	int GetDurability() { return Durability; }
+
+	void SetDurability(int _Durability) { Durability = _Durability; }
+
 	UFUNCTION(Server, Reliable)
 	void Server_SetPurchaseState(EPurchaseState State);
 
@@ -69,4 +73,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Variable")
 	EPurchaseState ePurchaseState;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Variable")
+	int Durability;
 };

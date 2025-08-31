@@ -25,10 +25,13 @@ struct FCleaningToolData
 	int Price;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* Icon;
+	int Durability;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<ARPBaseCleaningTool> Class;
+	UTexture2D* Icon = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<ARPBaseCleaningTool> Class = nullptr;
 };
 
 FORCEINLINE bool operator==(const FCleaningToolData& A, const FCleaningToolData& B)
