@@ -121,22 +121,44 @@ void URPHotbarComponent::OnRep_CurrentCleaningTool()
 
 		if (IsValid(ChildMesh))
 		{
-			if (ChildMesh->DoesSocketExist(FName("CleaningToolSocket")))
+			CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
+			CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+			CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
+			CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
+			
+			ECleaningToolState CleaningToolState = CurrentCleaningTool->GetCleaningToolState();
+
+			if (CleaningToolState == ECleaningToolState::Broom)
 			{
-				CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
-				CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-				CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-				FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
-				CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
-				
-				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true); // Snap + KeepRelative
-				CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("CleaningToolSocket"));
-
-				FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
-
-				CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
+				if (ChildMesh->DoesSocketExist(FName("BroomSocket")))
+				{
+					FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+					CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("BroomSocket"));
+				}
 			}
+			else if (CleaningToolState == ECleaningToolState::Mop)
+			{
+				if (ChildMesh->DoesSocketExist(FName("MopSocket")))
+				{
+					FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+					CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("MopSocket"));
+				}
+			}
+			else if (CleaningToolState == ECleaningToolState::Hammer)
+			{
+				if (ChildMesh->DoesSocketExist(FName("HammerSocket")))
+				{
+					FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+					CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("HammerSocket"));
+				}
+			}
+
+			FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
+
+			CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
+			
 		}
 	}
 }
@@ -156,25 +178,48 @@ void URPHotbarComponent::Server_SpawnActor_Implementation(TSubclassOf<ARPBaseCle
 	USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(
 		PlayerCharacter->GetDefaultSubobjectByName(TEXT("RTG_Character"))
 	);
+		
 
 	if (IsValid(ChildMesh))
 	{
-		if (ChildMesh->DoesSocketExist(FName("CleaningToolSocket")))
+
+		CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
+		CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+		CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
+		CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
+
+		ECleaningToolState CleaningToolState = CurrentCleaningTool->GetCleaningToolState();
+
+		if (CleaningToolState == ECleaningToolState::Broom)
 		{
-			CurrentCleaningTool->GetMesh()->SetSimulatePhysics(false);
-			CurrentCleaningTool->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-			CurrentCleaningTool->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-			FVector Scale = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeScale3D();
-			CurrentCleaningTool->GetMesh()->SetRelativeScale3D(Scale);
-
-			FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true); // Snap + KeepRelative
-			CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("CleaningToolSocket"));
-
-			FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
-
-			CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
+			if (ChildMesh->DoesSocketExist(FName("BroomSocket")))
+			{
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+				CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("BroomSocket"));
+			}
 		}
+		else if (CleaningToolState == ECleaningToolState::Mop)
+		{
+			if (ChildMesh->DoesSocketExist(FName("MopSocket")))
+			{
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+				CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("MopSocket"));
+			}
+		}
+		else if (CleaningToolState == ECleaningToolState::Hammer)
+		{
+			if (ChildMesh->DoesSocketExist(FName("HammerSocket")))
+			{
+				FAttachmentTransformRules AttachRules(EAttachmentRule::SnapToTarget, true);
+				CurrentCleaningTool->GetMesh()->AttachToComponent(ChildMesh, AttachRules, FName("HammerSocket"));
+			}
+		}
+
+		FTransform Transform = CurrentCleaningTool->GetClass()->GetDefaultObject<ARPBaseCleaningTool>()->GetMesh()->GetRelativeTransform();
+
+		CurrentCleaningTool->GetMesh()->SetRelativeTransform(Transform);
 	}
 }
 
