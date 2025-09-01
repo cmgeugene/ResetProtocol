@@ -41,7 +41,7 @@ private:
 	void RunInitialSpawn();
 	// 각 포인트에서 랜덤으로 스폰
 	bool SpawnFromPoint(ARPSpawnPoint* Point, FRandomStream& Stream);
-	bool FindSpawnTransform(ARPSpawnPoint* Point, FTransform& Out) const;
+	bool FindSpawnTransform(ARPSpawnPoint* Point, UClass* SpawnActorClass, FTransform& Out) const;
 	bool GetIsBugged() const;
 
 public:
