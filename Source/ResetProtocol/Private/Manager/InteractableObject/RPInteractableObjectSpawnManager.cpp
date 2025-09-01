@@ -3,6 +3,7 @@
 #include "Manager/InteractableObject/RPInteractableObjectSpawnManager.h"
 #include "Manager/InteractableObject/RPSpawnGroupAsset.h"
 #include "Manager/InteractableObject/RPSpawnPoint.h"
+#include "InteractableObject/RPCorpse.h"
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -221,16 +222,16 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 
 	// 스폰 위치
 	FTransform SpawnTransform;
-	if (!FindSpawnTransform(Point, SpawnTransform))
+	if (!FindSpawnTransform(Point, SpawnActorClass, SpawnTransform))
 	{
 		return false;
 	}
 
 	// 스폰 Param : Owner 설정
-	FActorSpawnParameters Params;
-	Params.Owner = this;
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
+	//FActorSpawnParameters Params;
+	//Params.Owner = this;
+	//Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	//
 	//AActor* SpawnActor = GetWorld()->SpawnActor<AActor>(SpawnActorClass, SpawnTransform, Params);
 	//if (!SpawnActor)
 	//{
@@ -260,7 +261,7 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	return true;
 }
 
-bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point, FTransform& Out) const
+bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point, UClass* SpawnActorClass, FTransform& Out) const
 {
 	FVector PointLocation = Point->GetActorLocation();
 	FRotator PointRotation = Point->GetActorRotation();
@@ -270,11 +271,15 @@ bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point,
 	Params.AddIgnoredActor(Point);
 	Params.AddIgnoredActor(this);
 
-	const FVector Start = PointLocation + FVector(0, 0, 150);
-	const FVector End = PointLocation - FVector(0, 0, 200);
+	const FVector Start = PointLocation + FVector(0, 0, 50);
+	const FVector End = PointLocation - FVector(0, 0, 100);
 	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
 	{
 		PointLocation = Hit.ImpactPoint;
+		if (SpawnActorClass == ARPCorpse::StaticClass())
+		{
+			PointLocation += FVector(0, 0, 40);
+		}
 	}
 
 	// 스폰 자리에서 충돌 체크
