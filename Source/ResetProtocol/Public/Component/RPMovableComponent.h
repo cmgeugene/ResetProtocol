@@ -43,6 +43,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_RootMode();
+	UFUNCTION()
+	void OnRep_CanHold();
 
 private:
 	void ApplyRootSwap(ERPRootMode Mode, UPrimitiveComponent* NewRoot, UPrimitiveComponent* Other);
@@ -85,7 +87,7 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bIsHeld;
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = "OnRep_CanHold")
 	bool bCanHold;
 
 	// 사용자 누적 회전 (deg, -180~180 정규화)
