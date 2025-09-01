@@ -44,7 +44,7 @@ public:
 	void InteractCheck();
 
 	UFUNCTION(BlueprintCallable, Category = "Interact")
-	void PickUpItem();
+	bool PickUpItem();
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PickUpItem(ARPBaseCleaningTool* TargetActor);
 

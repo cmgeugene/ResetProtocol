@@ -78,6 +78,12 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPGameState")
 	void Server_UpdateInventory(const TArray<FCleaningToolData>& InventoryData);
 
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayRepairAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopRepairAnimation();
 
 // Component
 protected:

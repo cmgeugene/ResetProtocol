@@ -105,10 +105,10 @@ void URPInteractorComponent::CreateInteractWidget(AController* Controller)
 	}
 }
 
-void URPInteractorComponent::PickUpItem()
+bool URPInteractorComponent::PickUpItem()
 {
 	if (IsStoreWidgetVisible)
-		return;
+		return false;
 
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 	if (IsValid(PlayerCharacter))
@@ -118,6 +118,8 @@ void URPInteractorComponent::PickUpItem()
 		if (IsValid(CleaningTool))
 		{
 			Server_PickUpItem(CleaningTool);
+
+			return true;
 		}
 
 		ARPCleaningStore* CleaningStore = Cast<ARPCleaningStore>(PlayerCharacter->GetHitResult().GetActor());
@@ -137,9 +139,12 @@ void URPInteractorComponent::PickUpItem()
 				PC->SetInputMode(InputMode);
 				PC->bShowMouseCursor = true;
 			}
+			return false;
 		}
 
 	}
+
+	return false;
 }
 
 bool URPInteractorComponent::Server_PickUpItem_Validate(ARPBaseCleaningTool* TargetActor)
@@ -407,6 +412,8 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 					IsHoldingItem = false;
 					HoldingActor = nullptr;
 
+					PlayerCharacter->StopRepairAnimation();
+
 					ShowRedialTimerWidget(false);
 					PlayerCharacter->GetHotbarComponent()->Client_DecresedDurability();
 				}
@@ -448,6 +455,8 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 					IsHoldingItem = true;
 					HoldingActor = InteractableObject;
 
+					PlayerCharacter->PlayRepairAnimation();
+
 					GetWorld()->GetTimerManager().SetTimer(
 						KeyHoldTimerHandle,
 						this,
@@ -471,6 +480,8 @@ void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 		KeyHoldTimerHandle.Invalidate();
 		IsHoldingItem = false;
 		HoldingActor = nullptr;
+
+		PlayerCharacter->StopRepairAnimation();
 
 		ShowRedialTimerWidget(false);
 	}
