@@ -138,6 +138,7 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 		}
 		if (SpawnPoint->SpawnGroupTags.IsEmpty())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Tag Empty : %s"), *SpawnPoint->SpawnPointId.ToString());
 			continue;
 		}
 
@@ -156,6 +157,7 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 				{
 					if (!SpawnPointTag.IsValid())
 					{
+						UE_LOG(LogTemp, Warning, TEXT("Tag is Invalid : %s"), *SpawnPoint->SpawnPointId.ToString());
 						continue;
 					}
 
@@ -164,6 +166,7 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 					{
 						if (!Group)
 						{
+							UE_LOG(LogTemp, Warning, TEXT("Asset Manager doesn't have Group : %s"), *SpawnPoint->SpawnPointId.ToString());
 							continue;
 						}
 
@@ -172,6 +175,7 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 
 						if (!bMatch)
 						{
+							UE_LOG(LogTemp, Warning, TEXT("There is no matching tags / Point Tag = %s, Manager Tag = %s"), *SpawnPointTag.GetTagName().ToString(), *Group->GroupTag.GetTagName().ToString());
 							continue;
 						}
 
@@ -179,6 +183,7 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 						{
 							if (IsValid(SpawnClass))
 							{
+								UE_LOG(LogTemp, Warning, TEXT("Add to Candidate : %s"), *SpawnClass->StaticClass()->GetName());
 								SpawnPoint->CachedSpawnCandidateClasses.AddUnique(SpawnClass);
 							}
 						}
@@ -209,6 +214,7 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	const TArray<TSubclassOf<AActor>>& SpawnPool = Point->CachedSpawnCandidateClasses;
 	if (SpawnPool.IsEmpty())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Spawn Fail : %s"), *Point->SpawnPointId.ToString()));
 		return false;
 	}
 
@@ -217,6 +223,7 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	UClass* SpawnActorClass = SpawnPool[Pick].Get();
 	if (!SpawnActorClass)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Spawn Fail : %s"), *Point->SpawnPointId.ToString()));
 		return false;
 	}
 
@@ -224,6 +231,7 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	FTransform SpawnTransform;
 	if (!FindSpawnTransform(Point, SpawnActorClass, SpawnTransform))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Spawn Fail : %s"), *Point->SpawnPointId.ToString()));
 		return false;
 	}
 
@@ -241,11 +249,13 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	AActor* SpawnActor = GetWorld()->SpawnActorDeferred<AActor>(SpawnActorClass, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 	if (!SpawnActor)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Spawn Fail : %s"), *Point->SpawnPointId.ToString()));
 		return false;
 	}
 	ARPBaseInteractableObject* BaseObject = Cast<ARPBaseInteractableObject>(SpawnActor);
 	if(!BaseObject)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Spawn Fail : %s"), *Point->SpawnPointId.ToString()));
 		return false;
 	}
 
@@ -318,4 +328,8 @@ void ARPInteractableObjectSpawnManager::HandleSpawnedActorDestroyed(AActor* Dest
 		PointCounts[*SpawnPoint] = FMath::Max(0, PointCounts[*SpawnPoint] - 1);
 		SpawnedToPoint.Remove(DestroyedActor);
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[SpawnDbg] Destroyed %s at %s (Age? N/A)"),
+		*GetNameSafe(DestroyedActor),
+		*DestroyedActor->GetActorLocation().ToString());
 }
