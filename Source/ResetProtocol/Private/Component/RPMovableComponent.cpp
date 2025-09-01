@@ -44,6 +44,7 @@ void URPMovableComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(URPMovableComponent, bIsHeld);
 	DOREPLIFETIME(URPMovableComponent, RootMode);
+	DOREPLIFETIME(URPMovableComponent, bCanHold);
 	DOREPLIFETIME(URPMovableComponent, UserYawDeg);
 	DOREPLIFETIME(URPMovableComponent, UserPitchDeg);
 }
@@ -304,6 +305,20 @@ void URPMovableComponent::OnRep_RootMode()
 	
 }
 
+void URPMovableComponent::OnRep_CanHold()
+{
+	if (bCanHold == false)
+	{
+		ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner());
+		if (!OwnerActor)
+		{
+			return;
+		}
+
+		OwnerActor->RootBox->SetSimulatePhysics(false);
+	}
+}
+
 void URPMovableComponent::ApplyRootSwap(ERPRootMode Mode, UPrimitiveComponent* NewRoot, UPrimitiveComponent* Other)
 {	
 	if (!NewRoot || !Other)
@@ -526,17 +541,26 @@ void URPMovableComponent::OnDropStart()
 	{
 		return;
 	}
+	ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner());
+	if(!OwnerActor)
+	{
+		return;
+	}
 
 	// Hologram 관련 처리
 	FTransform DropTransform = FTransform::Identity;
 	if (HologramComp->ConfirmInPlace(DropTransform))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("ConfirmInPlace"));
-
-		OnPlaceComplete(Holder.Get());
+		
+		float BoxZ = OwnerActor->RootBox->GetScaledBoxExtent().Z;
+		FVector DropLocation = DropTransform.GetLocation();
+		FVector NewLocation = DropLocation + FVector(0, 0, BoxZ);
+		DropTransform.SetLocation(NewLocation);
 
 		GetOwner()->SetActorTransform(DropTransform, false, nullptr, ETeleportType::TeleportPhysics);
 
+		OnPlaceComplete(Holder.Get());
 	}
 
 	PlayerController->Client_DeactivateHologram(GetOwner());
@@ -564,7 +588,12 @@ void URPMovableComponent::OnPlaceComplete(AActor* Interactor)
 	{
 		OwnerActor->OnResetComplete(Interactor);
 
-		bCanHold = false;
+		if (OwnerActor->HasAuthority())
+		{
+			bCanHold = false;
+			OnRep_CanHold();
+		}
+
 		HologramComp->UpdateSlotOccupation();
 	}
 }
