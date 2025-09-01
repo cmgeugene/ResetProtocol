@@ -124,9 +124,9 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 			OwnerActor->RootBox->SetSimulatePhysics(false);
 			OwnerActor->RootBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(true);
-			OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-			OwnerActor->SkeletalMeshComp->Stop();
-			OwnerActor->SkeletalMeshComp->RegisterComponent();
+			//OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			//OwnerActor->SkeletalMeshComp->Stop();
+			//OwnerActor->SkeletalMeshComp->RegisterComponent();
 		}
 		else
 		{

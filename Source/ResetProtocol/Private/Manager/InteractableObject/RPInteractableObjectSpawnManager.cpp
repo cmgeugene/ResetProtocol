@@ -227,10 +227,10 @@ bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRa
 	}
 
 	// 스폰 Param : Owner 설정
-	FActorSpawnParameters Params;
-	Params.Owner = this;
-	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
+	//FActorSpawnParameters Params;
+	//Params.Owner = this;
+	//Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	//
 	//AActor* SpawnActor = GetWorld()->SpawnActor<AActor>(SpawnActorClass, SpawnTransform, Params);
 	//if (!SpawnActor)
 	//{
@@ -275,6 +275,7 @@ bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point,
 	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
 	{
 		PointLocation = Hit.ImpactPoint;
+		PointLocation += FVector(0, 0, 40);
 	}
 
 	// 스폰 자리에서 충돌 체크
