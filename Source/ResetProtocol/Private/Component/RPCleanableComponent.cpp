@@ -52,6 +52,7 @@ void URPCleanableComponent::OnCleaningComplete(AActor* Interactor)
 {
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
+		OwnerActor->Multicast_AfterResetProcess();
 		OwnerActor->OnResetComplete(Interactor);
 	}
 }

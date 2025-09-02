@@ -20,7 +20,7 @@ ARPPlacementSlot::ARPPlacementSlot()
 	PlaceArrow->ArrowLength = 40.0f;
 	PlaceArrow->ArrowColor = FColor::Green;			// 필요하면 바꿔도 됨
 	PlaceArrow->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
-	PlaceArrow->SetIsVisualizationComponent(true);	// 에디터 시각화 용도
+	//PlaceArrow->SetIsVisualizationComponent(true);	// 에디터 시각화 용도
 
 	StaticHologram = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticHologram"));
 	StaticHologram->SetupAttachment(RootPlacePoint);

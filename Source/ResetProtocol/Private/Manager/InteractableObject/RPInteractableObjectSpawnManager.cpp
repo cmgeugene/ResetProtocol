@@ -14,6 +14,7 @@ ARPInteractableObjectSpawnManager::ARPInteractableObjectSpawnManager() :
 	RandomSeed(4885),
 	bMatchParentTags(false),
 	//OverlapChannel(ECC_Pawn),
+	BugProbability(20),
 	bIsAlreadySpawned(false)
 {
 	bReplicates = false;
@@ -306,9 +307,7 @@ bool ARPInteractableObjectSpawnManager::FindSpawnTransform(ARPSpawnPoint* Point,
 
 bool ARPInteractableObjectSpawnManager::GetIsBugged() const
 {
-	int bug = FMath::RandRange(1, 100);
-
-	if (bug > 80)
+	if (FMath::RandRange(1, 100) > BugProbability)
 	{
 		return false;
 	}

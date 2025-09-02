@@ -37,6 +37,13 @@ public:
 	void Highlight();
 	void UnHighlight();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void AfterResetProcess();
+	void AfterResetProcess_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AfterResetProcess();
+
 	void OnResetComplete(AActor* Interactor);
 
 protected:

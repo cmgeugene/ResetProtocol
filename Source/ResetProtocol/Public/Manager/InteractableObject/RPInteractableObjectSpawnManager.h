@@ -59,6 +59,9 @@ public:
 	//TEnumAsByte<ECollisionChannel> OverlapChannel;	
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Spawn|Bug")
+	int32 BugProbability;
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<URPSpawnGroupAsset>> AllGroups;
 	UPROPERTY(Transient)

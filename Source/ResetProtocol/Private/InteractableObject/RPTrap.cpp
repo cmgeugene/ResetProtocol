@@ -49,10 +49,6 @@ void ARPTrap::KeyReleaseInteract_Implementation(AActor* Interactor)
 {
 }
 
-void ARPTrap::AfterRepairProcess_Implementation()
-{
-}
-
 void ARPTrap::OnRep_IsBroken()
 {
 	if (bIsBroken)

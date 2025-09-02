@@ -53,7 +53,7 @@ void URPRepairableComponent::Multicast_Repair_Implementation()
 			OwnerActor->ActiveMesh = OwnerActor->StaticMeshComp;
 			OwnerActor->bIsBroken = false;
 
-			OwnerActor->AfterRepairProcess();
+			OwnerActor->AfterResetProcess();
 		}
 	}
 }
@@ -84,11 +84,6 @@ void URPRepairableComponent::OnCompleteRepair(AActor* Interactor)
 {
 	if (ARPBaseInteractableObject* OwnerObject = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
-		if (ARPTrap* OwnerActor = Cast<ARPTrap>(OwnerObject))
-		{
-			
-		}
-
 		OwnerObject->OnResetComplete(Interactor);
 	}
 }
