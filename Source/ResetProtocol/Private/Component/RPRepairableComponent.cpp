@@ -53,7 +53,7 @@ void URPRepairableComponent::Multicast_Repair_Implementation()
 			OwnerActor->ActiveMesh = OwnerActor->StaticMeshComp;
 			OwnerActor->bIsBroken = false;
 
-			OwnerActor->AfterRepairProcess();
+			OwnerActor->AfterResetProcess();
 		}
 	}
 }

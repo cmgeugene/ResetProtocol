@@ -73,6 +73,15 @@ void ARPBaseInteractableObject::BeginPlay()
 	}
 }
 
+void ARPBaseInteractableObject::AfterResetProcess_Implementation()
+{
+}
+
+void ARPBaseInteractableObject::Multicast_AfterResetProcess_Implementation()
+{
+	AfterResetProcess();
+}
+
 void ARPBaseInteractableObject::OnResetComplete(AActor* Interactor)
 {
 	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(Interactor);

@@ -543,6 +543,7 @@ void URPMovableComponent::OnDropStart()
 
 		GetOwner()->SetActorTransform(DropTransform, false, nullptr, ETeleportType::TeleportPhysics);
 
+		OwnerActor->Multicast_AfterResetProcess();
 		OnPlaceComplete(Holder.Get());
 	}
 

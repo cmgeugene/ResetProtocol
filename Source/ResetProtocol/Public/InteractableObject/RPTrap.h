@@ -22,10 +22,6 @@ public:
 	virtual void KeyHoldInteract_Implementation(AActor* Interactor) override;
 	virtual void KeyReleaseInteract_Implementation(AActor* Interactor) override;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void AfterRepairProcess();
-	void AfterRepairProcess_Implementation();
-
 	UFUNCTION()
 	void OnRep_IsBroken();
 
