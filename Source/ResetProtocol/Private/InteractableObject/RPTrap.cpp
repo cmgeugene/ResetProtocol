@@ -83,5 +83,9 @@ void ARPTrap::BeginPlay()
 			bIsBroken = true;
 			OnRep_IsBroken();
 		}
+		else
+		{
+			bIsFixed = true;
+		}
 	}
 }

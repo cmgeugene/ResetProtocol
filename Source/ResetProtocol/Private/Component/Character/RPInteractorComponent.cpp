@@ -23,6 +23,7 @@
 
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/Actor.h"
 
 URPInteractorComponent::URPInteractorComponent()
 	: IsHoldingItem(false)
@@ -502,7 +503,10 @@ void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 	{
 		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-		KeyHoldTimerHandle.Invalidate();
+		if (GetWorld()->GetTimerManager().IsTimerActive(KeyHoldTimerHandle))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(KeyHoldTimerHandle);
+		}
 		IsHoldingItem = false;
 		HoldingActor = nullptr;
 
