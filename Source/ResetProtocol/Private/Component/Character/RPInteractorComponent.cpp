@@ -23,6 +23,7 @@
 
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/Actor.h"
 
 URPInteractorComponent::URPInteractorComponent()
 	: IsHoldingItem(false)
