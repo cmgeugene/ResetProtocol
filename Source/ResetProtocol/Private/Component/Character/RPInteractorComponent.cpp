@@ -365,7 +365,7 @@ void URPInteractorComponent::InteractCheck()
 			TArray<FInteractUIData> Datas;
 			Datas.Add(Data);
 			InteractActor = CleaningStore;
-			InteractWidget->SetText("CleaningTool Store");
+			InteractWidget->SetText(CleaningStore->ItemName.ToString());
 			InteractWidget->AddList(Datas);
 			InteractWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 
