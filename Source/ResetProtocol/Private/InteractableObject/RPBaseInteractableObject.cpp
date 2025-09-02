@@ -12,7 +12,7 @@
 #define ECC_ObjectStaticMesh ECC_GameTraceChannel4
 
 ARPBaseInteractableObject::ARPBaseInteractableObject() :
-	bIsBug(false)
+	bIsBug(false), bIsTutorialObject(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;

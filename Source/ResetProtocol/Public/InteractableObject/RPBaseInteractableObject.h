@@ -64,6 +64,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
 	bool bIsBug;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
+	bool bIsTutorialObject;
+
 	// 현재 사용하고 있는 Mesh
 	TObjectPtr<UMeshComponent> ActiveMesh;
 };
