@@ -277,16 +277,26 @@ void URPHotbarComponent::Client_SelectItem_Implementation(int SelectedNum)
 	}
 
 	CurrentSlotIndex = SelectedNum;
+
+	SetCurrentIndex(SelectedNum);
 }
 
-void URPHotbarComponent::Client_UnEquip_Implementation()
+void URPHotbarComponent::Server_UnEquip_Implementation()
 {
-	HotbarWidget->OffHighlight(CurrentSlotIndex);
-
 	if (IsValid(CurrentCleaningTool))
 	{
 		CurrentCleaningTool->Destroy();
 	}
+
+	CurrentSlotIndex = -1;
+
+	Client_UnEquip();
+}
+
+
+void URPHotbarComponent::Client_UnEquip_Implementation()
+{
+	HotbarWidget->OffHighlight(CurrentSlotIndex);
 
 	CurrentSlotIndex = -1;
 }
@@ -396,3 +406,4 @@ bool URPHotbarComponent::CheckDurability()
 	else
 		return false;
 }
+

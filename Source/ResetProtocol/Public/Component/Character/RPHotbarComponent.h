@@ -42,6 +42,8 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void SetCurrentIndex(int Index);
 
+
+
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void UpdateUI();
 
@@ -85,6 +87,9 @@ public:
 
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_SelectItem(int SelectedNum);
+	
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_UnEquip();
 
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_UnEquip();

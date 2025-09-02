@@ -453,21 +453,43 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 		{
 			if (InteractableObject->ObjectType == EInteractObjectType::Trap || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 			{
-				if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Hammer)
+				if (InteractableObject->bIsTutorialObject)
 				{
-					IsHoldingItem = true;
-					HoldingActor = InteractableObject;
+					if (IsValid(CleaningTool))
+					{
+						IsHoldingItem = true;
+						HoldingActor = InteractableObject;
 
-					PlayerCharacter->PlayRepairAnimation();
+						PlayerCharacter->PlayRepairAnimation();
 
-					GetWorld()->GetTimerManager().SetTimer(
-						KeyHoldTimerHandle,
-						this,
-						&URPInteractorComponent::KeyHoldTimerEnd,
-						KeyHoldingTime,
-						false
-					);
-					ShowRedialTimerWidget(true, KeyHoldingTime);
+						GetWorld()->GetTimerManager().SetTimer(
+							KeyHoldTimerHandle,
+							this,
+							&URPInteractorComponent::KeyHoldTimerEnd,
+							KeyHoldingTime,
+							false
+						);
+						ShowRedialTimerWidget(true, KeyHoldingTime);
+					}
+				}
+				else
+				{
+					if (IsValid(CleaningTool) && CleaningTool->GetCleaningToolState() == ECleaningToolState::Hammer)
+					{
+						IsHoldingItem = true;
+						HoldingActor = InteractableObject;
+
+						PlayerCharacter->PlayRepairAnimation();
+
+						GetWorld()->GetTimerManager().SetTimer(
+							KeyHoldTimerHandle,
+							this,
+							&URPInteractorComponent::KeyHoldTimerEnd,
+							KeyHoldingTime,
+							false
+						);
+						ShowRedialTimerWidget(true, KeyHoldingTime);
+					}
 				}
 			}
 		}
