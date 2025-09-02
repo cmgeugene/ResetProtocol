@@ -413,7 +413,9 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 		{
 			if (HoldingActor->GetClass()->ImplementsInterface(URPKeyHoldInterface::StaticClass()))
 			{
-				if (PlayerCharacter->GetHotbarComponent()->CheckDurability())
+				ARPBaseCleaningTool* CleaningTool = PlayerCharacter->GetHotbarComponent()->GetCurrentCleaningTool();
+
+				if (!IsValid(CleaningTool))
 				{
 					IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
 					IsHoldingItem = false;
@@ -422,8 +424,22 @@ void URPInteractorComponent::KeyHoldTimerEnd()
 					PlayerCharacter->StopRepairAnimation();
 
 					ShowRedialTimerWidget(false);
-					PlayerCharacter->GetHotbarComponent()->Client_DecresedDurability();
 				}
+				else
+				{
+					if (PlayerCharacter->GetHotbarComponent()->CheckDurability())
+					{
+						IRPKeyHoldInterface::Execute_KeyHoldInteract(HoldingActor, GetOwner());
+						IsHoldingItem = false;
+						HoldingActor = nullptr;
+
+						PlayerCharacter->StopRepairAnimation();
+
+						ShowRedialTimerWidget(false);
+						PlayerCharacter->GetHotbarComponent()->Client_DecresedDurability();
+					}
+				}
+				
 			}
 		}
 	}

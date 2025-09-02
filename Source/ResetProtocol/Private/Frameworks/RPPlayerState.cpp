@@ -57,4 +57,5 @@ void ARPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARPPlayerState, StoredPlayerInfo);
+	DOREPLIFETIME(ARPPlayerState, Inventory);
 }
