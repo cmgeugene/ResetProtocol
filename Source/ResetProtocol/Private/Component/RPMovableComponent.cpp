@@ -594,8 +594,11 @@ void URPMovableComponent::OnPlaceComplete(AActor* Interactor)
 
 		OwnerActor->bIsInPlaced = true;
 
-		//if(ARPCorpse)
-		OwnerActor->OnResetComplete(Interactor);
+		ARPCorpse* Corpse = Cast<ARPCorpse>(OwnerActor);
+		if(!Corpse)
+		{
+			OwnerActor->OnResetComplete(Interactor);
+		}
 
 		if (OwnerActor->HasAuthority())
 		{
