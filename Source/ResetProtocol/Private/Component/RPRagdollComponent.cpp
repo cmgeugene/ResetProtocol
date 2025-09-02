@@ -71,6 +71,8 @@ void URPRagdollComponent::Multicast_RagdollOff_Implementation()
 		OwnerActor->RootBox->SetSimulatePhysics(true);
 		OwnerActor->RootBox->SetCollisionProfileName(TEXT("ResetObjectRoot"));
 		OwnerActor->SkeletalMeshComp->SetSimulatePhysics(false);
+		// 스폰된 액터는 InitRagdoll
+		OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 		// Ragdoll을 키면 움직임의 제어권이 물리 엔진으로 넘어감
 		// - Ragdoll을 껐을 때 넘어간 제어권을 EAnimationMode로 가져오는 것
 		//OwnerActor->SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -122,11 +124,10 @@ void URPRagdollComponent::InitRagdoll(bool bOn)
 		if (bOn)
 		{
 			OwnerActor->RootBox->SetSimulatePhysics(false);
-			OwnerActor->RootBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+			OwnerActor->RootBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);	
+			OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 			OwnerActor->SkeletalMeshComp->SetSimulatePhysics(true);
-			//OwnerActor->SkeletalMeshComp->AttachToComponent(OwnerActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-			//OwnerActor->SkeletalMeshComp->Stop();
-			//OwnerActor->SkeletalMeshComp->RegisterComponent();
+			OwnerActor->SkeletalMeshComp->Stop();
 		}
 		else
 		{
