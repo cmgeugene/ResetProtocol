@@ -25,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetSpawnedActorCounts() { return SpawnedToPoint.Num(); }
+	UFUNCTION(BlueprintCallable)
+	int32 GetNumOfObjects() const { return NumOfObjects; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -44,7 +46,6 @@ private:
 	bool FindSpawnTransform(ARPSpawnPoint* Point, UClass* SpawnActorClass, FTransform& Out) const;
 	
 	bool GetIsBugged() const;
-	int32 GetNumOfObjects() const { return NumOfObjects; }
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Spawn|Timing")
