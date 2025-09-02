@@ -53,5 +53,6 @@ void ARPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARPGameState, MatchPhase);
+	DOREPLIFETIME(ARPGameState, ResetProcessResult);
 }
 
