@@ -7,6 +7,7 @@
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 ARPInteractableObjectSpawnManager::ARPInteractableObjectSpawnManager() :
 	bIsSpawnAtBeginPlay(true),
@@ -18,9 +19,16 @@ ARPInteractableObjectSpawnManager::ARPInteractableObjectSpawnManager() :
 	bIsAlreadySpawned(false),
 	NumOfObjects(0)
 {
-	bReplicates = false;
+	bReplicates = true;
 	SetReplicateMovement(false);
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+void ARPInteractableObjectSpawnManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARPInteractableObjectSpawnManager, NumOfObjects);
 }
 
 void ARPInteractableObjectSpawnManager::SpawnAllOnce()

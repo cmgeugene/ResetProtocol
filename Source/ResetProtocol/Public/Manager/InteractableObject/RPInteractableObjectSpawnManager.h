@@ -17,6 +17,8 @@ class RESETPROTOCOL_API ARPInteractableObjectSpawnManager : public AActor
 public:	
 	ARPInteractableObjectSpawnManager();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// 수동
 	UFUNCTION(BlueprintCallable)
 	void SpawnAllOnce();
@@ -75,5 +77,6 @@ private:
 	TMap<TWeakObjectPtr<ARPSpawnPoint>, int> PointCounts;
 	bool bIsAlreadySpawned;
 
+	UPROPERTY(Replicated)
 	int32 NumOfObjects;
 };
