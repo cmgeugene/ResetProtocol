@@ -284,8 +284,11 @@ void URPInteractorComponent::InteractCheck()
 		return;
 	}
 
-	if (InteractActor == PlayerCharacter->GetHitResult().GetActor())
-		return;
+	//if (InteractActor == PlayerCharacter->GetHitResult().GetActor())
+	//{
+
+	//	return;
+	//}
 
 	if (IsValid(InteractWidget))
 	{
@@ -453,9 +456,12 @@ void URPInteractorComponent::Server_KeyHoldRPC_Implementation(AActor* Target)
 		{
 			if (InteractableObject->ObjectType == EInteractObjectType::Trap || InteractableObject->ObjectType == EInteractObjectType::Corpse)
 			{
+				if (InteractableObject->bIsFixed)
+					return;
+
 				if (InteractableObject->bIsTutorialObject)
 				{
-					if (IsValid(CleaningTool))
+					if (!IsValid(CleaningTool))
 					{
 						IsHoldingItem = true;
 						HoldingActor = InteractableObject;
@@ -502,7 +508,13 @@ void URPInteractorComponent::Server_KeyReleaseRPC_Implementation()
 	{
 		ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetOwner());
 
-		KeyHoldTimerHandle.Invalidate();
+		if (GetWorld()->GetTimerManager().IsTimerActive(KeyHoldTimerHandle))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(KeyHoldTimerHandle);
+		}
+
+		//KeyHoldTimerHandle.Invalidate();
+
 		IsHoldingItem = false;
 		HoldingActor = nullptr;
 
@@ -644,9 +656,6 @@ void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* Int
 		}
 		else if (Type == EInteractObjectType::Stain)
 		{
-			Data = InteractUIData->FindItem("PickUp");
-			Datas.Add(Data);
-
 			Data = InteractUIData->FindItem("Clean");
 			Datas.Add(Data);
 		}
