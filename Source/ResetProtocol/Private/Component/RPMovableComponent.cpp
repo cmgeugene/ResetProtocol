@@ -4,6 +4,7 @@
 #include "Component/Hologram/RPHologramComponent.h"
 #include "InteractableObject/RPBaseInteractableObject.h"
 #include "InteractableObject/RPTrap.h"
+#include "InteractableObject/RPCorpse.h"
 #include "Character/RPPlayerCharacter.h"
 #include "Frameworks/RPPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -590,6 +591,10 @@ void URPMovableComponent::OnPlaceComplete(AActor* Interactor)
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
 		OwnerActor->Multicast_AfterResetProcess();
+
+		OwnerActor->bIsInPlaced = true;
+
+		//if(ARPCorpse)
 		OwnerActor->OnResetComplete(Interactor);
 
 		if (OwnerActor->HasAuthority())

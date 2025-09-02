@@ -12,7 +12,10 @@
 #define ECC_ObjectStaticMesh ECC_GameTraceChannel4
 
 ARPBaseInteractableObject::ARPBaseInteractableObject() :
-	bIsBug(false), bIsTutorialObject(false)
+	bIsBug(false),
+	bIsTutorialObject(false),
+	bIsFixed(false),
+	bIsInPlaced(false)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
@@ -45,6 +48,8 @@ void ARPBaseInteractableObject::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 
 	DOREPLIFETIME(ARPBaseInteractableObject, ObjectType);
 	DOREPLIFETIME(ARPBaseInteractableObject, bIsBug);
+	DOREPLIFETIME(ARPBaseInteractableObject, bIsFixed);
+	DOREPLIFETIME(ARPBaseInteractableObject, bIsInPlaced);
 }
 
 void ARPBaseInteractableObject::BeginPlay()

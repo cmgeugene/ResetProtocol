@@ -84,6 +84,7 @@ void URPRepairableComponent::OnCompleteRepair(AActor* Interactor)
 {
 	if (ARPBaseInteractableObject* OwnerObject = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
+		OwnerObject->bIsFixed = true;
 		OwnerObject->OnResetComplete(Interactor);
 	}
 }

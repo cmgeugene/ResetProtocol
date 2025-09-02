@@ -15,7 +15,8 @@ ARPInteractableObjectSpawnManager::ARPInteractableObjectSpawnManager() :
 	bMatchParentTags(false),
 	//OverlapChannel(ECC_Pawn),
 	BugProbability(20),
-	bIsAlreadySpawned(false)
+	bIsAlreadySpawned(false),
+	NumOfObjects(0)
 {
 	bReplicates = false;
 	SetReplicateMovement(false);
@@ -208,6 +209,13 @@ void ARPInteractableObjectSpawnManager::RunInitialSpawn()
 	}
 
 	bIsAlreadySpawned = true;
+
+	TArray<AActor*> AllObjects;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARPBaseInteractableObject::StaticClass(), AllObjects);
+
+	NumOfObjects = AllObjects.Num();
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawn : %d / All : %d"), SpawnedToPoint.Num(), NumOfObjects);
 }
 
 bool ARPInteractableObjectSpawnManager::SpawnFromPoint(ARPSpawnPoint* Point, FRandomStream& Stream)

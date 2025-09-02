@@ -94,6 +94,7 @@ void URPRagdollComponent::OnRagdollOffComplete(AActor* Interactor)
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
 		OwnerActor->Multicast_AfterResetProcess();
+		OwnerActor->bIsFixed = true;
 		OwnerActor->OnResetComplete(Interactor);
 	}
 }

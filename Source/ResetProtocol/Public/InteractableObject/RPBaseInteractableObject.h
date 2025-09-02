@@ -68,8 +68,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Type|Tag")
 	FGameplayTag HologramSlotTag;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Type")
 	bool bIsBug;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "State")
+	bool bIsFixed;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "State")
+	bool bIsInPlaced;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Type")
 	bool bIsTutorialObject;

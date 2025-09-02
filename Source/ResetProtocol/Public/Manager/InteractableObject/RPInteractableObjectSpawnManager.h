@@ -42,7 +42,9 @@ private:
 	// 각 포인트에서 랜덤으로 스폰
 	bool SpawnFromPoint(ARPSpawnPoint* Point, FRandomStream& Stream);
 	bool FindSpawnTransform(ARPSpawnPoint* Point, UClass* SpawnActorClass, FTransform& Out) const;
+	
 	bool GetIsBugged() const;
+	int32 GetNumOfObjects() const { return NumOfObjects; }
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Spawn|Timing")
@@ -71,4 +73,6 @@ private:
 	TMap<TWeakObjectPtr<AActor>, TWeakObjectPtr<ARPSpawnPoint>> SpawnedToPoint;
 	TMap<TWeakObjectPtr<ARPSpawnPoint>, int> PointCounts;
 	bool bIsAlreadySpawned;
+
+	int32 NumOfObjects;
 };
