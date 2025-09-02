@@ -585,42 +585,62 @@ void URPInteractorComponent::AddPitch(float DeltaPitchDeg)
 void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* InteractableObjcet)
 {
 	TArray<FInteractUIData> Datas;
-	FInteractUIData Data = InteractUIData->FindItem("PickUp");
+	FInteractUIData Data;
 
 	EInteractObjectType Type = InteractableObjcet->ObjectType;
 
-	if (Type == EInteractObjectType::Trash)
+	if (InteractableObjcet->bIsTutorialObject)
 	{
-		Data = InteractUIData->FindItem("Handle");
-		Datas.Add(Data);
+		if (Type == EInteractObjectType::Trash)
+		{
+			Data = InteractUIData->FindItem("TutorialHandle");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::ScatteredObject)
+		{
+			Data = InteractUIData->FindItem("Handle");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::Trap)
+		{
+			Data = InteractUIData->FindItem("TutorialRepair");
+			Datas.Add(Data);
+		}
 	}
-	else if (Type == EInteractObjectType::Stain)
+	else
 	{
-		Data = InteractUIData->FindItem("PickUp");
-		Datas.Add(Data);
+		if (Type == EInteractObjectType::Trash)
+		{
+			Data = InteractUIData->FindItem("Handle");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::Stain)
+		{
+			Data = InteractUIData->FindItem("PickUp");
+			Datas.Add(Data);
 
-		Data = InteractUIData->FindItem("Clean");
-		Datas.Add(Data);
-	}
-	else if (Type == EInteractObjectType::ScatteredObject)
-	{
-		Data = InteractUIData->FindItem("Handle");
-		Datas.Add(Data);
-	}
-	else if (Type == EInteractObjectType::Trap)
-	{
-		Data = InteractUIData->FindItem("Repair");
-		Datas.Add(Data);
-	}
-	else if (Type == EInteractObjectType::Corpse)
-	{
-		Data = InteractUIData->FindItem("Handle");
-		Datas.Add(Data);
+			Data = InteractUIData->FindItem("Clean");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::ScatteredObject)
+		{
+			Data = InteractUIData->FindItem("Handle");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::Trap)
+		{
+			Data = InteractUIData->FindItem("Repair");
+			Datas.Add(Data);
+		}
+		else if (Type == EInteractObjectType::Corpse)
+		{
+			Data = InteractUIData->FindItem("Handle");
+			Datas.Add(Data);
 
-		Data = InteractUIData->FindItem("Repair");
-		Datas.Add(Data);
+			Data = InteractUIData->FindItem("Repair");
+			Datas.Add(Data);
+		}
 	}
-
 
 	InteractWidget->AddList(Datas);
 }
