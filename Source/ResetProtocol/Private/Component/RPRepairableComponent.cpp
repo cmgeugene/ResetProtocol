@@ -84,11 +84,6 @@ void URPRepairableComponent::OnCompleteRepair(AActor* Interactor)
 {
 	if (ARPBaseInteractableObject* OwnerObject = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
-		if (ARPTrap* OwnerActor = Cast<ARPTrap>(OwnerObject))
-		{
-			
-		}
-
 		OwnerObject->OnResetComplete(Interactor);
 	}
 }

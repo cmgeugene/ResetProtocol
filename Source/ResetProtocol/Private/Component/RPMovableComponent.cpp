@@ -543,7 +543,6 @@ void URPMovableComponent::OnDropStart()
 
 		GetOwner()->SetActorTransform(DropTransform, false, nullptr, ETeleportType::TeleportPhysics);
 
-		OwnerActor->Multicast_AfterResetProcess();
 		OnPlaceComplete(Holder.Get());
 	}
 
@@ -590,6 +589,7 @@ void URPMovableComponent::OnPlaceComplete(AActor* Interactor)
 {
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
+		OwnerActor->Multicast_AfterResetProcess();
 		OwnerActor->OnResetComplete(Interactor);
 
 		if (OwnerActor->HasAuthority())
