@@ -236,6 +236,9 @@ void URPInteractorComponent::Server_Interact_Implementation(AActor* Target)
 					{
 						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Pick up Trash"));
 						IRPClickInterface::Execute_ClickInteract(InteractableObject, GetOwner());
+
+						if(!InteractableObject->bIsTutorialObject)
+							PlayerCharacter->PlayPickUpAnimation();
 					}
 				}
 				else if (InteractableObject->ObjectType == EInteractObjectType::Stain)

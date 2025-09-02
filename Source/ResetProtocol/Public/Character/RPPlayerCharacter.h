@@ -85,6 +85,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void StopRepairAnimation();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayPickUpAnimation();
+
 // Component
 protected:
 	
