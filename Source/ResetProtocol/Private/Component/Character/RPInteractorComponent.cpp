@@ -634,6 +634,9 @@ void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* Int
 	}
 	else
 	{
+		bool IsFixed = InteractableObjcet->bIsFixed;
+		bool IsInPlaced = InteractableObjcet->bIsInPlaced;
+
 		if (Type == EInteractObjectType::Trash)
 		{
 			Data = InteractUIData->FindItem("Handle");
@@ -649,21 +652,33 @@ void URPInteractorComponent::UpdateInteractWidget(ARPBaseInteractableObject* Int
 		}
 		else if (Type == EInteractObjectType::ScatteredObject)
 		{
-			Data = InteractUIData->FindItem("Handle");
-			Datas.Add(Data);
+			if (!IsInPlaced)
+			{
+				Data = InteractUIData->FindItem("Handle");
+				Datas.Add(Data);
+			}
 		}
 		else if (Type == EInteractObjectType::Trap)
 		{
-			Data = InteractUIData->FindItem("Repair");
-			Datas.Add(Data);
+			if (!IsFixed)
+			{
+				Data = InteractUIData->FindItem("Repair");
+				Datas.Add(Data);
+			}
 		}
 		else if (Type == EInteractObjectType::Corpse)
 		{
-			Data = InteractUIData->FindItem("Handle");
-			Datas.Add(Data);
+			if (!IsInPlaced)
+			{
+				Data = InteractUIData->FindItem("Handle");
+				Datas.Add(Data);
+			}
 
-			Data = InteractUIData->FindItem("Repair");
-			Datas.Add(Data);
+			if (!IsFixed)
+			{
+				Data = InteractUIData->FindItem("Repair");
+				Datas.Add(Data);
+			}
 		}
 	}
 
