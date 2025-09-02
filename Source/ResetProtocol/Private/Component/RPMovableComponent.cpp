@@ -91,24 +91,7 @@ void URPMovableComponent::Pickup(AActor* Interactor)
 	{
 		bIsPickup = true;
 
-		FTimerHandle DestoryTimerHandle;
-		if (AActor* OwnerActor = GetOwner())
-		{
-			TWeakObjectPtr<AActor> WeakOwnerActor = OwnerActor;
-
-			OnPickupComplete(Interactor);
-			GetWorld()->GetTimerManager().SetTimer(DestoryTimerHandle,
-				[WeakOwnerActor]()
-				{
-					if (WeakOwnerActor.IsValid())
-					{
-						WeakOwnerActor->Destroy();
-					}
-				},
-				0.5f,
-				false
-			);
-		}
+		OnPickupComplete(Interactor);
 	}
 }
 
@@ -576,9 +559,29 @@ void URPMovableComponent::OnDropStart()
 
 void URPMovableComponent::OnPickupComplete(AActor* Interactor)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("OnPickupComplete start"));
 	if (ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner()))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("OnPickupComplete has OwnerActor"));
 		OwnerActor->OnResetComplete(Interactor);
+
+		FTimerHandle DestoryTimerHandle;
+		//if (AActor* OwnerActor = GetOwner())
+		{
+			TWeakObjectPtr<AActor> WeakOwnerActor = OwnerActor;
+
+			GetWorld()->GetTimerManager().SetTimer(DestoryTimerHandle,
+				[WeakOwnerActor]()
+				{
+					if (WeakOwnerActor.IsValid())
+					{
+						WeakOwnerActor->Destroy();
+					}
+				},
+				0.5f,
+				false
+			);
+		}
 	}
 }
 

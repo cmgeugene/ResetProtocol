@@ -85,15 +85,10 @@ void ARPBaseInteractableObject::OnResetComplete(AActor* Interactor)
 	{
 		return;
 	}
-	ARPBaseInteractableObject* OwnerActor = Cast<ARPBaseInteractableObject>(GetOwner());
-	if (!OwnerActor)
-	{
-		return;
-	}
 
 	if (!bIsBug)
 	{
-		PlayerController->Server_OnResetSuccessHandle(OwnerActor->ObjectType);
+		PlayerController->Server_OnResetSuccessHandle(ObjectType);
 	}
 	else
 	{

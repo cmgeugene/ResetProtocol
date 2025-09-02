@@ -308,7 +308,7 @@ bool ARPInteractableObjectSpawnManager::GetIsBugged() const
 {
 	int bug = FMath::RandRange(1, 100);
 
-	if (bug > 50)
+	if (bug > 80)
 	{
 		return false;
 	}
