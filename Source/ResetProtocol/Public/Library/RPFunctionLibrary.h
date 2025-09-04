@@ -43,4 +43,14 @@ class RESETPROTOCOL_API URPFunctionLibrary : public UBlueprintFunctionLibrary
 	 */
 	UFUNCTION(BlueprintPure, Category = "Reset Protocol|Player")
 	static FPlayerInfo GetPlayerInfoFromController(APlayerController* PlayerController);
+
+	// 에셋 썸네일 내보내기
+	// 지정된 에셋의 썸네일을 생성하여 특정 경로에 저장합니다.
+	// @param	InAsset		썸네일을 내보낼 에셋 오브젝트 레퍼런스
+	// @param	InDirectoryPath	썸네일이 저장될 디렉토리의 전체 경로 (예: C:/Thumbnails)
+	// @param	InFileName	썸네일이 저장될 파일 이름 (확장자 제외). 예: MyAssetThumbnail
+	// @param	InResolution	내보낼 썸네일의 해상도 (예: X=256, Y=256).
+	// @return	bool			썸네일 내보내기 성공 시 true, 실패 시 false를 반환합니다.
+	UFUNCTION(BlueprintCallable, Category = "ResetProtocol|FunctionLibrary")
+	static bool ExportAssetThumbnail(UObject* InAsset, const FString& InDirectoryPath, const FString& InFileName, const FIntPoint& InResolution);
 };
