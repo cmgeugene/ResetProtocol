@@ -11,6 +11,7 @@
 #include "Frameworks/RPGameMode.h"
 #include "Component/RPMovableComponent.h"
 #include "Component/Hologram/RPHologramComponent.h"
+#include "GameFramework/Pawn.h"
 
 void ARPPlayerController::Server_OnResetSuccessHandle_Implementation(const EInteractObjectType Type)
 {
@@ -139,5 +140,17 @@ void ARPPlayerController::Client_DeactivateHologram_Implementation(const AActor*
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Client_DeactivateHologram 호출"));
 		MoveComp->HologramComp->DeactivateHologram();
+	}
+}
+
+void ARPPlayerController::Server_EnterSpectateMode_Implementation()
+{
+	PlayerState->SetIsSpectator(true);
+	ChangeState(NAME_Spectating);
+
+	ARPPlayerCharacter* PlayerCharacter = Cast<ARPPlayerCharacter>(GetPawn());
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->SetActorHiddenInGame(true);
 	}
 }

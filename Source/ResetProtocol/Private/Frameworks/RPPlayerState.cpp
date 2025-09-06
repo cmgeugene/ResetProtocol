@@ -4,6 +4,7 @@
 #include "Frameworks/RPPlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "Component/PlayerInfoComponent.h"
+#include "Frameworks/RPPlayerController.h"
 
 ARPPlayerState::ARPPlayerState()
 {
@@ -50,6 +51,15 @@ void ARPPlayerState::StorePlayerInfo(const FPlayerInfo& NewPlayerInfo)
 {
 	StoredPlayerInfo = NewPlayerInfo;
 	UE_LOG(LogTemp, Display, TEXT("[RPPlayerState] Stored Bytes in PlayerInfo : %d"), StoredPlayerInfo.Bytes);
+}
+
+void ARPPlayerState::RequestSpectateMode()
+{
+	ARPPlayerController* RPPC = Cast<ARPPlayerController>(GetPlayerController());
+	if (RPPC)
+	{
+		RPPC->Server_EnterSpectateMode();
+	}
 }
 
 void ARPPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

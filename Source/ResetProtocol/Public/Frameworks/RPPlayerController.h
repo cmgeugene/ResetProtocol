@@ -59,6 +59,10 @@ public:
 	void Client_DeactivateHologram(const AActor* GrabbedActor);
 	void Client_DeactivateHologram_Implementation(const AActor* GrabbedActor);
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "RPPlayerController")
+	void Server_EnterSpectateMode();
+	void Server_EnterSpectateMode_Implementation();
+
 private:
 
 	UPROPERTY()

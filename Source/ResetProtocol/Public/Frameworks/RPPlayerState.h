@@ -50,6 +50,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StorePlayerInfo(const FPlayerInfo& NewPlayerInfo);
 
+	// 촬영용 관전자 모드 들어가기 함수
+	UFUNCTION(BlueprintCallable, Category = "RPPlayerState")
+	void RequestSpectateMode();
+
 private:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 };
