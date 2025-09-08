@@ -40,9 +40,9 @@ void ARPCorpse::Tick(float DeltaTime)
 		else
 		{
 			// 클라에서 뼈 전체의 위치를 리플리케이션 받는건 아니지만
-			// 중심이되는 Hips(pelvis)위치를 RootBox로 옮겨서 Mesh의 위치도 동기화
-			// - 틱에서 서버 Mesh의 Hips의 Location으로 RootBox를 옮기면, 이 RootBox의 Location이 리플리케이션됨
-			//   - 즉, RootBox의 Location은 서버 Mesh의 Hips Location
+			// 중심이 되는 Hips(pelvis)위치를 RootBox로 옮겨서 Mesh의 위치도 동기화
+			// - 서버일 때 틱에서 RootBox를 서버 Mesh의 Hips의 Location으로 옮기면, 이 RootBox의 Location이 리플리케이션됨
+			//   - 즉, RootBox의 Location == 서버 Mesh의 Hips Location
 			// - 리플리케이션된 Location으로 클라 Mesh를 옮겨주면, 서버-클라의 Mesh가 동기화
 			if (FBodyInstance* SkeletalBody = SkeletalMeshComp->GetBodyInstance(TEXT("Hips")))
 			{
@@ -56,7 +56,6 @@ void ARPCorpse::Tick(float DeltaTime)
 			}
 		}
 	}
-
 }
 
 void ARPCorpse::DragInteract_Implementation(AActor* Interactor)

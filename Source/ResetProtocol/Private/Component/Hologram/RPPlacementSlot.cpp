@@ -118,10 +118,10 @@ void ARPPlacementSlot::StaticMeshLocationAligned()
 	// 2) 소스 메시의 월드 바운즈
 	FBoxSphereBounds Bounds = StaticHologram->Bounds; // 월드 기준
 	FVector Center = Bounds.Origin;
-	FVector Half = Bounds.BoxExtent;
+	FVector HalfBoxSize = Bounds.BoxExtent;
 
 	// 3) 현재 "밑면"의 Z
-	float BottomZ = Center.Z - Half.Z;
+	float BottomZ = Center.Z - HalfBoxSize.Z;
 	float DeltaZ = SlotLocation.Z - BottomZ + 2.0f;		// 2.0f : 약간 띄울려고 사용
 
 	FVector NewLocation = StaticHologram->GetComponentLocation();
@@ -143,10 +143,11 @@ void ARPPlacementSlot::SkeletalMeshLocationAligned()
 	// Mesh의 World Bounds
 	FBoxSphereBounds Bounds = SkeletalHologram->Bounds;		// 월드 기준
 	FVector Center = Bounds.Origin;
-	FVector Half = Bounds.BoxExtent;
+	FVector HalfBoxSize = Bounds.BoxExtent;					// 박스의 크기임 위치가 아님
 
-	// 현재 밑면의 Z
-	float BottomZ = Center.Z - Half.Z;
+	// 현재 Mesh의 바닥의 Z값
+	float BottomZ = Center.Z - HalfBoxSize.Z;
+	// SlotLocation.Z - BottomZ : Slot의 위치와 Mesh의 바닥 간의 위치 차
 	float DeltaZ = SlotLocation.Z - BottomZ + 2.0f;			// 2.0f : 약간 띄울려고 사용
 
 	FVector NewLocation = SkeletalHologram->GetComponentLocation();
