@@ -38,7 +38,7 @@
 | **Z** | 도구 던지기 |
 
 ## 🧩 오염 요소(Reset 오브젝트) 구조
-- <img width="800" height="750" alt="Reset 오브젝트 UML ver최종" src="https://github.com/user-attachments/assets/5989555d-2473-4b74-aa9b-e34117044da5" />
+<img width="800" height="750" alt="Reset 오브젝트 UML ver최종" src="https://github.com/user-attachments/assets/5989555d-2473-4b74-aa9b-e34117044da5" />
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
