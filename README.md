@@ -60,7 +60,7 @@
 
 1.  **저장소 클론**
     ```bash
-    git clone https://github.com/[YourUsername]/ResetProtocol.git
+    git clone https://github.com/cmgeugene/ResetProtocol.git
     ```
 
 2.  **필수 프로그램 설치**
