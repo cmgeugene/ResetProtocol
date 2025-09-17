@@ -194,25 +194,36 @@ void ARPPlacementSlot::ShowHologramFromActor(const AActor* GrabbedActor)
 		StaticHologram->SetStaticMesh(ActorStaticmesh->GetStaticMesh());
 		StaticHologram->SetWorldTransform(GetActorTransform());
 		StaticHologram->SetWorldScale3D(ActorStaticmesh->GetComponentScale());
-		StaticMeshLocationAligned();
-
 		ApplyGhostMaterial(StaticHologram);
 
+		StaticMeshLocationAligned();
 		StaticHologram->SetVisibility(true);
-
+		
 		return;
 	}
 	
 	if (USkeletalMeshComponent* ActorSkeletalMesh = FindActorSkeletalMesh(GrabbedActor))
 	{
+		// Grab 오브젝트의 Mesh 적용
 		SkeletalHologram->SetSkeletalMesh(ActorSkeletalMesh->GetSkeletalMeshAsset());
 		SkeletalHologram->SetWorldTransform(GetActorTransform());
 		SkeletalHologram->SetWorldScale3D(ActorSkeletalMesh->GetComponentScale());
-		SkeletalMeshLocationAligned();
-
 		ApplyGhostMaterial(SkeletalHologram);
 
+		// Grab 오브젝트의 Idle 상태 애니메이션 적용
+		UAnimationAsset* AnimToPlay = ActorSkeletalMesh->AnimationData.AnimToPlay;
+		SkeletalHologram->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		SkeletalHologram->SetAnimation(AnimToPlay);
+		
+		// 애니메이션 적용 로직을 추가하고나서 첫 Grab에서 위치가 제대로 안잡히고, 두번째부터 바닥으로 조정됨
+		// - 애니메이션이 적용되어서 Bone의 Transform이 None Anim(T포즈)의 Bone Trasnform과 달라짐
+		// - 이를 RefreshBoneTransforms()로 강제 갱신
+		SkeletalHologram->RefreshBoneTransforms();
+		SkeletalHologram->UpdateBounds();
+
+		SkeletalMeshLocationAligned();
 		SkeletalHologram->SetVisibility(true);
+		SkeletalHologram->bPauseAnims = false;
 
 		return;
 	}
@@ -229,6 +240,7 @@ void ARPPlacementSlot::HideHologram()
 
 	if (SkeletalHologram->GetSkeletalMeshAsset())
 	{
+		SkeletalHologram->bPauseAnims = true;
 		SkeletalHologram->SetVisibility(false);
 	}
 }
