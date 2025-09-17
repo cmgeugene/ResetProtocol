@@ -77,7 +77,7 @@
 
 5.  **프로젝트 실행**
     - 빌드가 성공하면, Visual Studio에서 `F5` 키를 눌러 디버깅을 시작하거나 언리얼 에디터에서 직접 프로젝트를 열 수 있습니다.
-    - 에디터가 열리면 `Content/Maps/LobbyLevel`을 열어 시작할 수 있습니다.
+    - 에디터가 열리면 `Content/Maps/LoadInLevel`을 열어 시작할 수 있습니다.
 
 
 
